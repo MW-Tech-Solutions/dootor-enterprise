@@ -1,4 +1,4 @@
-name: Deploy to Bluehost on Push
+name: Deploy on Push
 
 on:
   push:
@@ -9,25 +9,35 @@ jobs:
   deploy:
     name: 🚀 FTP Deploy to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: 🚚 Checkout latest code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # needed for changed-files detection
+          fetch-depth: 2
 
-      - name: 📂 Sync files to Bluehost via FTP
+      - name: 📂 Sync files to production server
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
+          port: ${{ secrets.FTP_PORT }}
+          protocol: ftp
+
           local-dir: ./
           server-dir: ${{ secrets.FTP_SERVER_DIR }}
+
+          timeout: 120000
+          log-level: verbose
+
           exclude: |
-            **/.git/**
             **/.git*
+            **/.git*/**
             **/.github/**
+            **/.env
+            **/.env.*
             **/node_modules/**
             **/vendor/**
             **/uploads/**
@@ -37,4 +47,3 @@ jobs:
             **/*.zip
             **/error_log.txt
             **/scratch/**
-            **/.env
