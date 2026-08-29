@@ -21,7 +21,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         port: 21
         # Change this path to match your subdomain folder on Bluehost (e.g. /public_html/dootor-enterprise/)
-        server-dir: /public_html/dootor-enterprise/  
+        server-dir: ./  
         exclude: |
           **/.git*
           **/.git*/**
