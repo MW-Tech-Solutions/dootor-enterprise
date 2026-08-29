@@ -13,6 +13,26 @@
 //     die('Access Denied: Invalid security key.');
 // }
 
+// Create required directories if they are missing
+$storageDirs = [
+    __DIR__.'/../storage',
+    __DIR__.'/../storage/framework',
+    __DIR__.'/../storage/framework/cache',
+    __DIR__.'/../storage/framework/cache/data',
+    __DIR__.'/../storage/framework/sessions',
+    __DIR__.'/../storage/framework/views',
+    __DIR__.'/../storage/app',
+    __DIR__.'/../storage/app/public',
+    __DIR__.'/../storage/logs',
+];
+
+foreach ($storageDirs as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+        @chmod($dir, 0775);
+    }
+}
+
 // 2. Bootstrap Laravel
 try {
     require __DIR__.'/../vendor/autoload.php';
@@ -99,6 +119,30 @@ runArtisanCommand('migrate', ['--force' => true]);
 
 // Seed database (optional, only run if you need default platform settings seeded)
 runArtisanCommand('db:seed', ['--force' => true]);
+
+// Fix plain text passwords in database to prevent Bcrypt exceptions
+echo "<div class='cmd-box'>⚙️ <strong>Fixing plain text passwords in database...</strong><br>";
+try {
+    $users = \App\Models\User::all();
+    $fixedCount = 0;
+    foreach ($users as $user) {
+        if ($user->email === 'admin@test.com') {
+            // Always force the test admin's password to a fresh Bcrypt hash of 'password'
+            $user->password = \Illuminate\Support\Facades\Hash::make('password');
+            $user->save();
+            $fixedCount++;
+        } elseif (!str_starts_with($user->password, '$2y$') && !str_starts_with($user->password, '$2a$') && !str_starts_with($user->password, '$2b$')) {
+            // If it is plain text, MD5, or Argon2, convert it to standard Bcrypt
+            $user->password = \Illuminate\Support\Facades\Hash::make($user->password);
+            $user->save();
+            $fixedCount++;
+        }
+    }
+    echo "<span class='success'>[SUCCESS]</span> Finished checking passwords. Updated {$fixedCount} password(s) to secure Bcrypt hashes.<br>";
+} catch (\Exception $e) {
+    echo "<span class='error'>[ERROR]</span> Failed to fix passwords: " . htmlspecialchars($e->getMessage()) . "<br>";
+}
+echo "</div>";
 
 // Link public storage
 runArtisanCommand('storage:link');

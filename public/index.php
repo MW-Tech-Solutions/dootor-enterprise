@@ -15,6 +15,25 @@ if (file_exists($maintenance = __DIR__.'/../storage/framework/maintenance.php'))
     require $maintenance;
 }
 
+// Create required storage directories if they are missing
+$storageDirs = [
+    __DIR__.'/../storage',
+    __DIR__.'/../storage/framework',
+    __DIR__.'/../storage/framework/cache',
+    __DIR__.'/../storage/framework/cache/data',
+    __DIR__.'/../storage/framework/sessions',
+    __DIR__.'/../storage/framework/views',
+    __DIR__.'/../storage/app',
+    __DIR__.'/../storage/app/public',
+    __DIR__.'/../storage/logs',
+];
+foreach ($storageDirs as $dir) {
+    if (!is_dir($dir)) {
+        @mkdir($dir, 0775, true);
+        @chmod($dir, 0775);
+    }
+}
+
 // Register the Composer autoloader...
 require __DIR__.'/../vendor/autoload.php';
 

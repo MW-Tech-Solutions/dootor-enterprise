@@ -1,34 +1,40 @@
-name: 🚀 Deploy Website via Webhook
+name: Deploy to Bluehost on Push
 
 on:
   push:
     branches:
-      - main  # Trigger deployment when code is pushed to the main branch
+      - main
 
 jobs:
-  web-deploy:
-    name: ⛑️ Trigger Server Pull
+  deploy:
+    name: 🚀 FTP Deploy to Production
     runs-on: ubuntu-latest
+
     steps:
-    - name: 🚚 Get latest code
-      uses: actions/checkout@v4
+      - name: 🚚 Checkout latest code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # needed for changed-files detection
 
-    - name: 📡 Trigger Deploy Webhook on Server
-      run: |
-        echo "Triggering deployment webhook on server..."
-        HTTP_STATUS=$(curl -s -o /tmp/deploy_response.txt -w "%{http_code}" \
-          -X POST \
-          -H "X-Deploy-Token: ${{ secrets.DEPLOY_SECRET }}" \
-          "${{ secrets.DEPLOY_WEBHOOK_URL }}")
-
-        echo "--- Server Response ---"
-        cat /tmp/deploy_response.txt
-        echo ""
-        echo "--- HTTP Status: $HTTP_STATUS ---"
-
-        if [ "$HTTP_STATUS" != "200" ]; then
-          echo "❌ Deployment failed with HTTP status $HTTP_STATUS"
-          exit 1
-        fi
-
-        echo "✅ Deployment triggered successfully!"
+      - name: 📂 Sync files to Bluehost via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./
+          server-dir: ${{ secrets.FTP_SERVER_DIR }}
+          exclude: |
+            **/.git/**
+            **/.git*
+            **/.github/**
+            **/node_modules/**
+            **/vendor/**
+            **/uploads/**
+            **/adminpictures/**
+            **/storage/**
+            **/*.sql
+            **/*.zip
+            **/error_log.txt
+            **/scratch/**
+            **/.env
