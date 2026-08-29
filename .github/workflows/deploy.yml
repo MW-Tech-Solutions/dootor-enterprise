@@ -27,9 +27,12 @@ jobs:
           **/.git*/**
           **/.github*/**
           **/node_modules/**
+          **/vendor/**
+          .env
           **/.env
           **/.env.*
           **/.env.example
+          composer.lock
           database.sql
           tests/**
           storage/framework/cache/**
