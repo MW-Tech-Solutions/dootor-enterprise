@@ -3,23 +3,38 @@
  * Dootor Enterprise - GitHub Deployment Webhook
  *
  * GitHub Actions calls this endpoint via HTTP after each push.
- * The server then pulls the latest code from GitHub directly.
+ * This script downloads the latest code from GitHub as a ZIP and extracts it.
+ * NO terminal, git, or SSH access required on the server.
  *
  * SETUP:
  *  1. Upload this file to your server's /public/ folder.
- *  2. In cPanel, initialize git in your project root:
- *     git clone https://github.com/MW-Tech-Solutions/dootor-enterprise.git .
- *  3. Add DEPLOY_SECRET to your GitHub repo secrets (Settings > Secrets).
- *  4. Set the same secret in the $secret variable below.
+ *  2. Add DEPLOY_SECRET to GitHub repo Secrets (Settings > Secrets > Actions).
+ *  3. Add DEPLOY_WEBHOOK_URL pointing to this file's URL in GitHub Secrets.
+ *  4. Set $secret below to match your DEPLOY_SECRET value.
  */
 
 // ======================================================
-//  ⚙️ CONFIGURATION - Set your secret token here
+//  ⚙️ CONFIGURATION
 // ======================================================
-$secret = getenv('DEPLOY_WEBHOOK_SECRET') ?: 'CHANGE_THIS_TO_A_RANDOM_SECRET_STRING';
+$secret      = 'CHANGE_THIS_TO_MATCH_YOUR_DEPLOY_SECRET'; // Must match GitHub secret DEPLOY_SECRET
+$githubUser  = 'MW-Tech-Solutions';
+$githubRepo  = 'dootor-enterprise';
+$branch      = 'main';
+
+// The root folder of your project on the server (one level above /public/)
+$projectRoot = dirname(__DIR__);
+
+// Files/folders to never overwrite during deployment (keeps live server configs safe)
+$protectedPaths = [
+    '.env',
+    'public/storage',
+    'storage/app',
+    'storage/logs',
+    'vendor',
+];
 
 // ======================================================
-//  🔒 Security Check - Validate the secret token
+//  🔒 Security - Validate the secret token
 // ======================================================
 $receivedToken = $_SERVER['HTTP_X_DEPLOY_TOKEN'] ?? $_GET['token'] ?? '';
 
@@ -28,38 +43,126 @@ if (!hash_equals($secret, $receivedToken)) {
     die(json_encode(['status' => 'error', 'message' => 'Unauthorized. Invalid or missing deploy token.']));
 }
 
-// Only allow POST requests from GitHub Actions
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
-    die(json_encode(['status' => 'error', 'message' => 'Method Not Allowed. Only POST requests are accepted.']));
+    die(json_encode(['status' => 'error', 'message' => 'Method Not Allowed.']));
 }
 
 // ======================================================
-//  🚀 Run Git Pull
+//  📥 Download Latest Code from GitHub as ZIP
 // ======================================================
-$projectRoot = dirname(__DIR__); // Go up one level from /public to project root
+$zipUrl  = "https://github.com/{$githubUser}/{$githubRepo}/archive/refs/heads/{$branch}.zip";
+$tmpZip  = sys_get_temp_dir() . "/deploy_{$githubRepo}_" . time() . ".zip";
+$tmpDir  = sys_get_temp_dir() . "/deploy_{$githubRepo}_extracted_" . time();
 
-$output = [];
-$return_code = 0;
+$log = [];
+$log[] = "📥 Downloading latest code from GitHub...";
+$log[] = "URL: {$zipUrl}";
 
-// Run git pull
-exec("cd {$projectRoot} && git pull origin main 2>&1", $output, $return_code);
+// Download the ZIP
+$context = stream_context_create([
+    'http' => [
+        'timeout'         => 120,
+        'follow_location' => true,
+        'user_agent'      => 'PHP-Deployment-Webhook/1.0',
+    ]
+]);
 
-$outputStr = implode("\n", $output);
+$zipContent = @file_get_contents($zipUrl, false, $context);
 
-if ($return_code === 0) {
-    http_response_code(200);
-    echo json_encode([
-        'status'  => 'success',
-        'message' => 'Deployment complete!',
-        'output'  => $outputStr,
-    ]);
-} else {
+if ($zipContent === false) {
     http_response_code(500);
-    echo json_encode([
-        'status'  => 'error',
-        'message' => 'Git pull failed. Check the output for details.',
-        'output'  => $outputStr,
-        'code'    => $return_code,
-    ]);
+    die(json_encode(['status' => 'error', 'message' => 'Failed to download ZIP from GitHub.', 'log' => $log]));
 }
+
+file_put_contents($tmpZip, $zipContent);
+$log[] = "✅ ZIP downloaded successfully (" . round(strlen($zipContent) / 1024) . " KB)";
+
+// ======================================================
+//  📦 Extract the ZIP
+// ======================================================
+$log[] = "📦 Extracting ZIP to temp directory...";
+
+$zip = new ZipArchive();
+if ($zip->open($tmpZip) !== true) {
+    unlink($tmpZip);
+    http_response_code(500);
+    die(json_encode(['status' => 'error', 'message' => 'Failed to open downloaded ZIP file.', 'log' => $log]));
+}
+
+$zip->extractTo($tmpDir);
+$zip->close();
+unlink($tmpZip);
+
+$log[] = "✅ ZIP extracted successfully";
+
+// The extracted root folder is named: reponame-branch (e.g. dootor-enterprise-main)
+$extractedFolder = $tmpDir . "/{$githubRepo}-{$branch}";
+
+if (!is_dir($extractedFolder)) {
+    http_response_code(500);
+    die(json_encode(['status' => 'error', 'message' => "Extracted folder not found: {$extractedFolder}", 'log' => $log]));
+}
+
+// ======================================================
+//  🚀 Copy New Files to Project Root (skipping protected paths)
+// ======================================================
+$log[] = "🚀 Deploying files to: {$projectRoot}";
+
+function copyDirectory($src, $dst, $protectedPaths, $projectRoot, &$log)
+{
+    if (!is_dir($dst)) {
+        mkdir($dst, 0755, true);
+    }
+
+    $items = scandir($src);
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..') continue;
+
+        $srcPath = $src . DIRECTORY_SEPARATOR . $item;
+        $dstPath = $dst . DIRECTORY_SEPARATOR . $item;
+
+        // Get relative path from project root for protection check
+        $relativePath = ltrim(str_replace($projectRoot, '', $dstPath), DIRECTORY_SEPARATOR . '/');
+
+        foreach ($protectedPaths as $protected) {
+            if ($relativePath === $protected || strpos($relativePath, $protected . '/') === 0) {
+                $log[] = "🔒 Skipped (protected): {$relativePath}";
+                continue 2;
+            }
+        }
+
+        if (is_dir($srcPath)) {
+            copyDirectory($srcPath, $dstPath, $protectedPaths, $projectRoot, $log);
+        } else {
+            copy($srcPath, $dstPath);
+        }
+    }
+}
+
+copyDirectory($extractedFolder, $projectRoot, $protectedPaths, $projectRoot, $log);
+$log[] = "✅ Files deployed successfully!";
+
+// Cleanup temp directory
+function deleteDirectory($dir) {
+    if (!is_dir($dir)) return;
+    foreach (scandir($dir) as $item) {
+        if ($item === '.' || $item === '..') continue;
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+        is_dir($path) ? deleteDirectory($path) : unlink($path);
+    }
+    rmdir($dir);
+}
+deleteDirectory($tmpDir);
+$log[] = "🧹 Temp files cleaned up";
+
+// ======================================================
+//  ✅ Done
+// ======================================================
+http_response_code(200);
+echo json_encode([
+    'status'  => 'success',
+    'message' => '🎉 Deployment complete!',
+    'branch'  => $branch,
+    'log'     => $log,
+], JSON_PRETTY_PRINT);
