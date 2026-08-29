@@ -1,4 +1,4 @@
-name: 🚀 Deploy Website to Bluehost via FTP
+name: 🚀 Deploy Website via Webhook
 
 on:
   push:
@@ -7,36 +7,28 @@ on:
 
 jobs:
   web-deploy:
-    name: ⛑️ Deploy Codebase
+    name: ⛑️ Trigger Server Pull
     runs-on: ubuntu-latest
     steps:
     - name: 🚚 Get latest code
       uses: actions/checkout@v4
 
-    - name: 📂 Sync files to Bluehost FTP
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        port: 22
-        # Change this path to match your subdomain folder on Bluehost (e.g. /public_html/dootor-enterprise/)
-        server-dir: ./  
-        exclude: |
-          **/.git*
-          **/.git*/**
-          **/.github*/**
-          **/node_modules/**
-          **/vendor/**
-          .env
-          **/.env
-          **/.env.*
-          **/.env.example
-          composer.lock
-          database.sql
-          tests/**
-          storage/framework/cache/**
-          storage/framework/sessions/**
-          storage/framework/views/**
-          storage/logs/**
-          storage/app/public/**
+    - name: 📡 Trigger Deploy Webhook on Server
+      run: |
+        echo "Triggering deployment webhook on server..."
+        HTTP_STATUS=$(curl -s -o /tmp/deploy_response.txt -w "%{http_code}" \
+          -X POST \
+          -H "X-Deploy-Token: ${{ secrets.DEPLOY_SECRET }}" \
+          "${{ secrets.DEPLOY_WEBHOOK_URL }}")
+
+        echo "--- Server Response ---"
+        cat /tmp/deploy_response.txt
+        echo ""
+        echo "--- HTTP Status: $HTTP_STATUS ---"
+
+        if [ "$HTTP_STATUS" != "200" ]; then
+          echo "❌ Deployment failed with HTTP status $HTTP_STATUS"
+          exit 1
+        fi
+
+        echo "✅ Deployment triggered successfully!"
