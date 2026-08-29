@@ -16,13 +16,12 @@ jobs:
     - name: 📂 Sync files to Bluehost FTP
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
       with:
-        server: ${{ secrets.FTP_SERVER }}
+        server: sftp://${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        port: 21
+        port: 22
         # Change this path to match your subdomain folder on Bluehost (e.g. /public_html/dootor-enterprise/)
         server-dir: ./  
-        security: loose
         exclude: |
           **/.git*
           **/.git*/**
