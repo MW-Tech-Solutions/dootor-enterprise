@@ -5,6 +5,13 @@ use Illuminate\Http\Request;
 
 define('LARAVEL_START', microtime(true));
 
+// Polyfill mb_split if host PHP lacks native mbstring extension
+if (!function_exists('mb_split')) {
+    function mb_split($pattern, $string, $limit = -1) {
+        return preg_split('/' . $pattern . '/u', $string, $limit);
+    }
+}
+
 // Force base path correction for cPanel subfolder deployment
 if (isset($_SERVER['SCRIPT_NAME']) && strpos($_SERVER['SCRIPT_NAME'], '/public/') !== false) {
     $_SERVER['SCRIPT_NAME'] = preg_replace('/\/public\/index\.php/', '/index.php', $_SERVER['SCRIPT_NAME']);

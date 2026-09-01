@@ -70,7 +70,7 @@
         if ($role === 'admin') {
             $navItems = [
                 ['href' => route('admin.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard'],
-                ['href' => route('admin.approvals'), 'icon' => 'bi-clipboard-check', 'label' => 'Approvals'],
+                ['href' => route('admin.subscriptions'), 'icon' => 'bi-journal-check', 'label' => 'Subscriptions'],
                 ['href' => route('admin.users'), 'icon' => 'bi-people', 'label' => 'User Management'],
                 ['href' => route('admin.services'), 'icon' => 'bi-box-seam', 'label' => 'Services'],
                 ['href' => route('admin.settings'), 'icon' => 'bi-sliders', 'label' => 'Settings'],

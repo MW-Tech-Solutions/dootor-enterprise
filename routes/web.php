@@ -51,6 +51,9 @@ Route::middleware('auth')->group(function () {
         Route::patch('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.user.update');
         Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
         
+        Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('admin.subscriptions');
+        Route::patch('/subscriptions/{serviceRequest}', [AdminController::class, 'updateSubscriptionStatus'])->name('admin.subscription.update');
+        
         Route::get('/services', [AdminController::class, 'services'])->name('admin.services');
         Route::post('/services', [AdminController::class, 'storeService'])->name('admin.services.store');
         Route::patch('/services/{service}', [AdminController::class, 'updateService'])->name('admin.service.update');
@@ -94,7 +97,7 @@ Route::middleware('auth')->group(function () {
         
         Route::get('/services', [ClientController::class, 'services'])->name('client.services');
         
-        Route::get('/book/{vendorService}', [ClientController::class, 'book'])->name('client.book');
+        Route::get('/book/{service}', [ClientController::class, 'book'])->name('client.book');
         Route::post('/book', [ClientController::class, 'storeBooking'])->name('client.book.store');
         
         Route::get('/requests', [ClientController::class, 'requests'])->name('client.requests');

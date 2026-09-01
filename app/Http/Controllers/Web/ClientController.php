@@ -28,15 +28,8 @@ class ClientController extends Controller
 
     public function services()
     {
-        // Lists all active custom vendor services across approved vendors
-        $services = VendorService::with(['vendor.storefrontSetting', 'service'])
-            ->where('status', 'Active')
-            ->whereHas('vendor', function ($query) {
-                $query->where('status', 'Approved');
-            })
-            ->latest()
-            ->get();
-
+        // Lists all active base system services managed directly by the platform admin
+        $services = \App\Models\Service::where('status', 'Active')->latest()->get();
         return view('client.services', ['services' => $services]);
     }
 
@@ -56,24 +49,24 @@ class ClientController extends Controller
         return view('client.request-details', ['request' => $serviceRequest]);
     }
 
-    public function book(VendorService $vendorService)
+    public function book(\App\Models\Service $service)
     {
-        if ($vendorService->status !== 'Active') {
+        if ($service->status !== 'Active') {
             abort(404, 'Service is not active');
         }
 
-        return view('client.book', ['vendorService' => $vendorService]);
+        return view('client.book', ['service' => $service]);
     }
 
     public function storeBooking(Request $request)
     {
         $data = $request->validate([
-            'vendor_service_id' => ['required', 'exists:vendor_services,id'],
+            'service_id' => ['required', 'exists:services,id'],
             'documents.*' => ['nullable', 'file', 'max:5120'], // Max 5MB per document
         ]);
 
-        $vendorService = VendorService::with('vendor')->findOrFail($data['vendor_service_id']);
-        abort_unless($vendorService->status === 'Active', 422, 'This service is not active.');
+        $service = \App\Models\Service::findOrFail($data['service_id']);
+        abort_unless($service->status === 'Active', 422, 'This service is not active.');
 
         $client = Auth::user();
 
@@ -89,13 +82,16 @@ class ClientController extends Controller
             }
         }
 
+        // Auto-assign to first admin user in database (who handles all platform services)
+        $admin = User::where('role', 'admin')->first() ?? $client;
+
         $serviceRequest = ServiceRequest::create([
-            'service_id' => $vendorService->service_id,
-            'vendor_service_id' => $vendorService->id,
-            'service_name' => $vendorService->name,
-            'price' => $vendorService->price,
-            'vendor_id' => $vendorService->vendor_id,
-            'vendor_name' => $vendorService->vendor->name,
+            'service_id' => $service->id,
+            'vendor_service_id' => null,
+            'service_name' => $service->name,
+            'price' => $service->price,
+            'vendor_id' => $admin->id,
+            'vendor_name' => $admin->name ?? 'Admin / Platform',
             'client_id' => $client->id,
             'client_name' => $client->name,
             'client_email' => $client->email,

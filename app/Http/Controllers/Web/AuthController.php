@@ -48,7 +48,7 @@ class AuthController extends Controller
 
     public function showRegisterVendor()
     {
-        return view('auth.register');
+        return view('auth.register-client');
     }
 
     public function registerWeb(Request $request)
@@ -63,8 +63,8 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
-        $data['role'] = 'vendor';
-        $data['status'] = 'Pending'; // Needs admin approval/KYC submission
+        $data['role'] = 'client';
+        $data['status'] = 'Approved'; // Clients are auto-approved
         $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
@@ -72,7 +72,7 @@ class AuthController extends Controller
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('vendor.kyc')->with('success', 'Registration successful! Please complete your KYC details to be approved.');
+        return redirect()->route('client.dashboard')->with('success', 'Welcome to the platform!');
     }
 
     public function showRegisterClient()

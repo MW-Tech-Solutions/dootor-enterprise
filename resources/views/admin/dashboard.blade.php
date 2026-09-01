@@ -44,82 +44,85 @@
 @section('content')
 <div class="mb-4">
     <h1 class="h3 fw-bold text-dark mb-1">System Administration</h1>
-    <p class="text-secondary small">Oversee users, verify vendor credentials, configure global platform rates, and manage payment options</p>
+    <p class="text-secondary small">Oversee clients, configure global platform rates, manage subscriptions, and configure billing options</p>
 </div>
 
 <!-- Stats row -->
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
-            <span class="text-muted d-block small mb-1">Total Users</span>
+            <span class="text-muted d-block small mb-1">Total Clients</span>
             <span class="fw-bold display-6">{{ $total_users }}</span>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
-            <span class="text-muted d-block small mb-1">Total Providers</span>
-            <span class="fw-bold display-6 text-success">{{ $total_vendors }}</span>
+            <span class="text-muted d-block small mb-1">Active Services</span>
+            <span class="fw-bold display-6 text-success">{{ $active_services }}</span>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
-            <span class="text-muted d-block small mb-1">Pending Approvals</span>
-            <span class="fw-bold display-6 text-warning">{{ $pending_approvals }}</span>
+            <span class="text-muted d-block small mb-1">Pending Processing</span>
+            <span class="fw-bold display-6 text-warning">{{ $pending_requests }}</span>
         </div>
     </div>
     <div class="col-md-3">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
-            <span class="text-muted d-block small mb-1">Service Orders</span>
+            <span class="text-muted d-block small mb-1">Total Service Orders</span>
             <span class="fw-bold display-6 text-primary">{{ $total_requests }}</span>
         </div>
     </div>
 </div>
 
 <div class="row g-4">
-    <!-- Pending Vendor Vetting -->
+    <!-- Recent Service Requests -->
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h5 fw-bold text-dark mb-0">Pending Vendor Verification</h2>
-                <a href="{{ route('admin.approvals') }}" class="btn btn-dark btn-sm rounded-pill px-3">View Vetting Queue</a>
+                <h2 class="h5 fw-bold text-dark mb-0">Recent Service Subscriptions</h2>
+                <a href="{{ route('admin.subscriptions') }}" class="btn btn-dark btn-sm rounded-pill px-3">View Subscriptions</a>
             </div>
 
-            @if(count($pending_vendors) > 0)
+            @if(count($recent_requests) > 0)
                 <div class="table-responsive">
                     <table class="table align-middle">
                         <thead>
                             <tr class="text-secondary small">
-                                <th>Vendor</th>
-                                <th>NIN</th>
-                                <th>Bank Account</th>
-                                <th>Action</th>
+                                <th>Client</th>
+                                <th>Service</th>
+                                <th>Reference</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($pending_vendors as $vendor)
+                            @foreach($recent_requests as $request)
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
-                                            @if($vendor->avatar_url)
-                                                <img src="{{ $vendor->avatar_url }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
-                                            @else
-                                                <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 12px;">
-                                                    {{ strtoupper(substr($vendor->first_name, 0, 1)) }}
-                                                </div>
-                                            @endif
+                                            <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 11px;">
+                                                {{ strtoupper(substr($request->client->first_name ?? 'C', 0, 1)) }}
+                                            </div>
                                             <div>
-                                                <span class="fw-semibold text-dark d-block">{{ $vendor->first_name }} {{ $vendor->last_name }}</span>
-                                                <span class="text-muted small">{{ $vendor->email }}</span>
+                                                <span class="fw-semibold text-dark d-block" style="font-size: 13px;">{{ $request->client_name }}</span>
+                                                <span class="text-muted small" style="font-size: 11px;">{{ $request->client_email }}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ $vendor->kycProfile->nin ?? 'Not Provided' }}</td>
+                                    <td class="small fw-semibold text-dark">{{ $request->service_name }}</td>
                                     <td>
-                                        <span class="small text-dark fw-medium">{{ $vendor->kycProfile->bank_name ?? '' }}</span> <br>
-                                        <span class="text-muted small">No: {{ $vendor->kycProfile->account_number ?? '' }}</span>
+                                        <code class="small">#{{ sprintf('%04d', $request->id) }}</code>
                                     </td>
                                     <td>
-                                        <a href="{{ route('admin.approvals') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3">Review Profile</a>
+                                        @php
+                                            $statusClass = match($request->status) {
+                                                'Completed' => 'bg-success text-white',
+                                                'Processing' => 'bg-info text-dark',
+                                                'Cancelled' => 'bg-danger text-white',
+                                                default => 'bg-warning text-dark'
+                                            };
+                                        @endphp
+                                        <span class="badge {{ $statusClass }} rounded-pill px-2.5 py-1" style="font-size: 10px;">{{ $request->status }}</span>
                                     </td>
                                 </tr>
                             @endforeach
@@ -128,8 +131,8 @@
                 </div>
             @else
                 <div class="text-center py-5 my-auto">
-                    <i class="bi bi-patch-check-fill fs-1 text-success"></i>
-                    <p class="text-secondary mt-2 small">Queue is empty! All vendor profiles are vetted and processed.</p>
+                    <i class="bi bi-journal-x fs-1 text-muted"></i>
+                    <p class="text-secondary mt-2 small">No service requests yet.</p>
                 </div>
             @endif
         </div>
@@ -141,6 +144,14 @@
             <h2 class="h5 fw-bold text-dark mb-4">Quick Shortcuts</h2>
             
             <div class="d-grid gap-2 mb-4">
+                <a href="{{ route('admin.subscriptions') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="fw-semibold d-block shortcut-title small">Client Subscriptions</span>
+                        <span class="shortcut-desc extra-small">Search clients and manage processing statuses</span>
+                    </div>
+                    <i class="bi bi-chevron-right"></i>
+                </a>
+
                 <a href="{{ route('admin.services') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
                     <div>
                         <span class="fw-semibold d-block shortcut-title small">Configure Platform Services</span>

@@ -14,15 +14,18 @@ class AdminController extends Controller
 {
     public function dashboard()
     {
-        $vendors = User::where('role', 'vendor')->latest()->get();
-        $pendingVendors = $vendors->where('status', 'Pending')->values();
+        $total_users = User::where('role', 'client')->count();
+        $active_services = Service::where('status', 'Active')->count();
+        $total_requests = ServiceRequest::count();
+        $pending_requests = ServiceRequest::whereIn('status', ['Awaiting Payment', 'Processing'])->count();
+        $recent_requests = ServiceRequest::with('client')->latest()->take(5)->get();
 
         return view('admin.dashboard', [
-            'total_vendors' => $vendors->count(),
-            'pending_approvals' => $pendingVendors->count(),
-            'total_users' => User::count(),
-            'total_requests' => ServiceRequest::count(),
-            'pending_vendors' => $pendingVendors->load('kycProfile')->take(5),
+            'total_users' => $total_users,
+            'active_services' => $active_services,
+            'total_requests' => $total_requests,
+            'pending_requests' => $pending_requests,
+            'recent_requests' => $recent_requests,
         ]);
     }
 
@@ -188,5 +191,44 @@ class AdminController extends Controller
         $settings->update($data);
 
         return redirect()->back()->with('success', 'System settings updated successfully.');
+    }
+
+    public function subscriptions(Request $request)
+    {
+        $search = $request->query('search');
+        $query = User::where('role', 'client')->with(['clientRequests.service'])->latest();
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('first_name', 'like', "%{$search}%")
+                  ->orWhere('last_name', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%")
+                  ->orWhereHas('clientRequests', function ($qr) use ($search) {
+                      $qr->where('id', $search)
+                         ->orWhere('payment_reference', 'like', "%{$search}%")
+                         ->orWhere('service_name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $users = $query->paginate(20)->withQueryString();
+
+        return view('admin.subscriptions', [
+            'users' => $users,
+            'search' => $search,
+        ]);
+    }
+
+    public function updateSubscriptionStatus(Request $request, ServiceRequest $serviceRequest)
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(['Awaiting Payment', 'Processing', 'Completed', 'Cancelled'])],
+        ]);
+
+        $serviceRequest->update([
+            'status' => $data['status']
+        ]);
+
+        return redirect()->back()->with('success', 'Subscription status updated successfully.');
     }
 }

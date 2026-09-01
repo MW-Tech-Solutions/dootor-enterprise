@@ -154,7 +154,7 @@
                     <span class="text-gradient">Services In One Place</span>
                 </h1>
                 <p class="lead text-secondary mb-4">
-                    Fast-track passport approvals, visa handling, NIN verification, court affidavits, and more. A secured multi-vendor portal connecting clients to verified agents.
+                    Fast-track passport approvals, visa handling, NIN verification, court affidavits, and more. A secured portal for direct processing and verified document handling.
                 </p>
                 <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3">
                     <a href="#services" class="btn btn-dark btn-lg px-4 rounded-pill">Explore Services <i class="bi bi-arrow-right ms-2"></i></a>
@@ -272,7 +272,7 @@
         <div class="text-center max-w-lg mx-auto mb-4">
             <span class="text-uppercase small fw-bold text-gradient tracking-wide">Catalog</span>
             <h2 class="display-5 fw-bold mt-2">Services We Assist With</h2>
-            <p class="text-secondary">Explore the documentation and certification services offered by our verified vendors.</p>
+            <p class="text-secondary">Explore our catalog of official documentation and certification services.</p>
         </div>
 
         <!-- Search and Filter Controls -->
@@ -306,13 +306,8 @@
                             <h3 class="h6 fw-bold mb-2">{{ $service->name }}</h3>
                             <p class="text-secondary small flex-grow-1">{{ $service->description }}</p>
                             <hr class="my-2 border-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                @if($service->price > 0)
-                                    <span class="fw-bold text-dark">{{ $settings->default_currency ?? 'USD' }} {{ number_format($service->price, 2) }}</span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary rounded-pill">Custom Rate</span>
-                                @endif
-                                <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3">Order</a>
+                            <div class="d-flex justify-content-end align-items-center">
+                                <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 w-100 text-center">Order Now</a>
                             </div>
                         </div>
                     </div>
@@ -331,9 +326,8 @@
                             <h3 class="h6 fw-bold mb-2">{{ $service['title'] }}</h3>
                             <p class="text-secondary small flex-grow-1">{{ $service['description'] }}</p>
                             <hr class="my-2 border-light">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-secondary-subtle text-secondary rounded-pill">Varies by Vendor</span>
-                                <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3">Order</a>
+                            <div class="d-flex justify-content-end align-items-center">
+                                <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 w-100 text-center">Order Now</a>
                             </div>
                         </div>
                     </div>

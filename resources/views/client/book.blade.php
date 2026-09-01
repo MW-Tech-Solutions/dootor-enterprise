@@ -17,7 +17,7 @@
 
             <form action="{{ route('client.book.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
-                <input type="hidden" name="vendor_service_id" value="{{ $vendorService->id }}">
+                <input type="hidden" name="service_id" value="{{ $service->id }}">
 
                 <!-- Requirements note -->
                 <div class="alert alert-info rounded-3 mb-4 small" role="alert">
@@ -52,7 +52,7 @@
             
             <div class="d-flex justify-content-between mb-2 small text-secondary">
                 <span>Service Price:</span>
-                <span>{{ $settings->default_currency ?? 'USD' }} {{ number_format($vendorService->price, 2) }}</span>
+                <span>{{ $settings->default_currency ?? 'USD' }} {{ number_format($service->price, 2) }}</span>
             </div>
             <div class="d-flex justify-content-between mb-2 small text-secondary">
                 <span>System processing fee:</span>
@@ -63,12 +63,12 @@
             
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <span class="fw-bold text-dark small">Total Charged:</span>
-                <span class="fw-bold fs-5 text-dark">{{ $settings->default_currency ?? 'USD' }} {{ number_format($vendorService->price, 2) }}</span>
+                <span class="fw-bold fs-5 text-dark">{{ $settings->default_currency ?? 'USD' }} {{ number_format($service->price, 2) }}</span>
             </div>
 
             <div class="p-3 bg-light rounded-3 small">
                 <span class="fw-semibold text-dark d-block mb-1"><i class="bi bi-shield-check text-success"></i> Secure Checkout</span>
-                <span class="text-secondary small">Your payment will be safely held in escrow until the vendor processes your document details.</span>
+                <span class="text-secondary small">Your payment will be safely processed to begin document handling.</span>
             </div>
         </div>
     </div>

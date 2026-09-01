@@ -16,7 +16,7 @@
                     <tr class="text-secondary small">
                         <th>Request ID</th>
                         <th>Service</th>
-                        <th>Vendor</th>
+                        <th>Processor</th>
                         <th>Price</th>
                         <th>Payment Status</th>
                         <th>Processing Status</th>

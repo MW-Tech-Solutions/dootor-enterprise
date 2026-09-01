@@ -5,7 +5,7 @@
 @section('content')
 <div class="mb-4">
     <h1 class="h3 fw-bold text-dark mb-1">Hello, {{ Auth::user()->first_name }}!</h1>
-    <p class="text-secondary small">Track your document requests and explore verified providers</p>
+    <p class="text-secondary small">Track your document requests and explore available services</p>
 </div>
 
 <!-- Stats row -->
@@ -43,7 +43,7 @@
                 <thead>
                     <tr class="text-secondary small">
                         <th>Service</th>
-                        <th>Vendor</th>
+                        <th>Processor</th>
                         <th>Price</th>
                         <th>Payment</th>
                         <th>Status</th>

@@ -24,7 +24,7 @@
                     <span class="fw-semibold text-dark fs-6">{{ $settings->default_currency ?? 'USD' }} {{ number_format($request->price, 2) }}</span>
                 </div>
                 <div class="col-sm-6">
-                    <span class="text-muted d-block">Vendor Agent</span>
+                    <span class="text-muted d-block">Processor</span>
                     <span class="fw-semibold text-dark fs-6">{{ $request->vendor_name }}</span>
                 </div>
                 <div class="col-sm-6">
