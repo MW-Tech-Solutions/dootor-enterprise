@@ -41,7 +41,7 @@
         <div>
             <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
                 @if($settings && $settings->logo_url)
-                    <img src="{{ $settings->logo_url }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
+                    <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
                 @else
                     <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                         <!-- Stylized D (Gold) -->
@@ -99,7 +99,7 @@
             <div class="text-center mb-4 d-block d-lg-none">
                 <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
                     @if($settings && $settings->logo_url)
-                        <img src="{{ $settings->logo_url }}" alt="Logo" class="rounded" style="height: 38px; width: 38px; object-fit: contain;">
+                        <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 38px; width: 38px; object-fit: contain;">
                     @else
                         <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                             <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogoRegVendorMobile)" />
@@ -165,24 +165,28 @@
                 <!-- Location Fields -->
                 <div class="row g-2 mb-3">
                     <div class="col-sm-6">
-                        <label for="country" class="form-label small fw-medium">Country</label>
-                        <select name="country" id="country" class="form-select bg-light rounded-3" style="border-color: #dee2e6;" required>
-                            <option value="">Select Country</option>
+                        <label for="country" class="form-label small fw-medium">Country (African Countries Only)</label>
+                        <select name="country" id="country" class="form-select african-country-select bg-light rounded-3 @error('country') is-invalid @enderror" data-selected="{{ old('country', 'Nigeria') }}" data-division-target="state" data-label-target="state_label" style="border-color: #dee2e6;" required>
                             @php
-                                $countries = [
-                                    "Afghanistan", "Albania", "Algeria", "Andorra", "Angola", "Antigua and Barbuda", "Argentina", "Armenia", "Australia", "Austria", "Azerbaijan", "Bahamas", "Bahrain", "Bangladesh", "Barbados", "Belarus", "Belgium", "Belize", "Benin", "Bhutan", "Bolivia", "Bosnia and Herzegovina", "Botswana", "Brazil", "Brunei", "Bulgaria", "Burkina Faso", "Burundi", "Cabo Verde", "Cambodia", "Cameroon", "Canada", "Central African Republic", "Chad", "Chile", "China", "Colombia", "Comoros", "Congo", "Costa Rica", "Croatia", "Cuba", "Cyprus", "Czechia", "Denmark", "Djibouti", "Dominica", "Dominican Republic", "Ecuador", "Egypt", "El Salvador", "Equatorial Guinea", "Eritrea", "Estonia", "Eswatini", "Ethiopia", "Fiji", "Finland", "France", "Gabon", "Gambia", "Georgia", "Germany", "Ghana", "Greece", "Grenada", "Guatemala", "Guinea", "Guinea-Bissau", "Guyana", "Haiti", "Honduras", "Hungary", "Iceland", "India", "Indonesia", "Iran", "Iraq", "Ireland", "Israel", "Italy", "Jamaica", "Japan", "Jordan", "Kazakhstan", "Kenya", "Kiribati", "Kuwait", "Kyrgyzstan", "Laos", "Latvia", "Lebanon", "Lesotho", "Liberia", "Libya", "Liechtenstein", "Lithuania", "Luxembourg", "Madagascar", "Malawi", "Malaysia", "Maldives", "Mali", "Malta", "Marshall Islands", "Mauritania", "Mauritius", "Mexico", "Micronesia", "Moldova", "Monaco", "Mongolia", "Montenegro", "Morocco", "Mozambique", "Myanmar", "Namibia", "Nauru", "Nepal", "Netherlands", "New Zealand", "Nicaragua", "Niger", "Nigeria", "North Korea", "North Macedonia", "Norway", "Oman", "Pakistan", "Palau", "Palestine", "Panama", "Papua New Guinea", "Paraguay", "Peru", "Philippines", "Poland", "Portugal", "Qatar", "Romania", "Russia", "Rwanda", "Saint Kitts and Nevis", "Saint Lucia", "Saint Vincent", "Samoa", "San Marino", "Sao Tome and Principe", "Saudi Arabia", "Senegal", "Serbia", "Seychelles", "Sierra Leone", "Singapore", "Slovakia", "Slovenia", "Solomon Islands", "Somalia", "South Africa", "South Korea", "South Sudan", "Spain", "Sri Lanka", "Sudan", "Suriname", "Sweden", "Switzerland", "Syria", "Taiwan", "Tajikistan", "Tanzania", "Thailand", "Timor-Leste", "Togo", "Tonga", "Trinidad and Tobago", "Tunisia", "Turkey", "Turkmenistan", "Tuvalu", "Uganda", "Ukraine", "United Arab Emirates", "United Kingdom", "United States", "Uruguay", "Uzbekistan", "Vanuatu", "Vatican City", "Venezuela", "Vietnam", "Yemen", "Zambia", "Zimbabwe"
-                                ];
+                                $afCountries = $africanCountries ?? \App\Services\AfricanLocationService::allCountries();
+                                $selectedCountry = old('country', 'Nigeria');
                             @endphp
-                            @foreach($countries as $c)
-                                <option value="{{ $c }}" {{ old('country') == $c ? 'selected' : '' }}>{{ $c }}</option>
+                            @foreach($afCountries as $c)
+                                <option value="{{ $c['name'] }}" {{ $selectedCountry == $c['name'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
                             @endforeach
                         </select>
+                        @error('country')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-sm-6">
-                        <label for="state" class="form-label small fw-medium">State / Province</label>
-                        <select name="state" id="state" class="form-select bg-light rounded-3" style="border-color: #dee2e6;" required>
-                            <option value="">Select State/Province</option>
+                        <label for="state" id="state_label" class="form-label small fw-medium african-division-label">State / Region</label>
+                        <select name="state" id="state" class="form-select african-division-select bg-light rounded-3 @error('state') is-invalid @enderror" data-selected="{{ old('state') }}" style="border-color: #dee2e6;" required>
+                            <option value="">Loading States...</option>
                         </select>
+                        @error('state')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
                     </div>
                 </div>
 
@@ -209,86 +213,11 @@
             </form>
 
             <div class="text-center text-secondary small mt-3 pt-3 border-top border-light">
-                Already have an account? <a href="{{ route('login') }}" class="text-decoration-none text-brand-success fw-semibold">Sign In</a> <br>
-                Looking to book services? <a href="{{ route('register.client') }}" class="text-decoration-none text-brand-success fw-semibold">Register as Client</a>
+                Already have an account? <a href="{{ route('login') }}" class="text-decoration-none text-brand-success fw-semibold">Sign In</a>
+                {{-- Vendor registration disabled for the mean time --}}
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const countrySelect = document.getElementById("country");
-        const stateSelect = document.getElementById("state");
-
-        const locationData = {
-            "Nigeria": [
-                "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
-                "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT - Abuja", "Gombe", 
-                "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
-                "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", 
-                "Taraba", "Yobe", "Zamfara"
-            ],
-            "Canada": [
-                "Alberta", "British Columbia", "Manitoba", "New Brunswick", "Newfoundland and Labrador", 
-                "Nova Scotia", "Ontario", "Prince Edward Island", "Quebec", "Saskatchewan", 
-                "Northwest Territories", "Nunavut", "Yukon"
-            ],
-            "United Kingdom": [
-                "England", "Scotland", "Wales", "Northern Ireland"
-            ],
-            "United States": [
-                "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", 
-                "Delaware", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", 
-                "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", 
-                "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", 
-                "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", 
-                "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", 
-                "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", 
-                "Wisconsin", "Wyoming"
-            ]
-        };
-
-        const genericStates = [
-            "Federal Capital Territory / Capital Region",
-            "Central Region / Province",
-            "Eastern Region / Province",
-            "Western Region / Province",
-            "Northern Region / Province",
-            "Southern Region / Province",
-            "Main Region / Province",
-            "Other / Default Subdivision"
-        ];
-
-        function updateStates(selectedCountry, savedState = '') {
-            stateSelect.innerHTML = '<option value="">Select State/Province</option>';
-            if (!selectedCountry) {
-                return;
-            }
-
-            const list = locationData[selectedCountry] || genericStates;
-            
-            list.forEach(function(state) {
-                const option = document.createElement("option");
-                option.value = state;
-                option.textContent = state;
-                if (state === savedState) {
-                    option.selected = true;
-                }
-                stateSelect.appendChild(option);
-            });
-        }
-
-        countrySelect.addEventListener("change", function() {
-            updateStates(this.value);
-        });
-
-        // Initialize on page load with old value
-        const initialCountry = countrySelect.value;
-        const initialState = "{{ old('state') }}";
-        if (initialCountry) {
-            updateStates(initialCountry, initialState);
-        }
-    });
-</script>
+<script src="{{ asset('js/location-loader.js') }}"></script>
 @endsection

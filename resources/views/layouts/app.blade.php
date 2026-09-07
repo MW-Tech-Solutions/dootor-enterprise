@@ -39,6 +39,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="api-base-url" content="{{ url('/api/location') }}">
     <title>@yield('title', $platformName)</title>
     
     <!-- Fonts -->
@@ -82,36 +83,50 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 16px;
-            border-radius: 8px;
-            color: #64748b;
+            padding: 11px 16px;
+            border-radius: 10px;
+            color: #475569 !important;
             text-decoration: none;
             transition: all 0.2s ease;
         }
 
         .sidebar-link:hover {
-            background-color: #f1f5f9;
-            color: #0f172a;
+            background-color: #f1f5f9 !important;
+            color: #004225 !important;
         }
 
         .sidebar-link.active {
-            background-color: #f1f5f9;
-            color: hsl(var(--primary, 209, 84%, 79%));
+            background-color: #004225 !important;
+            color: #ffffff !important;
             font-weight: 600;
+            box-shadow: 0 4px 12px rgba(0, 66, 37, 0.25) !important;
+        }
+
+        .sidebar-link.active i {
+            color: #d4af37 !important;
         }
 
         .dark .sidebar-link {
-            color: #94a3b8;
+            color: #94a3b8 !important;
         }
 
         .dark .sidebar-link:hover {
-            background-color: #1e293b;
-            color: #f8fafc;
+            background-color: #1e293b !important;
+            color: #f8fafc !important;
         }
 
         .dark .sidebar-link.active {
-            background-color: #1e293b;
-            color: hsl(var(--primary, 209, 84%, 79%));
+            background-color: #004225 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 12px rgba(0, 66, 37, 0.4) !important;
+        }
+
+        .modal-backdrop {
+            z-index: 1050 !important;
+        }
+
+        .modal {
+            z-index: 1060 !important;
         }
     </style>
     @yield('styles')
@@ -121,7 +136,7 @@
 
     <!-- Global Toast / Alerts -->
     @if(session('success') || session('error'))
-    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1050;">
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1070;">
         <div id="liveToast" class="toast show align-items-center {{ session('success') ? 'text-bg-success' : 'text-bg-danger' }} border-0 position-relative overflow-hidden shadow-lg" role="alert" aria-live="assertive" aria-atomic="true" style="border-radius: 10px;">
             <div class="d-flex py-1">
                 <div class="toast-body fw-medium px-3">
@@ -144,14 +159,12 @@
             var progressEl = document.getElementById('toastProgressBar');
             
             if (toastEl) {
-                // Animate progress bar shrinking
                 setTimeout(function() {
                     if (progressEl) {
                         progressEl.style.width = '0%';
                     }
                 }, 50);
 
-                // Auto close and remove toast
                 setTimeout(function() {
                     toastEl.style.transition = 'all 0.4s ease';
                     toastEl.style.opacity = '0';
@@ -165,6 +178,17 @@
     </script>
     @endif
 
+    <!-- Global Bootstrap Modal Stack & Z-Index Auto-Hoisting Fix -->
+    <script>
+        document.addEventListener('show.bs.modal', function (event) {
+            var modal = event.target;
+            if (modal && modal.parentNode !== document.body) {
+                document.body.appendChild(modal);
+            }
+        });
+    </script>
+
     @yield('scripts')
+    @stack('scripts')
 </body>
 </html>

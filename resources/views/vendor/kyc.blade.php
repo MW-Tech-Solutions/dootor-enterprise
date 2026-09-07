@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Complete KYC - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Complete KYC - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -50,21 +50,21 @@
                         <div class="col-md-4">
                             <label for="id_card" class="form-label small fw-medium">National ID / Passport Photo</label>
                             @if($kyc->id_card_url)
-                                <a href="{{ $kyc->id_card_url }}" target="_blank" class="d-block small mb-2 text-decoration-none"><i class="bi bi-file-earmark-image"></i> View Current ID Card</a>
+                                <a href="{{ app_file_url($kyc->id_card_url) }}" target="_blank" class="d-block small mb-2 text-decoration-none"><i class="bi bi-file-earmark-image"></i> View Current ID Card</a>
                             @endif
                             <input type="file" name="id_card" id="id_card" class="form-control rounded-3 form-control-sm" {{ !$kyc->id_card_url ? 'required' : '' }}>
                         </div>
                         <div class="col-md-4">
                             <label for="proof_of_address" class="form-label small fw-medium">Proof of Address (Utility Bill)</label>
                             @if($kyc->proof_of_address_url)
-                                <a href="{{ $kyc->proof_of_address_url }}" target="_blank" class="d-block small mb-2 text-decoration-none"><i class="bi bi-file-earmark-image"></i> View Current Proof</a>
+                                <a href="{{ app_file_url($kyc->proof_of_address_url) }}" target="_blank" class="d-block small mb-2 text-decoration-none"><i class="bi bi-file-earmark-image"></i> View Current Proof</a>
                             @endif
                             <input type="file" name="proof_of_address" id="proof_of_address" class="form-control rounded-3 form-control-sm" {{ !$kyc->proof_of_address_url ? 'required' : '' }}>
                         </div>
                         <div class="col-md-4">
                             <label for="personal_image" class="form-label small fw-medium">Personal Passport Image</label>
                             @if($kyc->personal_image_url)
-                                <a href="{{ $kyc->personal_image_url }}" target="_blank" class="d-block small mb-2 text-decoration-none"><i class="bi bi-file-earmark-image"></i> View Current Photo</a>
+                                <a href="{{ app_file_url($kyc->personal_image_url) }}" target="_blank" class="d-block small mb-2 text-decoration-none"><i class="bi bi-file-earmark-image"></i> View Current Photo</a>
                             @endif
                             <input type="file" name="personal_image" id="personal_image" class="form-control rounded-3 form-control-sm" {{ !$kyc->personal_image_url ? 'required' : '' }}>
                         </div>

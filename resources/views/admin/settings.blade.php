@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'System Settings - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'System Settings - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -14,7 +14,7 @@
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
             <h2 class="h5 fw-bold text-dark mb-4"><i class="bi bi-palette me-2"></i> Branding &amp; Visual Design</h2>
             
-            <form action="{{ route('admin.settings.update') }}" method="POST">
+            <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 
                 <div class="row g-3 mb-3">
@@ -29,8 +29,15 @@
                 </div>
 
                 <div class="mb-3">
-                    <label for="logo_url" class="form-label small fw-medium">Logo Image URL</label>
-                    <input type="text" name="logo_url" id="logo_url" class="form-control rounded-3" value="{{ old('logo_url', $settings->logo_url) }}" placeholder="https://...">
+                    <label for="logo_file" class="form-label small fw-medium">Upload Platform Logo</label>
+                    @if($settings->logo_url)
+                    <div class="mb-2 d-flex align-items-center gap-3 p-2 border rounded-3 bg-light">
+                        <img src="{{ asset($settings->logo_url) }}" alt="Current Logo" class="rounded" style="max-height: 40px; max-width: 120px; object-fit: contain;">
+                        <span class="small text-muted">Current Logo Active</span>
+                    </div>
+                    @endif
+                    <input type="file" name="logo_file" id="logo_file" class="form-control rounded-3" accept="image/*">
+                    <small class="text-muted d-block mt-1">Recommended format: PNG, SVG, WEBP, or JPG (Max 5MB)</small>
                 </div>
 
                 <div class="row g-3 mb-3">

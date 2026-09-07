@@ -6,6 +6,8 @@ use App\Models\SystemSetting;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
+require_once __DIR__ . '/../Helpers/functions.php';
+
 class AppServiceProvider extends ServiceProvider
 {
     /**

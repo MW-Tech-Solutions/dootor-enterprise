@@ -99,9 +99,44 @@ class User extends Authenticatable
         return $this->hasMany(ServiceRequest::class, 'client_id');
     }
 
+    public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
+    }
+
+    public function directPermissions(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'user_permissions');
+    }
+
+    public function hasPermission(string $permissionSlug): bool
+    {
+        // Global Super Admin access
+        if ($this->role === 'admin') {
+            return true;
+        }
+
+        // Check if user has direct permission override
+        if ($this->directPermissions()->where('slug', $permissionSlug)->exists()) {
+            return true;
+        }
+
+        // Check if user has permission through any assigned role
+        foreach ($this->roles as $role) {
+            if ($role->slug === 'super-admin') {
+                return true;
+            }
+            if ($role->permissions()->where('slug', $permissionSlug)->exists()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function isAdmin(): bool
     {
-        return $this->role === 'admin';
+        return $this->role === 'admin' || $this->roles()->where('slug', 'super-admin')->exists();
     }
 
     public function isVendor(): bool

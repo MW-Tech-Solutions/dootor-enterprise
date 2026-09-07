@@ -1,24 +1,31 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Client Subscriptions - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('title', 'Service Applications & Manual Form Uploads')
 
 @section('content')
 <div class="mb-4">
-    <h1 class="h3 fw-bold text-dark mb-1">Client Subscriptions</h1>
-    <p class="text-secondary small">Search clients and manage processing statuses for their ordered services</p>
+    <h4 class="fw-bold text-dark mb-1">Service Applications & Upload Review</h4>
+    <p class="text-secondary small">Review online & manual application uploads, inspect scanned forms, verify documents, and update user service status.</p>
 </div>
 
+@if(session('success'))
+<div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+</div>
+@endif
+
 <!-- Search Panel -->
-<div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+<div class="card border-0 shadow-sm p-3 rounded-4 bg-white mb-4">
     <form action="{{ route('admin.subscriptions') }}" method="GET" class="row g-3">
         <div class="col-md-9">
             <div class="input-group">
                 <span class="input-group-text bg-white border-end-0 border-light"><i class="bi bi-search text-muted"></i></span>
-                <input type="text" name="search" class="form-control border-start-0 border-light ps-0" placeholder="Search by name, email, request ID, or payment reference..." value="{{ $search }}">
+                <input type="text" name="search" class="form-control border-start-0 border-light ps-0" placeholder="Search by client name, email, application ref (DE-2026-XXXX), or service..." value="{{ $search }}">
             </div>
         </div>
         <div class="col-md-3 d-flex gap-2">
-            <button type="submit" class="btn btn-dark rounded-pill px-4 flex-grow-1">Search</button>
+            <button type="submit" class="btn text-white rounded-pill px-4 flex-grow-1" style="background-color: #004225;">Search</button>
             @if($search)
                 <a href="{{ route('admin.subscriptions') }}" class="btn btn-outline-secondary rounded-pill px-3"><i class="bi bi-x-lg"></i></a>
             @endif
@@ -26,95 +33,174 @@
     </form>
 </div>
 
-<!-- Users and Subscriptions Listing -->
+<!-- Users and Applications Listing -->
 @if($users->count() > 0)
     <div class="d-flex flex-column gap-4">
         @foreach($users as $user)
             <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
                 <div class="card-header bg-light border-0 py-3 px-4 d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-2">
                     <div class="d-flex align-items-center gap-3">
-                        <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 14px;">
-                            {{ strtoupper(substr($user->first_name, 0, 1)) }}
+                        <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 14px; background-color: #004225;">
+                            {{ strtoupper(substr($user->first_name ?? $user->name, 0, 1)) }}
                         </div>
                         <div>
-                            <h3 class="h6 fw-bold text-dark mb-0">{{ $user->first_name }} {{ $user->last_name }}</h3>
+                            <h3 class="h6 fw-bold text-dark mb-0">{{ $user->name }}</h3>
                             <span class="text-secondary small">{{ $user->email }} | {{ $user->phone ?? 'No Phone' }}</span>
                         </div>
                     </div>
                     <div>
-                        <span class="badge bg-dark-subtle text-dark rounded-pill px-3 py-1 text-uppercase small" style="font-size: 11px;">
-                            Total Orders: {{ $user->clientRequests->count() }}
+                        <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 text-uppercase small" style="font-size: 11px;">
+                            Applications: {{ $user->clientRequests->count() }}
                         </span>
                     </div>
                 </div>
                 
                 <div class="card-body p-4">
                     @if($user->clientRequests->count() > 0)
-                        <div class="table-responsive">
-                            <table class="table align-middle">
-                                <thead>
-                                    <tr class="text-secondary small border-bottom">
-                                        <th class="ps-0">Request ID</th>
-                                        <th>Service Name</th>
-                                        <th>Price</th>
-                                        <th>Payment Reference</th>
-                                        <th>Payment Status</th>
-                                        <th>Processing Status</th>
-                                        <th class="text-end pe-0">Update Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @foreach($user->clientRequests as $request)
-                                        <tr>
-                                            <td class="ps-0 fw-bold text-dark">#{{ sprintf('%04d', $request->id) }}</td>
-                                            <td>
-                                                <div class="fw-semibold text-dark">{{ $request->service_name }}</div>
-                                                <span class="text-muted small">Ordered {{ $request->created_at->format('M d, Y') }}</span>
-                                            </td>
-                                            <td class="fw-bold">{{ $settings->default_currency ?? 'USD' }} {{ number_format($request->price, 2) }}</td>
-                                            <td>
-                                                <code class="small">{{ $request->payment_reference ?? 'N/A' }}</code>
-                                            </td>
-                                            <td>
-                                                <span class="badge rounded-pill px-2.5 py-1 {{ $request->payment_status === 'Paid' ? 'bg-success text-white' : 'bg-warning text-dark' }}">
-                                                    {{ $request->payment_status }}
+                        <div class="d-flex flex-column gap-4">
+                            @foreach($user->clientRequests as $request)
+                                <div class="border rounded-3 p-3 bg-white">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                                        <div>
+                                            <span class="font-monospace fw-bold text-success fs-6 me-2" style="color: #004225 !important;">{{ $request->reference_number ?? ('DE-' . $request->id) }}</span>
+                                            <span class="fw-bold text-dark fs-6">{{ $request->service_name }}</span>
+                                            <small class="text-muted ms-2">• {{ $request->created_at->format('M d, Y H:i') }}</small>
+                                        </div>
+                                        <div class="d-flex gap-2 align-items-center">
+                                            @if($request->application_method === 'manual' || $request->manual_form_path)
+                                                <span class="badge bg-warning bg-opacity-10 text-dark border border-warning px-2.5 py-1">
+                                                    <i class="bi bi-file-earmark-arrow-up me-1"></i> Manual Form Upload
                                                 </span>
-                                            </td>
-                                            <td>
-                                                @php
-                                                    $statusBadge = match($request->status) {
-                                                        'Completed' => 'bg-success text-white',
-                                                        'Processing' => 'bg-info text-dark',
-                                                        'Cancelled' => 'bg-danger text-white',
-                                                        default => 'bg-warning text-dark'
-                                                    };
-                                                @endphp
-                                                <span class="badge {{ $statusBadge }} rounded-pill px-2.5 py-1">
-                                                    {{ $request->status }}
+                                            @else
+                                                <span class="badge bg-info bg-opacity-10 text-info border border-info px-2.5 py-1">
+                                                    <i class="bi bi-laptop me-1"></i> Online Application
                                                 </span>
-                                            </td>
-                                            <td class="text-end pe-0">
-                                                <form action="{{ route('admin.subscription.update', $request->id) }}" method="POST" class="d-inline-flex gap-2 align-items-center">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <select name="status" class="form-select form-select-sm rounded-3 w-auto" style="min-width: 140px;">
-                                                        <option value="Awaiting Payment" {{ $request->status === 'Awaiting Payment' ? 'selected' : '' }}>Awaiting Payment</option>
-                                                        <option value="Processing" {{ $request->status === 'Processing' ? 'selected' : '' }}>Processing</option>
-                                                        <option value="Completed" {{ $request->status === 'Completed' ? 'selected' : '' }}>Completed</option>
-                                                        <option value="Cancelled" {{ $request->status === 'Cancelled' ? 'selected' : '' }}>Cancelled</option>
-                                                    </select>
-                                                    <button type="submit" class="btn btn-dark btn-sm rounded-3 px-3">Save</button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
+                                            @endif
+
+                                            <span class="badge bg-{{ $request->payment_status === 'Paid' ? 'success' : 'secondary' }} bg-opacity-10 text-{{ $request->payment_status === 'Paid' ? 'success' : 'dark' }}">
+                                                {{ $request->payment_status }} (${{ number_format($request->amount_paid, 2) }})
+                                            </span>
+                                            <span class="badge bg-dark text-white">
+                                                {{ $request->status }}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <!-- Manual Upload Highlights & File Inspection -->
+                                    @if($request->manual_form_path || $request->passport_photo_path)
+                                        <div class="p-3 mb-3 rounded-3 border bg-light border-warning border-opacity-50">
+                                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                                                <div>
+                                                    <h6 class="fw-bold text-dark mb-1" style="font-size: 13px;">
+                                                        <i class="bi bi-file-earmark-pdf-fill text-danger me-1"></i> Client Uploaded Completed Manual Application Form
+                                                    </h6>
+                                                    <p class="text-muted small mb-0">Inspect the scanned form to verify handwritten details, signatures, and document cleanliness.</p>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    @if($request->manual_form_path)
+                                                        <a href="{{ asset($request->manual_form_path) }}" target="_blank" class="btn btn-sm btn-outline-dark fw-semibold">
+                                                            <i class="bi bi-eye me-1"></i> View Scanned Form
+                                                        </a>
+                                                    @endif
+                                                    @if($request->passport_photo_path)
+                                                        <a href="{{ asset($request->passport_photo_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary fw-semibold">
+                                                            <i class="bi bi-person-bounding-box me-1"></i> View Passport Photo
+                                                        </a>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    <!-- Application Update Form (Status, Stage & Assigned Staff) -->
+                                    <form action="{{ route('admin.subscription.update', $request->id) }}" method="POST" class="row g-3 mb-3">
+                                        @csrf
+                                        @method('PATCH')
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold text-muted mb-1">Update Service Status</label>
+                                            <select name="status" class="form-select form-select-sm">
+                                                <option value="Application Submitted" {{ $request->status === 'Application Submitted' ? 'selected' : '' }}>1. Application Submitted</option>
+                                                <option value="Payment Confirmed" {{ $request->status === 'Payment Confirmed' ? 'selected' : '' }}>2. Payment Confirmed</option>
+                                                <option value="Documents Under Review" {{ $request->status === 'Documents Under Review' ? 'selected' : '' }}>3. Documents Under Review</option>
+                                                <option value="Processing" {{ $request->status === 'Processing' ? 'selected' : '' }}>4. Processing</option>
+                                                <option value="Awaiting External Agency" {{ $request->status === 'Awaiting External Agency' ? 'selected' : '' }}>5. Awaiting External Agency</option>
+                                                <option value="Action Required" {{ $request->status === 'Action Required' ? 'selected' : '' }}>6. Action Required (Client)</option>
+                                                <option value="Ready for Collection" {{ $request->status === 'Ready for Collection' ? 'selected' : '' }}>7. Ready for Collection</option>
+                                                <option value="Completed" {{ $request->status === 'Completed' ? 'selected' : '' }}>8. Completed ✅</option>
+                                                <option value="Rejected" {{ $request->status === 'Rejected' ? 'selected' : '' }}>9. Rejected ❌</option>
+                                                <option value="Cancelled" {{ $request->status === 'Cancelled' ? 'selected' : '' }}>10. Cancelled</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold text-muted mb-1">Assigned Staff</label>
+                                            <select name="assigned_staff_id" class="form-select form-select-sm">
+                                                <option value="">-- Unassigned --</option>
+                                                @foreach($staffMembers as $staff)
+                                                <option value="{{ $staff->id }}" {{ $request->assigned_staff_id === $staff->id ? 'selected' : '' }}>
+                                                    {{ $staff->name }} ({{ ucfirst($staff->role) }})
+                                                </option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label small fw-semibold text-muted mb-1">Review Notes for Client (Optional)</label>
+                                            <input type="text" name="admin_notes" class="form-control form-control-sm" placeholder="e.g. Scanned form approved. Processing started.">
+                                        </div>
+                                        <div class="col-12 d-flex justify-content-end gap-2">
+                                            <div class="form-check me-auto align-self-center">
+                                                <input class="form-check-input" type="checkbox" name="is_user_visible" value="1" id="visCheck{{ $request->id }}" checked>
+                                                <label class="form-check-label small text-muted" for="visCheck{{ $request->id }}">
+                                                    Send update & note notification to client
+                                                </label>
+                                            </div>
+                                            <button type="submit" class="btn text-white btn-sm px-4 fw-semibold" style="background-color: #004225;">
+                                                <i class="bi bi-save me-1"></i> Save Status & Notify Client
+                                            </button>
+                                        </div>
+                                    </form>
+
+                                    <!-- Uploaded Documents Verification Section -->
+                                    <div class="bg-light p-3 rounded-3 mt-2">
+                                        <h6 class="fw-bold mb-2 small text-uppercase text-secondary">Document Review & Verification</h6>
+                                        @if($request->requestDocuments && $request->requestDocuments->count() > 0)
+                                            <div class="row g-2">
+                                                @foreach($request->requestDocuments as $doc)
+                                                <div class="col-md-6">
+                                                    <div class="p-2 border rounded bg-white d-flex justify-content-between align-items-center">
+                                                        <div class="overflow-hidden me-2">
+                                                            <a href="{{ asset($doc->file_path) }}" target="_blank" class="fw-bold text-decoration-none text-dark small text-truncate d-block">
+                                                                <i class="bi bi-file-earmark-text me-1 text-success"></i> {{ $doc->document_name }}
+                                                            </a>
+                                                            @if($doc->admin_notes)
+                                                            <div class="small text-danger mt-1">Note: {{ $doc->admin_notes }}</div>
+                                                            @endif
+                                                        </div>
+                                                        <form action="{{ route('admin.document.status', $doc->id) }}" method="POST" class="d-flex gap-1 flex-shrink-0">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <select name="status" class="form-select form-select-sm" style="font-size: 11px;" onchange="this.form.submit()">
+                                                                <option value="Pending" {{ $doc->status === 'Pending' ? 'selected' : '' }}>Pending</option>
+                                                                <option value="Received" {{ $doc->status === 'Received' ? 'selected' : '' }}>Received</option>
+                                                                <option value="Accepted" {{ $doc->status === 'Accepted' ? 'selected' : '' }}>Accepted ✅</option>
+                                                                <option value="Requires Correction" {{ $doc->status === 'Requires Correction' ? 'selected' : '' }}>Requires Correction ⚠️</option>
+                                                                <option value="Rejected" {{ $doc->status === 'Rejected' ? 'selected' : '' }}>Rejected ❌</option>
+                                                            </select>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <span class="small text-muted">No individual document records submitted for verification yet.</span>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     @else
                         <div class="text-center py-4 bg-light rounded-3">
                             <i class="bi bi-journal-x fs-4 text-muted"></i>
-                            <p class="text-secondary small mb-0 mt-1">This user hasn't subscribed to any services yet.</p>
+                            <p class="text-secondary small mb-0 mt-1">This user hasn't submitted any service applications yet.</p>
                         </div>
                     @endif
                 </div>
@@ -127,9 +213,9 @@
     </div>
 @else
     <div class="card border-0 shadow-sm p-5 rounded-4 text-center bg-white">
-        <i class="bi bi-people display-4 text-muted mb-3"></i>
-        <h3 class="h5 fw-bold text-dark mb-1">No Clients Found</h3>
-        <p class="text-secondary small mb-0">No users match your query or have active service subscriptions.</p>
+        <i class="bi bi-inbox display-4 text-muted mb-3"></i>
+        <h3 class="h5 fw-bold text-dark mb-1">No Applications Found</h3>
+        <p class="text-secondary small mb-0">No client service applications or manual form uploads match your search criteria.</p>
     </div>
 @endif
 @endsection

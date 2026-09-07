@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Profile Settings - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Profile Settings - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -15,7 +15,7 @@
         <!-- Profile photo -->
         <div class="mb-4 d-flex align-items-center gap-3">
             @if($user->avatar_url)
-                <img src="{{ $user->avatar_url }}" alt="avatar" class="rounded-circle border border-3 border-light shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
+                <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle border border-3 border-light shadow-sm" style="width: 80px; height: 80px; object-fit: cover;">
             @else
                 <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold border border-3 border-light shadow-sm" style="width: 80px; height: 80px; font-size: 28px;">
                     {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}
@@ -59,12 +59,28 @@
 
         <div class="row g-3 mb-4">
             <div class="col-sm-6">
-                <label for="country" class="form-label small fw-medium">Country</label>
-                <input type="text" name="country" id="country" class="form-control rounded-3" value="{{ old('country', $user->country) }}" placeholder="Nigeria">
+                <label for="country" class="form-label small fw-medium">Country (African Countries Only)</label>
+                <select name="country" id="country" class="form-select african-country-select rounded-3 @error('country') is-invalid @enderror" data-selected="{{ old('country', $user->country ?? 'Nigeria') }}" data-division-target="state" data-label-target="state_label" required>
+                    @php
+                        $afCountries = $africanCountries ?? \App\Services\AfricanLocationService::allCountries();
+                        $selectedCountry = old('country', $user->country ?? 'Nigeria');
+                    @endphp
+                    @foreach($afCountries as $c)
+                        <option value="{{ $c['name'] }}" {{ $selectedCountry == $c['name'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                    @endforeach
+                </select>
+                @error('country')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
             <div class="col-sm-6">
-                <label for="state" class="form-label small fw-medium">State / Region</label>
-                <input type="text" name="state" id="state" class="form-control rounded-3" value="{{ old('state', $user->state) }}" placeholder="Lagos">
+                <label for="state" id="state_label" class="form-label small fw-medium african-division-label">State / Region</label>
+                <select name="state" id="state" class="form-select african-division-select rounded-3 @error('state') is-invalid @enderror" data-selected="{{ old('state', $user->state) }}" required>
+                    <option value="">Loading...</option>
+                </select>
+                @error('state')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
             </div>
         </div>
 
@@ -72,3 +88,7 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/location-loader.js') }}"></script>
+@endpush

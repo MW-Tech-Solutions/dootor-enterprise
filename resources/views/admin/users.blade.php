@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'User Management - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'User Management - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -57,7 +57,7 @@
                             <td>
                                 <div class="d-flex align-items-center gap-2">
                                     @if($user->avatar_url)
-                                        <img src="{{ $user->avatar_url }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                        <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                                     @else
                                         <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 12px;">
                                             {{ strtoupper(substr($user->first_name, 0, 1)) }}
@@ -98,57 +98,70 @@
                                 </div>
                             </td>
                         </tr>
-
-                        <!-- Edit User Modal -->
-                        <div class="modal fade" id="editUserModal-{{ $user->id }}" tabindex="-1" aria-labelledby="editUserModalLabel-{{ $user->id }}" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content border-0 shadow">
-                                    <div class="modal-header border-bottom">
-                                        <h5 class="modal-title fw-bold" id="editUserModalLabel-{{ $user->id }}">Modify User Settings</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <form action="{{ route('admin.user.update', $user->id) }}" method="POST">
-                                        @csrf
-                                        @method('PATCH')
-                                        <div class="modal-body">
-                                            <div class="mb-3">
-                                                <label for="first_name-{{ $user->id }}" class="form-label small fw-medium">First Name</label>
-                                                <input type="text" name="first_name" id="first_name-{{ $user->id }}" class="form-control rounded-3" value="{{ old('first_name', $user->first_name) }}" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="last_name-{{ $user->id }}" class="form-label small fw-medium">Last Name</label>
-                                                <input type="text" name="last_name" id="last_name-{{ $user->id }}" class="form-control rounded-3" value="{{ old('last_name', $user->last_name) }}" required>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="role-{{ $user->id }}" class="form-label small fw-medium">System Role</label>
-                                                <select name="role" id="role-{{ $user->id }}" class="form-select rounded-3">
-                                                    <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                                                    <option value="vendor" {{ $user->role === 'vendor' ? 'selected' : '' }}>Vendor</option>
-                                                    <option value="client" {{ $user->role === 'client' ? 'selected' : '' }}>Client</option>
-                                                </select>
-                                            </div>
-                                            <div class="mb-3">
-                                                <label for="status-{{ $user->id }}" class="form-label small fw-medium">Access Status</label>
-                                                <select name="status" id="status-{{ $user->id }}" class="form-select rounded-3">
-                                                    <option value="Approved" {{ $user->status === 'Approved' ? 'selected' : '' }}>Approved</option>
-                                                    <option value="Pending" {{ $user->status === 'Pending' ? 'selected' : '' }}>Pending</option>
-                                                    <option value="Rejected" {{ $user->status === 'Rejected' ? 'selected' : '' }}>Rejected</option>
-                                                    <option value="Disabled" {{ $user->status === 'Disabled' ? 'selected' : '' }}>Disabled</option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer border-top">
-                                            <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
-                                            <button type="submit" class="btn btn-dark rounded-pill px-4">Save Changes</button>
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
                     @endforeach
                 </tbody>
             </table>
         </div>
+
+        <!-- Edit User Modals (Placed outside table container to prevent stacking context bugs) -->
+        @foreach($users as $user)
+            <div class="modal fade" id="editUserModal-{{ $user->id }}" tabindex="-1" aria-labelledby="editUserModalLabel-{{ $user->id }}" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header border-bottom">
+                            <h5 class="modal-title fw-bold" id="editUserModalLabel-{{ $user->id }}">Modify User Settings</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <form action="{{ route('admin.user.update', $user->id) }}" method="POST">
+                            @csrf
+                            @method('PATCH')
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label for="first_name-{{ $user->id }}" class="form-label small fw-medium">First Name</label>
+                                    <input type="text" name="first_name" id="first_name-{{ $user->id }}" class="form-control rounded-3" value="{{ old('first_name', $user->first_name) }}" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="last_name-{{ $user->id }}" class="form-label small fw-medium">Last Name</label>
+                                    <input type="text" name="last_name" id="last_name-{{ $user->id }}" class="form-control rounded-3" value="{{ old('last_name', $user->last_name) }}" required>
+                                </div>
+                                <div class="row g-2 mb-3">
+                                    <div class="col-sm-6">
+                                        <label for="country-{{ $user->id }}" class="form-label small fw-medium">Country</label>
+                                        <select name="country" id="country-{{ $user->id }}" class="form-select african-country-select rounded-3" data-selected="{{ old('country', $user->country ?? 'Nigeria') }}" data-division-target="state-{{ $user->id }}" data-label-target="state_label-{{ $user->id }}">
+                                        </select>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <label for="state-{{ $user->id }}" id="state_label-{{ $user->id }}" class="form-label small fw-medium african-division-label">State / Region</label>
+                                        <select name="state" id="state-{{ $user->id }}" class="form-select african-division-select rounded-3" data-selected="{{ old('state', $user->state) }}">
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="role-{{ $user->id }}" class="form-label small fw-medium">System Role</label>
+                                    <select name="role" id="role-{{ $user->id }}" class="form-select rounded-3">
+                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
+                                        <option value="client" {{ $user->role === 'client' ? 'selected' : '' }}>Client</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="status-{{ $user->id }}" class="form-label small fw-medium">Access Status</label>
+                                    <select name="status" id="status-{{ $user->id }}" class="form-select rounded-3">
+                                        <option value="Approved" {{ $user->status === 'Approved' ? 'selected' : '' }}>Approved</option>
+                                        <option value="Pending" {{ $user->status === 'Pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="Rejected" {{ $user->status === 'Rejected' ? 'selected' : '' }}>Rejected</option>
+                                        <option value="Disabled" {{ $user->status === 'Disabled' ? 'selected' : '' }}>Disabled</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="modal-footer border-top">
+                                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                                <button type="submit" class="btn btn-dark rounded-pill px-4">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @endforeach
 
         <div class="d-flex justify-content-center mt-4">
             {{ $users->links() }}
@@ -161,3 +174,7 @@
     @endif
 </div>
 @endsection
+
+@push('scripts')
+<script src="{{ asset('js/location-loader.js') }}"></script>
+@endpush

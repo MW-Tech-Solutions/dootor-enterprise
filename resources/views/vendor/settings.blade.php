@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Storefront Settings - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Storefront Settings - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -59,7 +59,7 @@
                     <label for="background_image" class="form-label small fw-medium">Storefront Hero Banner Image</label>
                     @if($storefront->background_image_url)
                         <div class="mb-2">
-                            <img src="{{ $storefront->background_image_url }}" alt="banner" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
+                            <img src="{{ app_file_url($storefront->background_image_url) }}" alt="banner" class="img-fluid rounded" style="max-height: 100px; object-fit: cover;">
                         </div>
                     @endif
                     <input type="file" name="background_image" id="background_image" class="form-control form-control-sm border-0 bg-light rounded-3">
@@ -80,7 +80,7 @@
                 
                 <div class="mb-4 d-flex align-items-center gap-3">
                     @if($user->avatar_url)
-                        <img src="{{ $user->avatar_url }}" alt="avatar" class="rounded-circle border border-3 border-light shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
+                        <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle border border-3 border-light shadow-sm" style="width: 70px; height: 70px; object-fit: cover;">
                     @else
                         <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold border border-3 border-light shadow-sm" style="width: 70px; height: 70px; font-size: 24px;">
                             {{ strtoupper(substr($user->first_name ?? 'V', 0, 1)) }}

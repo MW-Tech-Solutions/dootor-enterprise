@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Platform Services - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Platform Services - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -32,7 +32,16 @@
                         <h3 class="h6 fw-bold mb-1">{{ $service->name }}</h3>
                         <p class="text-secondary small mb-3 flex-grow-1">{{ $service->description }}</p>
                         
-                        <hr class="my-3 border-light">
+                        <div class="d-flex flex-wrap gap-1 mb-3">
+                            <a href="{{ route('admin.service.form-builder', $service->id) }}" class="btn btn-outline-success btn-sm rounded-pill">
+                                <i class="bi bi-ui-checks me-1"></i> Form Builder
+                            </a>
+                            <a href="{{ route('admin.service.workflow', $service->id) }}" class="btn btn-outline-primary btn-sm rounded-pill">
+                                <i class="bi bi-diagram-3 me-1"></i> Workflows
+                            </a>
+                        </div>
+                        
+                        <hr class="my-2 border-light">
                         
                         <div class="d-flex justify-content-between align-items-center mt-auto">
                             <span class="text-muted small">ID: #{{ $service->id }}</span>

@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Vendor Approvals - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Vendor Approvals - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -17,7 +17,7 @@
                         <button class="accordion-button collapsed d-flex justify-content-between align-items-center" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-{{ $vendor->id }}">
                             <div class="d-flex align-items-center gap-3">
                                 @if($vendor->avatar_url)
-                                    <img src="{{ $vendor->avatar_url }}" alt="avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <img src="{{ app_file_url($vendor->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 40px; height: 40px; object-fit: cover;">
                                 @else
                                     <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 40px; height: 40px; font-size: 14px;">
                                         {{ strtoupper(substr($vendor->first_name, 0, 1)) }}
@@ -41,8 +41,8 @@
                                         <div class="col-sm-4 text-center">
                                             <span class="text-muted d-block small mb-1">ID Card / Passport</span>
                                             @if($vendor->kycProfile->id_card_url)
-                                                <a href="{{ $vendor->kycProfile->id_card_url }}" target="_blank" class="d-block border rounded p-1 shadow-sm bg-light">
-                                                    <img src="{{ $vendor->kycProfile->id_card_url }}" alt="ID Card" class="img-fluid rounded" style="max-height: 120px; object-fit: cover;">
+                                                <a href="{{ app_file_url($vendor->kycProfile->id_card_url) }}" target="_blank" class="d-block border rounded p-1 shadow-sm bg-light">
+                                                    <img src="{{ app_file_url($vendor->kycProfile->id_card_url) }}" alt="ID Card" class="img-fluid rounded" style="max-height: 120px; object-fit: cover;">
                                                 </a>
                                             @else
                                                 <span class="text-danger small">Missing</span>
@@ -51,8 +51,8 @@
                                         <div class="col-sm-4 text-center">
                                             <span class="text-muted d-block small mb-1">Proof of Address</span>
                                             @if($vendor->kycProfile->proof_of_address_url)
-                                                <a href="{{ $vendor->kycProfile->proof_of_address_url }}" target="_blank" class="d-block border rounded p-1 shadow-sm bg-light">
-                                                    <img src="{{ $vendor->kycProfile->proof_of_address_url }}" alt="Address Proof" class="img-fluid rounded" style="max-height: 120px; object-fit: cover;">
+                                                <a href="{{ app_file_url($vendor->kycProfile->proof_of_address_url) }}" target="_blank" class="d-block border rounded p-1 shadow-sm bg-light">
+                                                    <img src="{{ app_file_url($vendor->kycProfile->proof_of_address_url) }}" alt="Address Proof" class="img-fluid rounded" style="max-height: 120px; object-fit: cover;">
                                                 </a>
                                             @else
                                                 <span class="text-danger small">Missing</span>
@@ -61,8 +61,8 @@
                                         <div class="col-sm-4 text-center">
                                             <span class="text-muted d-block small mb-1">Personal Photo</span>
                                             @if($vendor->kycProfile->personal_image_url)
-                                                <a href="{{ $vendor->kycProfile->personal_image_url }}" target="_blank" class="d-block border rounded p-1 shadow-sm bg-light">
-                                                    <img src="{{ $vendor->kycProfile->personal_image_url }}" alt="Personal Photo" class="img-fluid rounded" style="max-height: 120px; object-fit: cover;">
+                                                <a href="{{ app_file_url($vendor->kycProfile->personal_image_url) }}" target="_blank" class="d-block border rounded p-1 shadow-sm bg-light">
+                                                    <img src="{{ app_file_url($vendor->kycProfile->personal_image_url) }}" alt="Personal Photo" class="img-fluid rounded" style="max-height: 120px; object-fit: cover;">
                                                 </a>
                                             @else
                                                 <span class="text-danger small">Missing</span>

@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Browse Services - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Browse Services - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">

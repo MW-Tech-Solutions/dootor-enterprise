@@ -7,12 +7,12 @@
         align-items: center;
         gap: 12px;
         padding: 11px 16px;
-        border-radius: 8px;
+        border-radius: 10px;
         color: #475569 !important;
         text-decoration: none;
-        transition: all 0.2s ease;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         font-weight: 500;
-        margin-bottom: 2px;
+        margin-bottom: 3px;
     }
 
     .sidebar-link i {
@@ -22,24 +22,26 @@
 
     .sidebar-link:hover {
         background-color: #f1f5f9 !important;
-        color: #0f172a !important;
+        color: #004225 !important;
     }
 
     .sidebar-link:hover i {
-        color: #0f172a !important;
+        color: #004225 !important;
     }
 
     .sidebar-link.active {
-        background-color: rgba(0, 66, 37, 0.08) !important;
-        color: #004225 !important;
+        background-color: #004225 !important;
+        color: #ffffff !important;
         font-weight: 600;
-        border-left: 4px solid #004225;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
+        box-shadow: 0 4px 12px rgba(0, 66, 37, 0.25) !important;
+    }
+
+    .sidebar-link.active span {
+        color: #ffffff !important;
     }
 
     .sidebar-link.active i {
-        color: #004225 !important;
+        color: #d4af37 !important;
     }
     
     .sidebar-profile {
@@ -70,9 +72,19 @@
         if ($role === 'admin') {
             $navItems = [
                 ['href' => route('admin.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard'],
-                ['href' => route('admin.subscriptions'), 'icon' => 'bi-journal-check', 'label' => 'Subscriptions'],
+                ['href' => route('admin.payment-verification'), 'icon' => 'bi-credit-card-2-front', 'label' => 'Credo Payment Verification'],
+                ['href' => route('admin.work-queue'), 'icon' => 'bi-clock-history', 'label' => 'Staff Work Queue'],
+                ['href' => route('admin.subscriptions'), 'icon' => 'bi-file-earmark-check', 'label' => 'Service Applications & Uploads'],
                 ['href' => route('admin.users'), 'icon' => 'bi-people', 'label' => 'User Management'],
-                ['href' => route('admin.services'), 'icon' => 'bi-box-seam', 'label' => 'Services'],
+                ['href' => route('admin.roles'), 'icon' => 'bi-shield-lock', 'label' => 'Roles & RBAC'],
+                ['href' => route('admin.services'), 'icon' => 'bi-box-seam', 'label' => 'Services Catalog'],
+                ['href' => route('admin.service-documents'), 'icon' => 'bi-card-checklist', 'label' => 'Service Checklists'],
+                ['href' => route('admin.document-types'), 'icon' => 'bi-file-earmark-plus', 'label' => 'Document Templates'],
+                ['href' => route('admin.email-templates'), 'icon' => 'bi-envelope-paper', 'label' => 'Email Templates'],
+                ['href' => route('admin.audit-logs'), 'icon' => 'bi-journal-code', 'label' => 'Audit Logs'],
+                ['href' => route('admin.reports'), 'icon' => 'bi-graph-up', 'label' => 'Reports & Analytics'],
+                ['href' => route('support.index'), 'icon' => 'bi-headset', 'label' => 'Support Desk'],
+                ['href' => route('admin.profile'), 'icon' => 'bi-person-badge', 'label' => 'My Profile'],
                 ['href' => route('admin.settings'), 'icon' => 'bi-sliders', 'label' => 'Settings'],
             ];
             $settingsPath = route('admin.settings');
@@ -91,6 +103,7 @@
                 ['href' => route('client.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard'],
                 ['href' => route('client.requests'), 'icon' => 'bi-clipboard-data', 'label' => 'My Requests'],
                 ['href' => route('client.services'), 'icon' => 'bi-search', 'label' => 'Browse Services'],
+                ['href' => route('support.index'), 'icon' => 'bi-headset', 'label' => 'Support Tickets'],
                 ['href' => route('client.settings'), 'icon' => 'bi-sliders', 'label' => 'Settings'],
             ];
             $settingsPath = route('client.settings');
@@ -98,13 +111,14 @@
     }
 @endphp
 
-<div class="d-flex min-vh-screen flex-row">
-    <!-- Sidebar -->
-    <aside class="d-none d-md-flex flex-column py-4 px-3 bg-light" style="width: 250px; min-height: 100vh; border-right: 1px solid #e2e8f0; z-index: 10;">
+@section('body')
+<div class="d-flex h-100 w-100 overflow-hidden" style="position: fixed; inset: 0;">
+    <!-- Sidebar Navigation (Desktop) -->
+    <aside class="bg-white border-end d-none d-md-flex flex-column flex-shrink-0 p-3 h-100" style="width: 260px; z-index: 1040; overflow-y: auto;">
         <div class="mb-4 px-3">
             <a href="/" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
                 @if($settings && $settings->logo_url)
-                    <img src="{{ $settings->logo_url }}" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
+                    <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
                 @else
                     <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                         <!-- Stylized D (Gold) -->
@@ -137,7 +151,7 @@
         <div class="mt-auto pt-3 border-top border-light">
             <div class="p-2 d-flex align-items-center gap-2 sidebar-profile mb-2">
                 @if($user->avatar_url)
-                    <img src="{{ $user->avatar_url }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                    <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                 @else
                     <div class="rounded-circle text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 13px; background-color: #d4af37 !important;">
                         {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'M', 0, 1)) }}
@@ -158,8 +172,8 @@
         </div>
     </aside>
 
-    <!-- Content Area -->
-    <div class="flex-grow-1 bg-light d-flex flex-column">
+    <!-- Content Area (Independently Scrollable) -->
+    <div class="flex-grow-1 bg-light d-flex flex-column h-100 overflow-y-auto" style="min-width: 0;">
         <!-- Header -->
         <header class="navbar navbar-expand bg-white border-bottom px-4 py-2 sticky-top">
             <div class="container-fluid p-0">
@@ -176,7 +190,7 @@
                     <div class="dropdown">
                         <button class="btn btn-link p-0 d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                             @if($user->avatar_url)
-                                <img src="{{ $user->avatar_url }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                             @else
                                 <div class="rounded-circle bg-gradient text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 14px;">
                                     {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'M', 0, 1)) }}
@@ -185,10 +199,13 @@
                             <span class="d-none d-sm-inline">{{ $user->first_name ?? '' }} {{ $user->last_name ?? '' }}</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                            @if($role === 'admin')
+                                <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="bi bi-person-badge me-2"></i> Admin Profile</a></li>
+                            @endif
                             @if(!$isPendingVendor && $settingsPath)
                                 <li><a class="dropdown-item" href="{{ $settingsPath }}"><i class="bi bi-gear me-2"></i> Settings</a></li>
                             @endif
-                            <li><a class="dropdown-item" href="#"><i class="bi bi-question-circle me-2"></i> Support</a></li>
+                            <li><a class="dropdown-item" href="{{ route('support.index') }}"><i class="bi bi-question-circle me-2"></i> Support Desk</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
                                 <form action="{{ route('logout') }}" method="POST" class="m-0">
@@ -214,7 +231,7 @@
     <div class="offcanvas-header border-bottom border-light">
         <h5 class="offcanvas-title d-flex align-items-center gap-2 text-dark" id="mobileSidebarLabel">
             @if($settings && $settings->logo_url)
-                <img src="{{ $settings->logo_url }}" alt="Logo" class="rounded" style="height: 28px; width: 28px; object-fit: contain;">
+                <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 28px; width: 28px; object-fit: contain;">
             @else
                 <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                     <!-- Stylized D (Gold) -->
@@ -248,7 +265,7 @@
         <div class="mt-auto pt-3 border-top border-light px-2">
             <div class="p-2 d-flex align-items-center gap-2 sidebar-profile mb-2">
                 @if($user->avatar_url)
-                    <img src="{{ $user->avatar_url }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                    <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                 @else
                     <div class="rounded-circle text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 13px; background-color: #d4af37 !important;">
                         {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'M', 0, 1)) }}

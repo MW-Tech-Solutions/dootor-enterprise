@@ -41,7 +41,7 @@
         <div>
             <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
                 @if($settings && $settings->logo_url)
-                    <img src="{{ $settings->logo_url }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
+                    <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
                 @else
                     <svg width="40" height="40" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                         <!-- Stylized D (Gold) -->
@@ -77,7 +77,7 @@
             <div class="text-center mb-4 d-block d-lg-none">
                 <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
                     @if($settings && $settings->logo_url)
-                        <img src="{{ $settings->logo_url }}" alt="Logo" class="rounded" style="height: 38px; width: 38px; object-fit: contain;">
+                        <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 38px; width: 38px; object-fit: contain;">
                     @else
                         <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                             <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogoForgotMobile)" />

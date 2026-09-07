@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Client Requests - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Client Requests - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -41,7 +41,7 @@
                                         </button>
                                         <ul class="dropdown-menu border-0 shadow small">
                                             @foreach($request->documents as $doc)
-                                                <li><a class="dropdown-item" href="{{ $doc['url'] }}" target="_blank"><i class="bi bi-file-earmark-arrow-down me-1 text-primary"></i> {{ $doc['name'] }}</a></li>
+                                                <li><a class="dropdown-item" href="{{ app_file_url($doc['url'] ?? null) }}" target="_blank"><i class="bi bi-file-earmark-arrow-down me-1 text-primary"></i> {{ $doc['name'] }}</a></li>
                                             @endforeach
                                         </ul>
                                     </div>

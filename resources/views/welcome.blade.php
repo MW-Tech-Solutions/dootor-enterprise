@@ -67,7 +67,7 @@
     <div class="container d-flex align-items-center justify-content-between">
         <a class="d-flex align-items-center gap-1 fw-bold text-dark text-decoration-none" href="/">
             @if($settings && $settings->logo_url)
-                <img src="{{ $settings->logo_url }}" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
+                <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
             @else
                 <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                     <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogo)" />
@@ -110,7 +110,7 @@
                     </a>
                 @else
                     <a href="{{ route('login') }}" class="btn btn-outline-dark px-4 rounded-pill">Login</a>
-                    <a href="{{ route('register') }}" class="btn btn-dark px-4 rounded-pill">Register</a>
+                    <a href="{{ route('register.client') }}" class="btn btn-dark px-4 rounded-pill">Register</a>
                 @endif
             </div>
         </div>
@@ -131,7 +131,7 @@
                 </a>
             @else
                 <a href="{{ route('login') }}" class="btn btn-outline-dark px-4 rounded-pill flex-fill">Login</a>
-                <a href="{{ route('register') }}" class="btn btn-dark px-4 rounded-pill flex-fill">Register</a>
+                <a href="{{ route('register.client') }}" class="btn btn-dark px-4 rounded-pill flex-fill">Register</a>
             @endif
         </div>
     </div>

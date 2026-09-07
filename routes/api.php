@@ -35,6 +35,8 @@ Route::prefix('auth')->group(function () {
 Route::prefix('public')->group(function () {
     Route::get('/settings', [PublicController::class, 'settings']);
     Route::get('/vendors/{vendor}/storefront', [PublicController::class, 'vendorStorefront']);
+    Route::get('/location/african-countries', [\App\Http\Controllers\Api\LocationApiController::class, 'africanCountries']);
+    Route::get('/location/divisions', [\App\Http\Controllers\Api\LocationApiController::class, 'divisions']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {

@@ -35,7 +35,7 @@
     <div class="container relative-content z-2">
         <div class="d-flex flex-column flex-md-row align-items-center align-items-md-end gap-4 text-white text-center text-md-start">
             @if($vendor->avatar_url)
-                <img src="{{ $vendor->avatar_url }}" alt="avatar" class="rounded-circle border border-4 border-white shadow-lg" style="width: 120px; height: 120px; object-fit: cover; margin-bottom: -40px;">
+                <img src="{{ app_file_url($vendor->avatar_url) }}" alt="avatar" class="rounded-circle border border-4 border-white shadow-lg" style="width: 120px; height: 120px; object-fit: cover; margin-bottom: -40px;">
             @else
                 <div class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold shadow-lg border border-4 border-white" style="width: 120px; height: 120px; font-size: 40px; margin-bottom: -40px;">
                     {{ strtoupper(substr($vendor->first_name ?? 'V', 0, 1)) }}

@@ -216,10 +216,11 @@ class VendorController extends Controller
         }
 
         $data = $request->validate([
-            'status' => ['required', Rule::in(['Awaiting Payment', 'Pending Documents', 'Under Review', 'In Progress', 'Completed', 'Rejected'])],
+            'status' => ['required', Rule::in(['Awaiting Payment', 'Payment Confirmed', 'Pending Documents', 'Documents Under Review', 'Under Review', 'In Progress', 'Processing', 'Completed', 'Rejected'])],
         ]);
 
         $serviceRequest->update($data);
+        $serviceRequest->syncStatusToWorkflowStage($data['status'], 'Status updated by service vendor.');
 
         return redirect()->back()->with('success', 'Request status updated successfully.');
     }

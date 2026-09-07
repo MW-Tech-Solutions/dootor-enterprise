@@ -34,9 +34,9 @@ class DatabaseSeeder extends Seeder
             'brand_gradient_from' => '#004225',
             'brand_gradient_to' => '#d4af37',
             'default_currency' => 'USD',
-            'payment_gateway' => 'paystack',
+            'payment_gateway' => 'credo',
             'payments_enabled' => true,
-            'payment_mode' => 'test',
+            'payment_mode' => 'live',
         ]);
 
         $services = [

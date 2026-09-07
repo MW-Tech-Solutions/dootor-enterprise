@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Clients - ' . ($settings->platform_name ?? 'Umar Maher'))
+@section('title', 'Clients - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
 <div class="mb-4">
@@ -32,7 +32,7 @@
                                     <td>
                                         <div class="d-flex align-items-center gap-2">
                                             @if($client->avatar_url)
-                                                <img src="{{ $client->avatar_url }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                                <img src="{{ app_file_url($client->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
                                             @else
                                                 <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 12px;">
                                                     {{ strtoupper(substr($client->first_name, 0, 1)) }}

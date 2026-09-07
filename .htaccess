@@ -1,9 +1,9 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
     
-    # Route static assets (like storage, build, images, assets) to the public folder
+    # Route static assets (like js, css, storage, build, images, assets, favicon) to the public folder
     RewriteCond %{REQUEST_URI} !^/public/
-    RewriteRule ^(storage|build|images|assets)/(.*)$ public/$1/$2 [L,NC]
+    RewriteRule ^(storage|build|images|assets|js|css|favicon\.ico|robots\.txt)(.*)$ public/$1$2 [L,NC]
 
     # Direct all requests to public/index.php, except for actual files or directories
     RewriteCond %{REQUEST_FILENAME} !-d
