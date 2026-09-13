@@ -108,48 +108,25 @@ if (function_exists('ob_end_clean')) {
     @ob_end_clean();
 }
 
-// Start executing Laravel setup tasks
+// Start executing Laravel setup & cache refresh tasks
 runArtisanCommand('config:clear');
 runArtisanCommand('cache:clear');
 runArtisanCommand('route:clear');
 runArtisanCommand('view:clear');
+runArtisanCommand('optimize:clear');
 
-// Run migrations (force parameter is critical for production)
+// Run pending migrations (force parameter is critical for production)
 runArtisanCommand('migrate', ['--force' => true]);
 
-// Seed database (optional, only run if you need default platform settings seeded)
-runArtisanCommand('db:seed', ['--force' => true]);
-
-// Fix plain text passwords in database to prevent Bcrypt exceptions
-echo "<div class='cmd-box'>⚙️ <strong>Fixing plain text passwords in database...</strong><br>";
+// Link public storage if needed
 try {
-    $users = \App\Models\User::all();
-    $fixedCount = 0;
-    foreach ($users as $user) {
-        if ($user->email === 'admin@test.com') {
-            // Always force the test admin's password to a fresh Bcrypt hash of 'password'
-            $user->password = \Illuminate\Support\Facades\Hash::make('password');
-            $user->save();
-            $fixedCount++;
-        } elseif (!str_starts_with($user->password, '$2y$') && !str_starts_with($user->password, '$2a$') && !str_starts_with($user->password, '$2b$')) {
-            // If it is plain text, MD5, or Argon2, convert it to standard Bcrypt
-            $user->password = \Illuminate\Support\Facades\Hash::make($user->password);
-            $user->save();
-            $fixedCount++;
-        }
-    }
-    echo "<span class='success'>[SUCCESS]</span> Finished checking passwords. Updated {$fixedCount} password(s) to secure Bcrypt hashes.<br>";
+    runArtisanCommand('storage:link');
 } catch (\Exception $e) {
-    echo "<span class='error'>[ERROR]</span> Failed to fix passwords: " . htmlspecialchars($e->getMessage()) . "<br>";
+    // Ignore if already linked
 }
-echo "</div>";
 
-// Link public storage
-runArtisanCommand('storage:link');
-
-// Re-cache for production speed boost
+// Re-cache views and configuration for production performance
 runArtisanCommand('config:cache');
-runArtisanCommand('route:cache');
 runArtisanCommand('view:cache');
 
 echo "</div>
