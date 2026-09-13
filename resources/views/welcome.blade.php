@@ -140,25 +140,25 @@
 <!-- Hero Section -->
 <section class="py-5 bg-light position-relative overflow-hidden" style="min-height: 70vh; display: flex; align-items: center;">
     <!-- Background Circle styling -->
-    <div class="position-absolute bg-brand-gradient rounded-circle opacity-10" style="width: 500px; height: 500px; top: -100px; right: -100px; filter: blur(50px);"></div>
-    <div class="position-absolute bg-brand-gradient rounded-circle opacity-10" style="width: 300px; height: 300px; bottom: -50px; left: -50px; filter: blur(30px);"></div>
+    <div class="position-absolute rounded-circle pointer-events-none" style="width: 450px; height: 450px; top: -100px; right: -100px; background: radial-gradient(circle, rgba(0, 66, 37, 0.1) 0%, rgba(212, 175, 55, 0.06) 50%, transparent 70%); filter: blur(40px); z-index: 1;"></div>
+    <div class="position-absolute rounded-circle pointer-events-none" style="width: 300px; height: 300px; bottom: -50px; left: -50px; background: radial-gradient(circle, rgba(0, 66, 37, 0.08) 0%, transparent 70%); filter: blur(30px); z-index: 1;"></div>
     
     <div class="container relative-content z-2">
         <div class="row align-items-center g-5">
             <div class="col-lg-6 text-center text-lg-start">
-                <span class="badge bg-brand-gradient text-white px-3 py-2 rounded-pill mb-3">
-                    <i class="bi bi-sparkles me-2"></i> Streamlined Document Support
+                <span class="badge px-3.5 py-2 rounded-pill mb-3 fw-semibold shadow-sm" style="background-color: #002e1a; color: #ffffff; border: 1px solid rgba(212, 175, 55, 0.5); font-size: 13px; letter-spacing: 0.3px; display: inline-flex; align-items: center;">
+                    <i class="bi bi-sparkles me-2" style="color: #ffe57f;"></i> Streamlined Document Support
                 </span>
-                <h1 class="display-3 fw-bold mb-4">
+                <h1 class="display-4 display-lg-3 fw-bold mb-4" style="color: #0f172a; line-height: 1.18;">
                     All Business &amp; Personal <br>
-                    <span class="text-gradient">Services In One Place</span>
+                    <span class="text-gradient" style="background: linear-gradient(135deg, #004225 0%, #056839 45%, #9e7808 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.08));">Services In One Place</span>
                 </h1>
-                <p class="lead text-secondary mb-4">
+                <p class="lead mb-4" style="color: #1e293b !important; font-weight: 500; font-size: 1.125rem; line-height: 1.6;">
                     Fast-track passport approvals, visa handling, NIN verification, court affidavits, and more. A secured portal for direct processing and verified document handling.
                 </p>
                 <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3">
-                    <a href="#services" class="btn btn-dark btn-lg px-4 rounded-pill">Explore Services <i class="bi bi-arrow-right ms-2"></i></a>
-                    <a href="{{ route('register.client') }}" class="btn btn-outline-secondary btn-lg px-4 rounded-pill">Register as Client</a>
+                    <a href="#services" class="btn btn-dark btn-lg px-4 rounded-pill shadow-sm">Explore Services <i class="bi bi-arrow-right ms-2"></i></a>
+                    <a href="{{ route('register.client') }}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">Register as Client</a>
                 </div>
             </div>
             
@@ -186,7 +186,7 @@
                             </div>
                             <div>
                                 <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 1: Order Placed & Secure Payment</span>
-                                <span class="text-secondary" style="font-size: 11.5px;">Completed via Credo Payment Gateway</span>
+                                <span style="color: #475569; font-size: 11.5px;">Completed via Credo Payment Gateway</span>
                             </div>
                         </div>
 
@@ -197,7 +197,7 @@
                             </div>
                             <div>
                                 <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 2: Document Verification</span>
-                                <span class="text-secondary" style="font-size: 11.5px;">NIN details verified by processing agent</span>
+                                <span style="color: #475569; font-size: 11.5px;">NIN details verified by processing agent</span>
                             </div>
                         </div>
 
@@ -208,7 +208,7 @@
                             </div>
                             <div>
                                 <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 3: Document Vetting</span>
-                                <span class="text-secondary" style="font-size: 11.5px;">Liaising with High Commission & government officials</span>
+                                <span style="color: #475569; font-size: 11.5px;">Liaising with High Commission & government officials</span>
                             </div>
                         </div>
 
@@ -238,8 +238,8 @@
                     <div class="bg-dark text-white rounded-circle p-3 mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                         <i class="bi bi-archive fs-3"></i>
                     </div>
-                    <h3 class="h5 fw-bold mb-2">All Services In One Place</h3>
-                    <p class="text-secondary small mb-0">From NIN and BVN to passports and visas, manage all documentation in a single unified platform.</p>
+                    <h3 class="h5 fw-bold mb-2 text-dark">All Services In One Place</h3>
+                    <p class="small mb-0" style="color: #334155;">From NIN and BVN to passports and visas, manage all documentation in a single unified platform.</p>
                 </div>
             </div>
             
@@ -248,8 +248,8 @@
                     <div class="bg-dark text-white rounded-circle p-3 mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                         <i class="bi bi-lightning-charge fs-3"></i>
                     </div>
-                    <h3 class="h5 fw-bold mb-2">Fast Processing</h3>
-                    <p class="text-secondary small mb-0">We prioritize efficiency and vetting to get your urgent requests completed quickly by verified agents.</p>
+                    <h3 class="h5 fw-bold mb-2 text-dark">Fast Processing</h3>
+                    <p class="small mb-0" style="color: #334155;">We prioritize efficiency and vetting to get your urgent requests completed quickly by verified agents.</p>
                 </div>
             </div>
 
@@ -258,8 +258,8 @@
                     <div class="bg-dark text-white rounded-circle p-3 mb-3 d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
                         <i class="bi bi-shield-check fs-3"></i>
                     </div>
-                    <h3 class="h5 fw-bold mb-2">Secure &amp; Trackable</h3>
-                    <p class="text-secondary small mb-0">Monitor every step of your application request from your secure dashboard with encrypted data uploads.</p>
+                    <h3 class="h5 fw-bold mb-2 text-dark">Secure &amp; Trackable</h3>
+                    <p class="small mb-0" style="color: #334155;">Monitor every step of your application request from your secure dashboard with encrypted data uploads.</p>
                 </div>
             </div>
         </div>
@@ -270,9 +270,9 @@
 <section id="services" class="py-5 bg-light">
     <div class="container py-4">
         <div class="text-center max-w-lg mx-auto mb-4">
-            <span class="text-uppercase small fw-bold text-gradient tracking-wide">Catalog</span>
-            <h2 class="display-5 fw-bold mt-2">Services We Assist With</h2>
-            <p class="text-secondary">Explore our catalog of official documentation and certification services.</p>
+            <span class="text-uppercase small fw-bold tracking-wide" style="color: #004225; letter-spacing: 1px;">Catalog</span>
+            <h2 class="display-5 fw-bold mt-2 text-dark">Services We Assist With</h2>
+            <p style="color: #334155; font-size: 1.05rem;">Explore our catalog of official documentation and certification services.</p>
         </div>
 
         <!-- Search and Filter Controls -->
@@ -300,11 +300,11 @@
                             <div class="position-absolute top-0 end-0 mt-3 me-3" title="Verified Service">
                                 <i class="bi bi-patch-check-fill fs-5" style="color: #d4af37;"></i>
                             </div>
-                            <div class="rounded-3 bg-brand-gradient text-white p-3 mb-3 d-flex align-items-center justify-content-center align-self-start" style="width: 50px; height: 50px;">
+                            <div class="rounded-3 text-white p-3 mb-3 d-flex align-items-center justify-content-center align-self-start shadow-sm" style="width: 50px; height: 50px; background-color: #004225;">
                                 <i class="bi bi-file-earmark-check fs-4"></i>
                             </div>
-                            <h3 class="h6 fw-bold mb-2">{{ $service->name }}</h3>
-                            <p class="text-secondary small flex-grow-1">{{ $service->description }}</p>
+                            <h3 class="h6 fw-bold mb-2 text-dark">{{ $service->name }}</h3>
+                            <p class="small flex-grow-1" style="color: #334155;">{{ $service->description }}</p>
                             <hr class="my-2 border-light">
                             <div class="d-flex justify-content-end align-items-center">
                                 <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 w-100 text-center">Order Now</a>
@@ -320,11 +320,11 @@
                             <div class="position-absolute top-0 end-0 mt-3 me-3" title="Verified Service">
                                 <i class="bi bi-patch-check-fill fs-5" style="color: #d4af37;"></i>
                             </div>
-                            <div class="rounded-3 bg-brand-gradient text-white p-3 mb-3 d-flex align-items-center justify-content-center align-self-start" style="width: 50px; height: 50px;">
+                            <div class="rounded-3 text-white p-3 mb-3 d-flex align-items-center justify-content-center align-self-start shadow-sm" style="width: 50px; height: 50px; background-color: #004225;">
                                 <i class="bi {{ $service['icon'] }} fs-4"></i>
                             </div>
-                            <h3 class="h6 fw-bold mb-2">{{ $service['title'] }}</h3>
-                            <p class="text-secondary small flex-grow-1">{{ $service['description'] }}</p>
+                            <h3 class="h6 fw-bold mb-2 text-dark">{{ $service['title'] }}</h3>
+                            <p class="small flex-grow-1" style="color: #334155;">{{ $service['description'] }}</p>
                             <hr class="my-2 border-light">
                             <div class="d-flex justify-content-end align-items-center">
                                 <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 w-100 text-center">Order Now</a>
@@ -342,9 +342,9 @@
     <div class="container py-4">
         <div class="row align-items-center g-5">
             <div class="col-lg-5">
-                <span class="text-uppercase small fw-bold text-gradient">Information</span>
-                <h2 class="display-5 fw-bold mt-2 mb-4">Frequently Asked Questions</h2>
-                <p class="text-secondary">Have questions about processing times, document requirements, payments, or security? Find fast answers here.</p>
+                <span class="text-uppercase small fw-bold" style="color: #004225; letter-spacing: 1px;">Information</span>
+                <h2 class="display-5 fw-bold mt-2 mb-4 text-dark">Frequently Asked Questions</h2>
+                <p style="color: #334155; font-size: 1.05rem;">Have questions about processing times, document requirements, payments, or security? Find fast answers here.</p>
                 <a href="#contact" class="btn btn-dark px-4 rounded-pill">Still have questions?</a>
             </div>
             
@@ -352,41 +352,41 @@
                 <div id="customFaqAccordion">
 
                     <div class="faq-item border-bottom py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0" type="button">
+                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
                             How long does document processing take?
                             <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
                         </button>
-                        <div class="faq-answer text-secondary small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px;">
+                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
                             Processing times vary depending on the service. Routine certificates like Court Affidavits are usually ready in 24 hours, while passport approvals and visa vetted applications can take between 3 to 10 working days.
                         </div>
                     </div>
 
                     <div class="faq-item border-bottom py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0" type="button">
+                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
                             Are the service providers verified?
                             <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
                         </button>
-                        <div class="faq-answer text-secondary small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px;">
+                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
                             Yes. All vendors on this platform must complete a strict KYC profile, upload official government IDs, submit banking details, and pass a vetting approval process by system administrators before they can list services.
                         </div>
                     </div>
 
                     <div class="faq-item border-bottom py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0" type="button">
+                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
                             What payment gateways are supported?
                             <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
                         </button>
-                        <div class="faq-answer text-secondary small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px;">
+                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
                             We support secure billing via Paystack and Credo for rapid local and international payments. All transactions are protected via industry-standard encryption protocols.
                         </div>
                     </div>
 
                     <div class="faq-item py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0" type="button">
+                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
                             Is my personal information secure?
                             <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
                         </button>
-                        <div class="faq-answer text-secondary small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px;">
+                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
                             Absolutely. We use end-to-end data encryption, secure server infrastructure, and strict access controls. Your data is never shared with third parties without your consent.
                         </div>
                     </div>

@@ -90,7 +90,7 @@ class ClientController extends Controller
 
         $passportPath = null;
         if ($request->hasFile('passport_photo')) {
-            $pPath = $request->file('passport_photo')->store('passports', 'public');
+            $pPath = \App\Helpers\FileUploadHelper::store($request->file('passport_photo'), 'passports');
             $passportPath = '/storage/' . $pPath;
         }
 
@@ -134,7 +134,7 @@ class ClientController extends Controller
         // Process uploaded supporting documents
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $docName => $file) {
-                $path = $file->store('requests', 'public');
+                $path = \App\Helpers\FileUploadHelper::store($file, 'requests');
                 $originalName = is_object($file) ? $file->getClientOriginalName() : 'Document';
                 $displayName = is_string($docName) ? ucwords(str_replace('_', ' ', $docName)) : $originalName;
 
@@ -187,13 +187,13 @@ class ClientController extends Controller
 
         $manualFormPath = null;
         if ($request->hasFile('manual_form')) {
-            $mPath = $request->file('manual_form')->store('manual_forms', 'public');
+            $mPath = \App\Helpers\FileUploadHelper::store($request->file('manual_form'), 'manual_forms');
             $manualFormPath = '/storage/' . $mPath;
         }
 
         $passportPath = null;
         if ($request->hasFile('passport_photo')) {
-            $pPath = $request->file('passport_photo')->store('passports', 'public');
+            $pPath = \App\Helpers\FileUploadHelper::store($request->file('passport_photo'), 'passports');
             $passportPath = '/storage/' . $pPath;
         }
 
@@ -245,7 +245,7 @@ class ClientController extends Controller
         // Supporting Documents
         if ($request->hasFile('documents')) {
             foreach ($request->file('documents') as $docName => $file) {
-                $path = $file->store('requests', 'public');
+                $path = \App\Helpers\FileUploadHelper::store($file, 'requests');
                 $originalName = is_object($file) ? $file->getClientOriginalName() : 'Document';
                 $displayName = is_string($docName) ? ucwords(str_replace('_', ' ', $docName)) : $originalName;
 
@@ -342,7 +342,7 @@ class ClientController extends Controller
         }
 
         if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('uploads', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('avatar'), 'uploads');
             $data['avatar_url'] = '/storage/' . $path;
         }
 

@@ -211,7 +211,7 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('logo_file')) {
-            $path = $request->file('logo_file')->store('branding', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('logo_file'), 'branding');
             $data['logo_url'] = '/storage/' . $path;
         }
 
@@ -898,7 +898,7 @@ class AdminController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('uploads', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('avatar'), 'uploads');
             $data['avatar_url'] = '/storage/' . $path;
         }
 

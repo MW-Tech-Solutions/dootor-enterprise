@@ -81,15 +81,15 @@ class VendorController extends Controller
         ];
 
         if ($request->hasFile('id_card')) {
-            $path = $request->file('id_card')->store('uploads', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('id_card'), 'uploads');
             $updateData['id_card_url'] = '/storage/' . $path;
         }
         if ($request->hasFile('proof_of_address')) {
-            $path = $request->file('proof_of_address')->store('uploads', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('proof_of_address'), 'uploads');
             $updateData['proof_of_address_url'] = '/storage/' . $path;
         }
         if ($request->hasFile('personal_image')) {
-            $path = $request->file('personal_image')->store('uploads', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('personal_image'), 'uploads');
             $updateData['personal_image_url'] = '/storage/' . $path;
         }
 
@@ -254,7 +254,7 @@ class VendorController extends Controller
         ]);
 
         if ($request->hasFile('background_image')) {
-            $path = $request->file('background_image')->store('uploads', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('background_image'), 'uploads');
             $data['background_image_url'] = '/storage/' . $path;
         }
 
@@ -276,7 +276,7 @@ class VendorController extends Controller
         ]);
 
         if ($request->hasFile('avatar')) {
-            $path = $request->file('avatar')->store('uploads', 'public');
+            $path = \App\Helpers\FileUploadHelper::store($request->file('avatar'), 'uploads');
             $data['avatar_url'] = '/storage/' . $path;
         }
 

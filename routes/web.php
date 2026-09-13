@@ -29,6 +29,30 @@ Route::get('/v/{vendor}', [PublicController::class, 'vendorStorefront'])->name('
 // Credo Payment Callback Route
 Route::get('/payment/credo/callback', [PaymentController::class, 'callback'])->name('payment.credo.callback');
 
+// Media / Storage File Fallback Route (for servers without symlink)
+Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
+    $relativePath = trim($folder, '/') . '/' . trim($filename, '/');
+    $path = storage_path('app/public/' . $relativePath);
+    if (!file_exists($path)) {
+        $path = public_path('storage/' . $relativePath);
+    }
+    if (!file_exists($path)) {
+        abort(404);
+    }
+
+    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    $mimeTypes = [
+        'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg', 'png' => 'image/png',
+        'gif' => 'image/gif', 'svg' => 'image/svg+xml', 'webp' => 'image/webp',
+        'pdf' => 'application/pdf', 'doc' => 'application/msword',
+        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'txt' => 'text/plain', 'zip' => 'application/zip',
+    ];
+    $mime = $mimeTypes[$ext] ?? 'application/octet-stream';
+
+    return response()->file($path, ['Content-Type' => $mime]);
+})->where('filename', '.*');
+
 // Web Authentication Routes
 Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLogin'])->name('login');

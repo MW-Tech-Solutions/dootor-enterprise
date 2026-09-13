@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/../app/Helpers/FinfoPolyfill.php';
+
 use App\Http\Middleware\ApiCors;
 use App\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;

@@ -74,9 +74,13 @@
         }
 
         .text-gradient {
-            background: linear-gradient(135deg, var(--brand-gradient-from), var(--brand-gradient-to));
+            background: linear-gradient(135deg, #004225 0%, #056839 50%, #9e7808 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+        }
+
+        .text-secondary-contrast {
+            color: #1e293b !important;
         }
 
         .sidebar-link {

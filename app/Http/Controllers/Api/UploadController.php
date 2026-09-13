@@ -15,10 +15,10 @@ class UploadController extends Controller
             'file' => ['required', 'file', 'max:10240'],
         ]);
 
-        $path = $request->file('file')->store('uploads', 'public');
+        $path = \App\Helpers\FileUploadHelper::store($request->file('file'), 'uploads');
 
         return response()->json([
-            'path' => Storage::url($path),
+            'path' => '/storage/' . $path,
         ], 201);
     }
 }
