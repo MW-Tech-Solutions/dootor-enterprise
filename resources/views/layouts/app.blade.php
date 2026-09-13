@@ -199,6 +199,69 @@
         });
     </script>
 
+    <!-- Global Floating Widgets (WhatsApp & Go To Top Button) -->
+    <div id="globalFloatingWidgets" class="position-fixed" style="bottom: 25px; right: 25px; z-index: 9990; display: flex; flex-direction: column; gap: 12px; align-items: center;">
+        <!-- Go To Top Button (Appears on scroll > 250px) -->
+        <button id="scrollToTopBtn" 
+                type="button" 
+                class="btn rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0" 
+                style="width: 48px; height: 48px; background-color: #004225; border: 1.5px solid rgba(212, 175, 55, 0.6); color: #ffffff; opacity: 0; visibility: hidden; transform: translateY(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;"
+                title="Scroll to Top"
+                onclick="scrollToTop()">
+            <i class="bi bi-chevron-up fs-5"></i>
+        </button>
+
+        <!-- WhatsApp Floating Widget -->
+        <a href="https://wa.me/14164589707?text=Hello%20Dootor%20Enterprises,%20I%20would%20like%20to%20inquire%20about%20your%20services." 
+           target="_blank" 
+           class="rounded-circle shadow-lg text-white d-flex align-items-center justify-content-center" 
+           style="width: 52px; height: 52px; background-color: #25D366; transition: all 0.3s ease; text-decoration: none;"
+           onmouseover="this.style.transform='scale(1.1)';" 
+           onmouseout="this.style.transform='scale(1)';"
+           title="Chat on WhatsApp">
+            <i class="bi bi-whatsapp" style="font-size: 28px;"></i>
+        </a>
+    </div>
+
+    <script>
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            var dashScroll = document.querySelector('.overflow-y-auto');
+            if (dashScroll) {
+                dashScroll.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('scrollToTopBtn');
+            if (!btn) return;
+
+            function checkScrollPosition() {
+                var scTop = window.scrollY || document.documentElement.scrollTop || 0;
+                var dashScroll = document.querySelector('.overflow-y-auto');
+                if (dashScroll && dashScroll.scrollTop > scTop) {
+                    scTop = dashScroll.scrollTop;
+                }
+
+                if (scTop > 250) {
+                    btn.style.opacity = '1';
+                    btn.style.visibility = 'visible';
+                    btn.style.transform = 'translateY(0)';
+                } else {
+                    btn.style.opacity = '0';
+                    btn.style.visibility = 'hidden';
+                    btn.style.transform = 'translateY(12px)';
+                }
+            }
+
+            window.addEventListener('scroll', checkScrollPosition, { passive: true });
+            var dashScroll = document.querySelector('.overflow-y-auto');
+            if (dashScroll) {
+                dashScroll.addEventListener('scroll', checkScrollPosition, { passive: true });
+            }
+        });
+    </script>
+
     @yield('scripts')
     @stack('scripts')
 </body>

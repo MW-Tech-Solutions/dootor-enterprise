@@ -528,16 +528,6 @@
     </div>
 </footer>
 
-<!-- Floating WhatsApp Widget -->
-<a href="https://wa.me/14164589707?text=Hello%20Dootor%20Enterprises,%20I%20would%20like%20to%20inquire%20about%20your%20services." 
-   target="_blank" 
-   class="position-fixed d-flex align-items-center justify-content-center rounded-circle shadow-lg text-white" 
-   style="width: 56px; height: 56px; background-color: #25D366; z-index: 9999; bottom: 25px; right: 25px; transition: all 0.3s ease; text-decoration: none;"
-   onmouseover="this.style.transform='scale(1.1)';" 
-   onmouseout="this.style.transform='scale(1)';"
-   title="Chat on WhatsApp">
-    <i class="bi bi-whatsapp" style="font-size: 30px;"></i>
-</a>
 @endsection
 
 @section('scripts')

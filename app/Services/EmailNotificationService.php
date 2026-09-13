@@ -96,4 +96,46 @@ class EmailNotificationService
             return false;
         }
     }
+
+    /**
+     * Send direct broadcast HTML email to user or custom recipient.
+     */
+    public static function sendBroadcast(
+        string $recipientEmail,
+        string $subject,
+        string $renderedHtml,
+        ?User $user = null
+    ): bool {
+        try {
+            Mail::html($renderedHtml, function ($message) use ($recipientEmail, $subject) {
+                $message->to($recipientEmail)
+                    ->subject($subject);
+            });
+
+            EmailLog::create([
+                'user_id' => $user?->id,
+                'recipient_email' => $recipientEmail,
+                'subject' => $subject,
+                'body' => $renderedHtml,
+                'status' => 'Sent',
+                'sent_at' => now(),
+            ]);
+
+            return true;
+        } catch (Throwable $e) {
+            Log::error("Failed to send broadcast email to {$recipientEmail}: " . $e->getMessage());
+
+            EmailLog::create([
+                'user_id' => $user?->id,
+                'recipient_email' => $recipientEmail,
+                'subject' => $subject ?? 'Broadcast Notice',
+                'body' => $renderedHtml ?? null,
+                'status' => 'Failed',
+                'error_message' => $e->getMessage(),
+                'sent_at' => now(),
+            ]);
+
+            return false;
+        }
+    }
 }

@@ -963,5 +963,126 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Password updated successfully!');
     }
+
+    /**
+     * Display Email Broadcast Composer page.
+     */
+    public function emailBroadcast()
+    {
+        $users = User::orderBy('first_name')->get(['id', 'first_name', 'last_name', 'email', 'role']);
+        return view('admin.email-broadcast', compact('users'));
+    }
+
+    /**
+     * Process & Send Broadcast Email.
+     */
+    public function sendEmailBroadcast(Request $request)
+    {
+        $request->validate([
+            'notice_category' => ['required', Rule::in(['maintenance', 'announcement', 'service_update', 'custom'])],
+            'recipient_target' => ['required', Rule::in(['all_clients', 'all_vendors', 'all_users', 'specific_user', 'external_emails'])],
+            'specific_user_id' => ['required_if:recipient_target,specific_user', 'nullable', 'exists:users,id'],
+            'external_emails' => ['required_if:recipient_target,external_emails', 'nullable', 'string'],
+            'email_subject' => ['required', 'string', 'max:255'],
+            'email_headline' => ['nullable', 'string', 'max:255'],
+            'email_body' => ['required', 'string'],
+            'button_text' => ['nullable', 'string', 'max:100'],
+            'button_url' => ['nullable', 'url', 'max:255'],
+        ]);
+
+        $recipients = [];
+
+        switch ($request->recipient_target) {
+            case 'all_clients':
+                $recipients = User::where('role', 'client')->get();
+                break;
+
+            case 'all_vendors':
+                $recipients = User::where('role', 'vendor')->get();
+                break;
+
+            case 'all_users':
+                $recipients = User::whereIn('role', ['client', 'vendor', 'admin', 'manager', 'processing_officer', 'super_admin'])->get();
+                break;
+
+            case 'specific_user':
+                $user = User::find($request->specific_user_id);
+                if ($user) {
+                    $recipients = [$user];
+                }
+                break;
+
+            case 'external_emails':
+                $rawEmails = array_map('trim', explode(',', $request->external_emails));
+                foreach ($rawEmails as $email) {
+                    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                        $recipients[] = (object) [
+                            'email' => $email,
+                            'name' => explode('@', $email)[0],
+                            'first_name' => explode('@', $email)[0],
+                            'id' => null
+                        ];
+                    }
+                }
+                break;
+        }
+
+        if (empty($recipients)) {
+            return redirect()->back()->with('error', 'No valid recipient email addresses found for the selected target group.')->withInput();
+        }
+
+        $settings = SystemSetting::first();
+        $companyName = $settings->platform_name ?? 'DOOTOR ENTERPRISES';
+        $logoUrl = $settings->logo_url ? app_file_url($settings->logo_url) : null;
+
+        $sentCount = 0;
+        $failedCount = 0;
+
+        foreach ($recipients as $recipient) {
+            $userObj = is_a($recipient, User::class) ? $recipient : null;
+            $recipientEmail = is_a($recipient, User::class) ? $recipient->email : $recipient->email;
+            $recipientName = is_a($recipient, User::class) ? ($recipient->first_name . ' ' . $recipient->last_name) : $recipient->name;
+
+            // Render email body template
+            $renderedHtml = view('emails.broadcast', [
+                'category' => $request->notice_category,
+                'subject' => $request->email_subject,
+                'headline' => $request->email_headline ?? $request->email_subject,
+                'bodyContent' => $request->email_body,
+                'buttonText' => $request->button_text,
+                'buttonUrl' => $request->button_url,
+                'recipientName' => $recipientName,
+                'companyName' => $companyName,
+                'logoUrl' => $logoUrl,
+            ])->render();
+
+            $success = \App\Services\EmailNotificationService::sendBroadcast(
+                $recipientEmail,
+                $request->email_subject,
+                $renderedHtml,
+                $userObj
+            );
+
+            if ($success) {
+                $sentCount++;
+            } else {
+                $failedCount++;
+            }
+        }
+
+        \App\Services\AuditLogger::log('broadcast_email_sent', 'EmailLog', null, "Category: {$request->notice_category}", null, [
+            'sent_count' => $sentCount,
+            'failed_count' => $failedCount,
+            'subject' => $request->email_subject,
+            'target' => $request->recipient_target,
+        ]);
+
+        $msg = "Broadcast notice dispatched successfully to {$sentCount} recipient(s).";
+        if ($failedCount > 0) {
+            $msg .= " ({$failedCount} failed to deliver)";
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
 }
 

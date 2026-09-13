@@ -134,6 +134,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/email-templates', [AdminController::class, 'emailTemplates'])->name('admin.email-templates');
         Route::patch('/email-templates/{template}', [AdminController::class, 'updateEmailTemplate'])->name('admin.email-templates.update');
 
+        // Admin Email Broadcast Routes
+        Route::get('/email-broadcast', [AdminController::class, 'emailBroadcast'])->name('admin.email-broadcast');
+        Route::post('/email-broadcast/send', [AdminController::class, 'sendEmailBroadcast'])->name('admin.email-broadcast.send');
+
         // System Audit Logs Route
         Route::get('/audit-logs', [AdminController::class, 'auditLogs'])->name('admin.audit-logs');
         
