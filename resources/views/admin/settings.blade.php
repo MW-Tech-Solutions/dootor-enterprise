@@ -176,15 +176,15 @@
             </div>
 
             @php
-                $activeGateway = env('PAYMENT_GATEWAY', 'credo');
-                $paymentMode = env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live'));
-                $billingCurrency = env('PORTAL_BASE_CURRENCY', 'USD');
-                $credoBaseUrl = env('CREDO_BASE_URL', 'https://api.credocentral.com');
-                $credoPublicKey = env('CREDO_PUBLIC_KEY', '');
-                $credoSecretKey = env('CREDO_SECRET_KEY', '');
-                $credoCallbackUrl = env('CREDO_CALLBACK_URL', route('payment.credo.callback'));
-                $paystackPublicKey = env('PAYSTACK_PUBLIC_KEY', '');
-                $paystackSecretKey = env('PAYSTACK_SECRET_KEY', '');
+                $activeGateway = config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'credo');
+                $paymentMode = config('services.credo.mode') ?: env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live'));
+                $billingCurrency = config('services.payment.currency') ?: env('PORTAL_BASE_CURRENCY', 'USD');
+                $credoBaseUrl = config('services.credo.base_url') ?: env('CREDO_BASE_URL', 'https://api.credocentral.com');
+                $credoPublicKey = config('services.credo.public_key') ?: env('CREDO_PUBLIC_KEY', '');
+                $credoSecretKey = config('services.credo.secret_key') ?: env('CREDO_SECRET_KEY', '');
+                $credoCallbackUrl = config('services.credo.callback_url') ?: env('CREDO_CALLBACK_URL', route('payment.credo.callback'));
+                $paystackPublicKey = config('services.paystack.public_key') ?: env('PAYSTACK_PUBLIC_KEY', '');
+                $paystackSecretKey = config('services.paystack.secret_key') ?: env('PAYSTACK_SECRET_KEY', '');
             @endphp
 
             <div class="row g-3 mb-3">

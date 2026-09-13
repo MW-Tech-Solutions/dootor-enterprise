@@ -35,4 +35,22 @@ return [
         ],
     ],
 
+    'credo' => [
+        'base_url' => env('CREDO_BASE_URL', 'https://api.credocentral.com'),
+        'public_key' => env('CREDO_PUBLIC_KEY', ''),
+        'secret_key' => env('CREDO_SECRET_KEY', ''),
+        'mode' => env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live')),
+        'callback_url' => env('CREDO_CALLBACK_URL') ?: env('CREDO_FRONTEND_CALLBACK_URL'),
+    ],
+
+    'paystack' => [
+        'public_key' => env('PAYSTACK_PUBLIC_KEY', ''),
+        'secret_key' => env('PAYSTACK_SECRET_KEY', ''),
+    ],
+
+    'payment' => [
+        'gateway' => env('PAYMENT_GATEWAY', 'credo'),
+        'currency' => env('PORTAL_BASE_CURRENCY', 'USD'),
+    ],
+
 ];

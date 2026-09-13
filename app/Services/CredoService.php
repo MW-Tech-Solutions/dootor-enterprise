@@ -14,10 +14,10 @@ class CredoService
 
     public function __construct()
     {
-        $this->paymentMode = trim((string) env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live')));
-        $this->baseUrl = trim((string) env('CREDO_BASE_URL', 'https://api.credocentral.com'));
-        $this->secretKey = trim((string) env('CREDO_SECRET_KEY', ''));
-        $this->publicKey = trim((string) env('CREDO_PUBLIC_KEY', ''));
+        $this->paymentMode = trim((string) (config('services.credo.mode') ?: env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live'))));
+        $this->baseUrl = trim((string) (config('services.credo.base_url') ?: env('CREDO_BASE_URL', 'https://api.credocentral.com')));
+        $this->secretKey = trim((string) (config('services.credo.secret_key') ?: env('CREDO_SECRET_KEY', '')));
+        $this->publicKey = trim((string) (config('services.credo.public_key') ?: env('CREDO_PUBLIC_KEY', '')));
     }
 
     /**
@@ -30,7 +30,7 @@ class CredoService
         $amountInMinorUnits = (int) round($rawAmount * 100);
 
         // Determine callback URL dynamically
-        $envCallback = env('CREDO_CALLBACK_URL') ?: env('CREDO_FRONTEND_CALLBACK_URL');
+        $envCallback = config('services.credo.callback_url') ?: (env('CREDO_CALLBACK_URL') ?: env('CREDO_FRONTEND_CALLBACK_URL'));
         $callbackUrl = !empty($params['callback_url']) ? $params['callback_url'] : ($envCallback ?: route('payment.credo.callback'));
         $cleanCallbackUrl = str_replace(' ', '%20', $callbackUrl);
 
@@ -40,35 +40,35 @@ class CredoService
 
         $payload = [
             'amount' => $amountInMinorUnits,
-            'currency' => $params['currency'] ?? env('PORTAL_BASE_CURRENCY', 'USD'),
+            'currency' => $params['currency'] ?? config('services.payment.currency', env('PORTAL_BASE_CURRENCY', 'USD')),
             'email' => $params['email'] ?? '',
             'customerFirstName' => $params['customerFirstName'] ?? $params['first_name'] ?? 'Valued',
             'customerLastName' => $params['customerLastName'] ?? $params['last_name'] ?? 'Customer',
             'phoneNumber' => $params['phoneNumber'] ?? $params['phone'] ?? '08000000000',
             'callbackUrl' => $cleanCallbackUrl,
             'reference' => $params['reference'] ?? ('CREDO-' . time() . '-' . rand(1000, 9999)),
-            'metadata' => $params['metadata'] ?? [],
         ];
+
+        if (!empty($params['metadata'])) {
+            $payload['metadata'] = (object) $params['metadata'];
+        }
 
         // Endpoints & Headers to attempt for resilient payment initialization
         $candidateUrls = array_unique([
             rtrim($this->baseUrl, '/') . '/transaction/initialize',
             'https://api.credocentral.com/transaction/initialize',
-            'https://api.sandbox.credocentral.com/transaction/initialize',
         ]);
 
-        $candidateHeaders = [
-            'SecretKey' => $this->secretKey,
-            'PublicKey' => $this->publicKey,
-            'Bearer SecretKey' => 'Bearer ' . $this->secretKey,
-            'Bearer PublicKey' => 'Bearer ' . $this->publicKey,
-        ];
+        $candidateHeaders = array_values(array_unique(array_filter([
+            $this->secretKey,
+            $this->publicKey,
+        ])));
 
         $lastError = 'Credo payment initialization failed.';
 
         foreach ($candidateUrls as $url) {
-            foreach ($candidateHeaders as $headerType => $authHeaderValue) {
-                if (empty($authHeaderValue) || $authHeaderValue === 'Bearer ') continue;
+            foreach ($candidateHeaders as $authHeaderValue) {
+                if (empty($authHeaderValue)) continue;
 
                 try {
                     $response = Http::timeout(10)->withHeaders([
