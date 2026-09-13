@@ -97,6 +97,60 @@
                 <button type="submit" class="btn btn-dark rounded-pill px-4 py-2 small">Save Visual Branding</button>
             </form>
         </div>
+
+        <!-- Landing Hero & Wallpaper Settings -->
+        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+            <h2 class="h5 fw-bold text-dark mb-4"><i class="bi bi-image me-2"></i> Landing Page Hero &amp; Wallpaper</h2>
+            
+            <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                
+                <div class="mb-3">
+                    <label for="hero_badge_text" class="form-label small fw-medium">Hero Badge Tagline</label>
+                    <input type="text" name="hero_badge_text" id="hero_badge_text" class="form-control rounded-3" value="{{ old('hero_badge_text', $settings->hero_badge_text ?? 'Streamlined Document Support') }}" placeholder="e.g. Streamlined Document Support">
+                </div>
+
+                <div class="mb-3">
+                    <label for="hero_title" class="form-label small fw-medium">Hero Heading Title</label>
+                    <input type="text" name="hero_title" id="hero_title" class="form-control rounded-3" value="{{ old('hero_title', $settings->hero_title ?? 'All Business & Personal Services In One Place') }}" placeholder="e.g. All Business & Personal Services In One Place">
+                </div>
+
+                <div class="mb-3">
+                    <label for="hero_subtitle" class="form-label small fw-medium">Hero Subtitle / Description</label>
+                    <textarea name="hero_subtitle" id="hero_subtitle" class="form-control rounded-3" rows="3" placeholder="Description sentence...">{{ old('hero_subtitle', $settings->hero_subtitle ?? 'Fast-track passport approvals, visa handling, NIN verification, court affidavits, and more. A secured portal for direct processing and verified document handling.') }}</textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label for="hero_bg_file" class="form-label small fw-medium">Hero Background Wallpaper</label>
+                    @if($settings->hero_bg_image)
+                    <div class="mb-2 p-2 border rounded-3 bg-light d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center gap-3 overflow-hidden">
+                            <img src="{{ asset($settings->hero_bg_image) }}" alt="Hero Wallpaper" class="rounded" style="height: 50px; width: 80px; object-fit: cover;">
+                            <span class="small text-dark fw-medium text-truncate">Wallpaper Active</span>
+                        </div>
+                        <div class="form-check me-2">
+                            <input class="form-check-input" type="checkbox" name="remove_hero_bg" value="1" id="remove_hero_bg">
+                            <label class="form-check-input-label small text-danger fw-semibold" for="remove_hero_bg">Remove Image</label>
+                        </div>
+                    </div>
+                    @endif
+                    <input type="file" name="hero_bg_file" id="hero_bg_file" class="form-control rounded-3" accept="image/*">
+                    <small class="text-muted d-block mt-1">Upload custom wallpaper (PNG, JPG, WEBP - Max 10MB). Overlaid with frosted glass effect on landing page.</small>
+                </div>
+
+                <div class="mb-4">
+                    <label for="hero_glass_style" class="form-label small fw-medium">Hero Glassmorphism Panel Overlay</label>
+                    <select name="hero_glass_style" id="hero_glass_style" class="form-select rounded-3">
+                        <option value="light_glass" {{ ($settings->hero_glass_style ?? 'light_glass') === 'light_glass' ? 'selected' : '' }}>Light Frosted Glass (75% White Translucent)</option>
+                        <option value="dark_glass" {{ ($settings->hero_glass_style ?? '') === 'dark_glass' ? 'selected' : '' }}>Dark Obsidian Glass (80% Dark Translucent)</option>
+                        <option value="emerald_glass" {{ ($settings->hero_glass_style ?? '') === 'emerald_glass' ? 'selected' : '' }}>Emerald Gold Glass (Deep Green & Gold Tint)</option>
+                        <option value="subtle_glass" {{ ($settings->hero_glass_style ?? '') === 'subtle_glass' ? 'selected' : '' }}>Subtle Translucent Glass (Minimal Overlay)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-dark rounded-pill px-4 py-2 small">Save Hero Settings</button>
+            </form>
+        </div>
     </div>
 
     <!-- Payout Gateway & Key configurations -->

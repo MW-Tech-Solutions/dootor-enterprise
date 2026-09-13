@@ -137,89 +137,120 @@
     </div>
 </header>
 
+@php
+    $heroBgImage = $settings->hero_bg_image ?? null;
+    $heroGlassStyle = $settings->hero_glass_style ?? 'light_glass';
+    $heroBadgeText = $settings->hero_badge_text ?? 'Streamlined Document Support';
+    $heroTitle = $settings->hero_title ?? 'All Business & Personal Services In One Place';
+    $heroSubtitle = $settings->hero_subtitle ?? 'Fast-track passport approvals, visa handling, NIN verification, court affidavits, and more. A secured portal for direct processing and verified document handling.';
+@endphp
+
 <!-- Hero Section -->
-<section class="py-5 bg-light position-relative overflow-hidden" style="min-height: 70vh; display: flex; align-items: center;">
-    <!-- Background Circle styling -->
-    <div class="position-absolute rounded-circle pointer-events-none" style="width: 450px; height: 450px; top: -100px; right: -100px; background: radial-gradient(circle, rgba(0, 66, 37, 0.1) 0%, rgba(212, 175, 55, 0.06) 50%, transparent 70%); filter: blur(40px); z-index: 1;"></div>
-    <div class="position-absolute rounded-circle pointer-events-none" style="width: 300px; height: 300px; bottom: -50px; left: -50px; background: radial-gradient(circle, rgba(0, 66, 37, 0.08) 0%, transparent 70%); filter: blur(30px); z-index: 1;"></div>
+<section class="py-5 position-relative overflow-hidden" style="min-height: 75vh; display: flex; align-items: center; @if($heroBgImage) background: url('{{ asset($heroBgImage) }}') no-repeat center center / cover; @else background-color: #f8fafc; @endif">
+    <!-- Ambient Overlay / Backdrop blur if wallpaper is present -->
+    @if($heroBgImage)
+        <div class="position-absolute top-0 start-0 w-100 h-100" style="background: rgba(0, 0, 0, 0.35); backdrop-filter: blur(4px); z-index: 1;"></div>
+    @else
+        <!-- Background Circle styling -->
+        <div class="position-absolute rounded-circle pointer-events-none" style="width: 450px; height: 450px; top: -100px; right: -100px; background: radial-gradient(circle, rgba(0, 66, 37, 0.1) 0%, rgba(212, 175, 55, 0.06) 50%, transparent 70%); filter: blur(40px); z-index: 1;"></div>
+        <div class="position-absolute rounded-circle pointer-events-none" style="width: 300px; height: 300px; bottom: -50px; left: -50px; background: radial-gradient(circle, rgba(0, 66, 37, 0.08) 0%, transparent 70%); filter: blur(30px); z-index: 1;"></div>
+    @endif
     
-    <div class="container relative-content z-2">
-        <div class="row align-items-center g-5">
-            <div class="col-lg-6 text-center text-lg-start">
-                <span class="badge px-3.5 py-2 rounded-pill mb-3 fw-semibold shadow-sm" style="background-color: #002e1a; color: #ffffff; border: 1px solid rgba(212, 175, 55, 0.5); font-size: 13px; letter-spacing: 0.3px; display: inline-flex; align-items: center;">
-                    <i class="bi bi-sparkles me-2" style="color: #ffe57f;"></i> Streamlined Document Support
-                </span>
-                <h1 class="display-4 display-lg-3 fw-bold mb-4" style="color: #0f172a; line-height: 1.18;">
-                    All Business &amp; Personal <br>
-                    <span class="text-gradient" style="background: linear-gradient(135deg, #004225 0%, #056839 45%, #9e7808 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 800; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.08));">Services In One Place</span>
-                </h1>
-                <p class="lead mb-4" style="color: #1e293b !important; font-weight: 500; font-size: 1.125rem; line-height: 1.6;">
-                    Fast-track passport approvals, visa handling, NIN verification, court affidavits, and more. A secured portal for direct processing and verified document handling.
-                </p>
-                <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3">
-                    <a href="#services" class="btn btn-dark btn-lg px-4 rounded-pill shadow-sm">Explore Services <i class="bi bi-arrow-right ms-2"></i></a>
-                    <a href="{{ route('register.client') }}" class="btn btn-outline-dark btn-lg px-4 rounded-pill">Register as Client</a>
-                </div>
-            </div>
-            
-            <div class="col-lg-6 text-center">
-                <!-- Premium Progress Status Tracker Mockup -->
-                <div class="card border-0 shadow-lg p-4 rounded-4 bg-white mx-auto text-start position-relative overflow-hidden" style="max-width: 480px; transform: rotate(1deg);">
-                    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
-                        <div>
-                            <span class="text-muted d-block small fw-bold uppercase tracking-wider" style="font-size: 11px;">TRACKING ID: DE-8947-NG</span>
-                            <span class="fw-bold fs-5 text-dark">Application Status</span>
-                        </div>
-                        <span class="badge px-3 py-2 rounded-pill fw-bold d-flex align-items-center gap-1.5" style="background-color: #fff9db; color: #f59f00;">
-                            <span class="spinner-grow spinner-grow-sm text-warning" role="status" style="width: 8px; height: 8px;"></span> Vetting
-                        </span>
+    <div class="container relative-content py-4" style="z-index: 2;">
+        <!-- Frosted Glass Card Wrapper -->
+        <div class="p-4 p-md-5 rounded-5 shadow-lg position-relative overflow-hidden" 
+             style="
+             @if($heroGlassStyle === 'dark_glass')
+                 background: rgba(15, 23, 42, 0.82); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.15); color: #ffffff;
+             @elseif($heroGlassStyle === 'emerald_glass')
+                 background: rgba(0, 46, 26, 0.85); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); border: 1px solid rgba(212, 175, 55, 0.4); color: #ffffff;
+             @elseif($heroGlassStyle === 'subtle_glass')
+                 background: rgba(255, 255, 255, 0.65); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.4); color: #0f172a;
+             @else
+                 background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(18px) saturate(180%); -webkit-backdrop-filter: blur(18px) saturate(180%); border: 1px solid rgba(255, 255, 255, 0.6); color: #0f172a;
+             @endif
+             box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+             ">
+            <div class="row align-items-center g-5">
+                <div class="col-lg-6 text-center text-lg-start">
+                    <span class="badge px-3.5 py-2 rounded-pill mb-3 fw-semibold shadow-sm" style="background-color: #002e1a; color: #ffffff; border: 1px solid rgba(212, 175, 55, 0.5); font-size: 13px; letter-spacing: 0.3px; display: inline-flex; align-items: center;">
+                        <i class="bi bi-sparkles me-2" style="color: #ffe57f;"></i> {{ $heroBadgeText }}
+                    </span>
+                    <h1 class="display-4 display-lg-3 fw-bold mb-4" style="line-height: 1.18;">
+                        @if(in_array($heroGlassStyle, ['dark_glass', 'emerald_glass']))
+                            <span style="color: #ffffff;">{{ $heroTitle }}</span>
+                        @else
+                            <span style="color: #0f172a;">{{ $heroTitle }}</span>
+                        @endif
+                    </h1>
+                    <p class="lead mb-4" style="@if(in_array($heroGlassStyle, ['dark_glass', 'emerald_glass'])) color: #e2e8f0 !important; @else color: #1e293b !important; @endif font-weight: 500; font-size: 1.125rem; line-height: 1.6;">
+                        {{ $heroSubtitle }}
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center justify-content-lg-start gap-3">
+                        <a href="#services" class="btn btn-dark btn-lg px-4 rounded-pill shadow-sm" style="background-color: #004225; border-color: #004225; color: #ffffff;">Explore Services <i class="bi bi-arrow-right ms-2"></i></a>
+                        <a href="{{ route('register.client') }}" class="btn {{ in_array($heroGlassStyle, ['dark_glass', 'emerald_glass']) ? 'btn-outline-light' : 'btn-outline-dark' }} btn-lg px-4 rounded-pill">Register as Client</a>
                     </div>
-
-                    <div class="d-flex flex-column gap-3.5 position-relative">
-                        <!-- Connecting Line -->
-                        <div class="position-absolute h-75 border-start border-2" style="left: 15px; top: 20px; border-color: #e2e8f0 !important; z-index: 1;"></div>
-                        
-                        <!-- Step 1 -->
-                        <div class="d-flex gap-3 position-relative" style="z-index: 2;">
-                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; flex-shrink: 0;">
-                                <i class="bi bi-check-lg" style="font-size: 14px;"></i>
-                            </div>
+                </div>
+                
+                <div class="col-lg-6 text-center">
+                    <!-- Premium Progress Status Tracker Mockup -->
+                    <div class="card border-0 shadow-lg p-4 rounded-4 bg-white mx-auto text-start position-relative overflow-hidden" style="max-width: 480px; transform: rotate(1deg);">
+                        <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
                             <div>
-                                <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 1: Order Placed & Secure Payment</span>
-                                <span style="color: #475569; font-size: 11.5px;">Completed via Credo Payment Gateway</span>
+                                <span class="text-muted d-block small fw-bold uppercase tracking-wider" style="font-size: 11px;">TRACKING ID: DE-8947-NG</span>
+                                <span class="fw-bold fs-5 text-dark">Application Status</span>
                             </div>
+                            <span class="badge px-3 py-2 rounded-pill fw-bold d-flex align-items-center gap-1.5" style="background-color: #fff9db; color: #f59f00;">
+                                <span class="spinner-grow spinner-grow-sm text-warning" role="status" style="width: 8px; height: 8px;"></span> Vetting
+                            </span>
                         </div>
 
-                        <!-- Step 2 -->
-                        <div class="d-flex gap-3 position-relative" style="z-index: 2;">
-                            <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; flex-shrink: 0;">
-                                <i class="bi bi-check-lg" style="font-size: 14px;"></i>
+                        <div class="d-flex flex-column gap-3.5 position-relative">
+                            <!-- Connecting Line -->
+                            <div class="position-absolute h-75 border-start border-2" style="left: 15px; top: 20px; border-color: #e2e8f0 !important; z-index: 1;"></div>
+                            
+                            <!-- Step 1 -->
+                            <div class="d-flex gap-3 position-relative" style="z-index: 2;">
+                                <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; flex-shrink: 0;">
+                                    <i class="bi bi-check-lg" style="font-size: 14px;"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 1: Order Placed & Secure Payment</span>
+                                    <span style="color: #475569; font-size: 11.5px;">Completed via Credo Payment Gateway</span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 2: Document Verification</span>
-                                <span style="color: #475569; font-size: 11.5px;">NIN details verified by processing agent</span>
-                            </div>
-                        </div>
 
-                        <!-- Step 3 -->
-                        <div class="d-flex gap-3 position-relative" style="z-index: 2;">
-                            <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm border border-warning" style="width: 30px; height: 30px; flex-shrink: 0; background-color: #fff9db; color: #f59f00;">
-                                <span class="spinner-border spinner-border-sm" role="status" style="width: 12px; height: 12px;"></span>
+                            <!-- Step 2 -->
+                            <div class="d-flex gap-3 position-relative" style="z-index: 2;">
+                                <div class="rounded-circle bg-success text-white d-flex align-items-center justify-content-center shadow-sm" style="width: 30px; height: 30px; flex-shrink: 0;">
+                                    <i class="bi bi-check-lg" style="font-size: 14px;"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 2: Document Verification</span>
+                                    <span style="color: #475569; font-size: 11.5px;">NIN details verified by processing agent</span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 3: Document Vetting</span>
-                                <span style="color: #475569; font-size: 11.5px;">Liaising with High Commission & government officials</span>
-                            </div>
-                        </div>
 
-                        <!-- Step 4 -->
-                        <div class="d-flex gap-3 position-relative" style="z-index: 2;">
-                            <div class="rounded-circle bg-light text-muted d-flex align-items-center justify-content-center shadow-sm border" style="width: 30px; height: 30px; flex-shrink: 0;">
-                                <i class="bi bi-send-fill" style="font-size: 12px;"></i>
+                            <!-- Step 3 -->
+                            <div class="d-flex gap-3 position-relative" style="z-index: 2;">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center shadow-sm border border-warning" style="width: 30px; height: 30px; flex-shrink: 0; background-color: #fff9db; color: #f59f00;">
+                                    <span class="spinner-border spinner-border-sm" role="status" style="width: 12px; height: 12px;"></span>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block text-dark small" style="font-size: 13px;">Step 3: Document Vetting</span>
+                                    <span style="color: #475569; font-size: 11.5px;">Liaising with High Commission & government officials</span>
+                                </div>
                             </div>
-                            <div>
-                                <span class="fw-semibold d-block text-muted small" style="font-size: 13px;">Step 4: Dispatch & Delivery</span>
-                                <span class="text-muted" style="font-size: 11.5px;">Tracking code will be shared via Email/SMS</span>
+
+                            <!-- Step 4 -->
+                            <div class="d-flex gap-3 position-relative" style="z-index: 2;">
+                                <div class="rounded-circle bg-light text-muted d-flex align-items-center justify-content-center shadow-sm border" style="width: 30px; height: 30px; flex-shrink: 0;">
+                                    <i class="bi bi-send-fill" style="font-size: 12px;"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-semibold d-block text-muted small" style="font-size: 13px;">Step 4: Dispatch & Delivery</span>
+                                    <span class="text-muted" style="font-size: 11.5px;">Tracking code will be shared via Email/SMS</span>
+                                </div>
                             </div>
                         </div>
                     </div>

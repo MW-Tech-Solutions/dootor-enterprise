@@ -197,6 +197,12 @@ class AdminController extends Controller
             'brand_secondary_color' => ['nullable', 'string', 'max:20'],
             'brand_gradient_from' => ['nullable', 'string', 'max:20'],
             'brand_gradient_to' => ['nullable', 'string', 'max:20'],
+            'hero_badge_text' => ['nullable', 'string', 'max:255'],
+            'hero_title' => ['nullable', 'string', 'max:255'],
+            'hero_subtitle' => ['nullable', 'string'],
+            'hero_bg_file' => ['nullable', 'image', 'mimes:png,jpg,jpeg,gif,webp', 'max:10240'],
+            'hero_glass_style' => ['nullable', Rule::in(['light_glass', 'dark_glass', 'emerald_glass', 'subtle_glass'])],
+            'remove_hero_bg' => ['nullable', 'boolean'],
             'default_currency' => ['nullable', 'string', 'max:10'],
             'maintenance_mode' => ['nullable', 'boolean'],
             'payment_gateway' => ['nullable', Rule::in(['paystack', 'credo'])],
@@ -215,7 +221,14 @@ class AdminController extends Controller
             $data['logo_url'] = '/storage/' . $path;
         }
 
-        unset($data['logo_file']);
+        if ($request->hasFile('hero_bg_file')) {
+            $path = \App\Helpers\FileUploadHelper::store($request->file('hero_bg_file'), 'branding');
+            $data['hero_bg_image'] = '/storage/' . $path;
+        } elseif ($request->boolean('remove_hero_bg')) {
+            $data['hero_bg_image'] = null;
+        }
+
+        unset($data['logo_file'], $data['hero_bg_file'], $data['remove_hero_bg']);
 
         $settings = SystemSetting::firstOrCreate([]);
         $settings->update($data);
