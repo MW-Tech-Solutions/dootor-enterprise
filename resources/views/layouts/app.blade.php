@@ -42,6 +42,13 @@
     <meta name="api-base-url" content="{{ url('/api/location') }}">
     <title>@yield('title', $platformName)</title>
     
+    <!-- Dynamic Favicon (Admin Uploaded System Logo) -->
+    @if($logoUrl)
+        <link rel="icon" href="{{ app_file_url($logoUrl) }}">
+        <link rel="shortcut icon" href="{{ app_file_url($logoUrl) }}">
+        <link rel="apple-touch-icon" href="{{ app_file_url($logoUrl) }}">
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
