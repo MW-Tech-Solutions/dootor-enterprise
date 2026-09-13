@@ -221,8 +221,14 @@
         </header>
 
         <!-- Main Dashboard View Content -->
-        <main class="container-fluid p-4">
-            @yield('content')
+        <main class="container-fluid p-4 d-flex flex-column" style="min-height: calc(100vh - 60px);">
+            <div class="flex-grow-1">
+                @yield('content')
+            </div>
+            <footer class="mt-4 pt-3 border-top text-muted small d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 opacity-75">
+                <div>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</div>
+                <div>Developed by <a href="https://kisprojectslab.com" target="_blank" rel="noopener noreferrer" class="text-dark fw-semibold text-decoration-none border-bottom">KendatTech</a></div>
+            </footer>
         </main>
     </div>
 </div>

@@ -180,8 +180,8 @@
 
             <!-- Footer -->
             <div class="email-footer">
-                <p style="margin: 0 0 8px 0;">&copy; {{ date('Y') }} {{ $companyName ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</p>
-                <p style="margin: 0 0 8px 0;">Secured Portal for Verified Document Handling & Official Services.</p>
+                <p style="margin: 0 0 8px 0;">&copy; {{ date('Y') }} {{ $companyName ?? 'DOOTOR ENTERPRISES' }}. All rights reserved. | Developed by <a href="https://kisprojectslab.com" target="_blank" style="color: #64748b; text-decoration: underline;">KendatTech</a></p>
+                <p style="margin: 0 0 8px 0;">Secured Portal for Verified Document Handling &amp; Official Services.</p>
                 <p style="margin: 0;">Need assistance? <a href="mailto:support@dootor-enterprises.com">Contact Support Desk</a></p>
             </div>
         </div>

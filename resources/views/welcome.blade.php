@@ -519,7 +519,10 @@
         <hr class="my-5 border-secondary">
         
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3 text-white-50 small">
-            <span>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</span>
+            <div>
+                <span>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</span>
+                <span class="ms-md-2 text-white-50 opacity-75">| Developed by <a href="https://kisprojectslab.com" target="_blank" rel="noopener noreferrer" class="text-white text-decoration-none fw-medium border-bottom border-light">KendatTech</a></span>
+            </div>
             <div class="d-flex gap-3">
                 <a href="#" class="text-white-50 text-decoration-none hover-white">Terms of Service</a>
                 <a href="#" class="text-white-50 text-decoration-none hover-white">Privacy Policy</a>

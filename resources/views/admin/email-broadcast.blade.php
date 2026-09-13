@@ -212,7 +212,7 @@ We apologize for any inconvenience and appreciate your patience as we work to se
 
                 <!-- Email Footer -->
                 <div class="p-2.5 bg-light text-center border-top text-muted" style="font-size: 10px;">
-                    <div>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</div>
+                    <div>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved. | Developed by <a href="https://kisprojectslab.com" target="_blank" class="text-secondary text-decoration-none border-bottom">KendatTech</a></div>
                     <div>Need assistance? <span class="text-success">support@dootor-enterprises.com</span></div>
                 </div>
             </div>
