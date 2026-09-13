@@ -81,7 +81,7 @@
                 ['href' => route('admin.service-documents'), 'icon' => 'bi-card-checklist', 'label' => 'Service Checklists'],
                 ['href' => route('admin.document-types'), 'icon' => 'bi-file-earmark-plus', 'label' => 'Document Templates'],
                 ['href' => route('admin.email-templates'), 'icon' => 'bi-envelope-paper', 'label' => 'Email Templates'],
-                ['href' => route('admin.email-broadcast'), 'icon' => 'bi-send-check', 'label' => 'Send Broadcast Email'],
+                ['href' => Route::has('admin.email-broadcast') ? route('admin.email-broadcast') : url('/admin/email-broadcast'), 'icon' => 'bi-send-check', 'label' => 'Send Broadcast Email'],
                 ['href' => route('admin.audit-logs'), 'icon' => 'bi-journal-code', 'label' => 'Audit Logs'],
                 ['href' => route('admin.reports'), 'icon' => 'bi-graph-up', 'label' => 'Reports & Analytics'],
                 ['href' => route('support.index'), 'icon' => 'bi-headset', 'label' => 'Support Desk'],
