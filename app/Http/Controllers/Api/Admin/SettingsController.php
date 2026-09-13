@@ -30,6 +30,11 @@ class SettingsController extends Controller
             'brand_secondary_color' => ['nullable', 'string', 'max:20'],
             'brand_gradient_from' => ['nullable', 'string', 'max:20'],
             'brand_gradient_to' => ['nullable', 'string', 'max:20'],
+            'hero_badge_text' => ['nullable', 'string', 'max:255'],
+            'hero_title' => ['nullable', 'string', 'max:255'],
+            'hero_subtitle' => ['nullable', 'string'],
+            'hero_bg_image' => ['nullable', 'string', 'max:2048'],
+            'hero_glass_style' => ['nullable', Rule::in(['light_glass', 'dark_glass', 'emerald_glass', 'subtle_glass'])],
             'default_currency' => ['nullable', 'string', 'max:10'],
             'maintenance_mode' => ['nullable', 'boolean'],
             'payment_gateway' => ['nullable', Rule::in(['paystack', 'credo'])],
@@ -53,6 +58,19 @@ class SettingsController extends Controller
             'template_payment_confirmation' => ['nullable', 'string'],
             'template_service_update' => ['nullable', 'string'],
         ]);
+
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('system_settings', 'hero_badge_text')) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('API Auto-migration failed: ' . $e->getMessage());
+            }
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $tableColumns = \Illuminate\Support\Facades\Schema::getColumnListing('system_settings');
+            $data = array_intersect_key($data, array_flip($tableColumns));
+        }
 
         $settings = SystemSetting::firstOrCreate([]);
         $settings->update($data);

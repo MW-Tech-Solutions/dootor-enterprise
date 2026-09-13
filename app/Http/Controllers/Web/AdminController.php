@@ -230,6 +230,21 @@ class AdminController extends Controller
 
         unset($data['logo_file'], $data['hero_bg_file'], $data['remove_hero_bg']);
 
+        // Auto-run pending migrations if hero columns are missing on server
+        if (!\Illuminate\Support\Facades\Schema::hasColumn('system_settings', 'hero_badge_text')) {
+            try {
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Auto-migration failed: ' . $e->getMessage());
+            }
+        }
+
+        // Filter data to only include columns that exist in the system_settings table
+        if (\Illuminate\Support\Facades\Schema::hasTable('system_settings')) {
+            $tableColumns = \Illuminate\Support\Facades\Schema::getColumnListing('system_settings');
+            $data = array_intersect_key($data, array_flip($tableColumns));
+        }
+
         $settings = SystemSetting::firstOrCreate([]);
         $settings->update($data);
 
