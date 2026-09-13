@@ -14,16 +14,10 @@ class CredoService
 
     public function __construct()
     {
-        $setting = \App\Models\SystemSetting::first();
-        
-        $this->paymentMode = $setting?->payment_mode ?? env('CREDO_PAYMENT_MODE', 'live');
-        
-        $envBase = env('CREDO_BASE_URL', 'https://api.credocentral.com');
-        $settingBase = !empty($setting?->credo_base_url) ? $setting->credo_base_url : null;
-        
-        $this->baseUrl = trim($settingBase ?: $envBase);
-        $this->secretKey = trim(!empty($setting?->credo_secret_key) ? $setting->credo_secret_key : env('CREDO_SECRET_KEY', ''));
-        $this->publicKey = trim(!empty($setting?->credo_public_key) ? $setting->credo_public_key : env('CREDO_PUBLIC_KEY', ''));
+        $this->paymentMode = trim((string) env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live')));
+        $this->baseUrl = trim((string) env('CREDO_BASE_URL', 'https://api.credocentral.com'));
+        $this->secretKey = trim((string) env('CREDO_SECRET_KEY', ''));
+        $this->publicKey = trim((string) env('CREDO_PUBLIC_KEY', ''));
     }
 
     /**

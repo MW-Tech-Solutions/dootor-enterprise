@@ -153,60 +153,139 @@
         </div>
     </div>
 
-    <!-- Payout Gateway & Key configurations -->
+    <!-- Escrow Payment Gateways (Strictly View-Only from .env) -->
     <div class="col-lg-5">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
-            <h2 class="h5 fw-bold text-dark mb-4"><i class="bi bi-wallet2 me-2"></i> Escrow Payment Gateways</h2>
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h5 fw-bold text-dark mb-0"><i class="bi bi-shield-lock me-2 text-primary"></i> Escrow Payment Gateways</h2>
+                <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-1 small">
+                    <i class="bi bi-file-earmark-code me-1"></i> Strictly .env
+                </span>
+            </div>
             
-            <form action="{{ route('admin.settings.update') }}" method="POST">
-                @csrf
-                
-                <div class="row g-3 mb-3">
-                    <div class="col-sm-6">
-                        <label for="default_currency" class="form-label small fw-medium">Billing Currency</label>
-                        <input type="text" name="default_currency" id="default_currency" class="form-control rounded-3" value="{{ old('default_currency', $settings->default_currency) }}" required>
-                    </div>
-                    <div class="col-sm-6">
-                        <label for="payment_gateway" class="form-label small fw-medium">Primary Gateway</label>
-                        <select name="payment_gateway" id="payment_gateway" class="form-select rounded-3">
-                            <option value="paystack" {{ $settings->payment_gateway === 'paystack' ? 'selected' : '' }}>Paystack</option>
-                            <option value="credo" {{ $settings->payment_gateway === 'credo' ? 'selected' : '' }}>Credo Gateway</option>
-                        </select>
+            <p class="text-secondary small mb-3">
+                Payment gateway API keys, base URLs, and environment modes are loaded directly from the application's <code>.env</code> file for bank-grade security.
+            </p>
+
+            <div class="alert alert-primary border-0 bg-primary-subtle text-primary-emphasis rounded-3 p-3 mb-4 small d-flex align-items-start gap-2">
+                <i class="bi bi-info-circle-fill fs-5 text-primary mt-1"></i>
+                <div>
+                    <strong class="d-block mb-1">View-Only Environment Settings</strong>
+                    Changes must be made directly in the server's <code>.env</code> file. Web editing is locked to prevent unauthorized tampering.
+                </div>
+            </div>
+
+            @php
+                $activeGateway = env('PAYMENT_GATEWAY', 'credo');
+                $paymentMode = env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live'));
+                $billingCurrency = env('PORTAL_BASE_CURRENCY', 'USD');
+                $credoBaseUrl = env('CREDO_BASE_URL', 'https://api.credocentral.com');
+                $credoPublicKey = env('CREDO_PUBLIC_KEY', '');
+                $credoSecretKey = env('CREDO_SECRET_KEY', '');
+                $credoCallbackUrl = env('CREDO_CALLBACK_URL', route('payment.credo.callback'));
+                $paystackPublicKey = env('PAYSTACK_PUBLIC_KEY', '');
+                $paystackSecretKey = env('PAYSTACK_SECRET_KEY', '');
+            @endphp
+
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <label class="form-label small fw-medium text-muted">Primary Active Gateway</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-credit-card-2-front"></i></span>
+                        <input type="text" class="form-control bg-light border-start-0 text-dark fw-semibold" value="{{ strtoupper($activeGateway) }} GATEWAY" readonly disabled>
                     </div>
                 </div>
-
-                <div class="row g-3 mb-3">
-                    <div class="col-sm-6">
-                        <label for="payment_mode" class="form-label small fw-medium">Transaction Mode</label>
-                        <select name="payment_mode" id="payment_mode" class="form-select rounded-3">
-                            <option value="test" {{ $settings->payment_mode === 'test' ? 'selected' : '' }}>Test Sandbox</option>
-                            <option value="live" {{ $settings->payment_mode === 'live' ? 'selected' : '' }}>Live Production</option>
-                        </select>
-                    </div>
-                    <div class="col-sm-6">
-                        <label for="payments_enabled" class="form-label small fw-medium">Billing Gate Status</label>
-                        <select name="payments_enabled" id="payments_enabled" class="form-select rounded-3">
-                            <option value="1" {{ $settings->payments_enabled ? 'selected' : '' }}>Online Processing</option>
-                            <option value="0" {{ !$settings->payments_enabled ? 'selected' : '' }}>Disabled</option>
-                        </select>
+                <div class="col-sm-6">
+                    <label class="form-label small fw-medium text-muted">Transaction Environment</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-speedometer2"></i></span>
+                        <input type="text" class="form-control bg-light border-start-0 text-dark fw-semibold" value="{{ strtoupper($paymentMode) }}" readonly disabled>
                     </div>
                 </div>
+            </div>
 
-                <div class="mb-3">
-                    <label for="paystack_public_key" class="form-label small fw-medium">Paystack Public Key</label>
-                    <input type="password" name="paystack_public_key" id="paystack_public_key" class="form-control rounded-3" value="{{ old('paystack_public_key', $settings->paystack_public_key) }}" placeholder="pk_test_...">
+            <div class="row g-3 mb-3">
+                <div class="col-sm-6">
+                    <label class="form-label small fw-medium text-muted">Billing Currency</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-currency-dollar"></i></span>
+                        <input type="text" class="form-control bg-light border-start-0 text-dark fw-semibold" value="{{ $billingCurrency }}" readonly disabled>
+                    </div>
                 </div>
-
-                <div class="mb-3">
-                    <label for="paystack_secret_key" class="form-label small fw-medium">Paystack Secret Key</label>
-                    <input type="password" name="paystack_secret_key" id="paystack_secret_key" class="form-control rounded-3" value="{{ old('paystack_secret_key', $settings->paystack_secret_key) }}" placeholder="sk_test_...">
+                <div class="col-sm-6">
+                    <label class="form-label small fw-medium text-muted">Gate Status</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-success"><i class="bi bi-check-circle-fill"></i></span>
+                        <input type="text" class="form-control bg-light border-start-0 text-success fw-semibold" value="Online &amp; Processing" readonly disabled>
+                    </div>
                 </div>
-                
-                <hr class="my-4 border-light">
+            </div>
 
-                <button type="submit" class="btn btn-dark rounded-pill px-4 py-2 small w-100">Save Escrow Gateways</button>
-            </form>
+            <hr class="my-3 border-light">
+
+            <h3 class="h6 fw-bold text-dark mb-3"><i class="bi bi-box-arrow-up-right me-1 text-primary"></i> Credo Gateway Settings (.env)</h3>
+
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Credo Base API URL</label>
+                <div class="input-group">
+                    <input type="text" class="form-control bg-light text-dark font-monospace small" value="{{ $credoBaseUrl }}" readonly disabled>
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-lock-fill"></i></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Credo Public Key</label>
+                <div class="input-group">
+                    <input type="text" class="form-control bg-light text-dark font-monospace small" value="{{ $credoPublicKey ?: 'Not set in .env' }}" readonly disabled>
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-key-fill"></i></span>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Credo Secret Key</label>
+                <div class="input-group">
+                    <input type="password" id="env_credo_secret" class="form-control bg-light text-dark font-monospace small" value="{{ $credoSecretKey }}" readonly disabled>
+                    <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleEnvSecretVisibility('env_credo_secret', this)">
+                        <i class="bi bi-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Credo Callback URL</label>
+                <div class="input-group">
+                    <input type="text" class="form-control bg-light text-dark font-monospace small" value="{{ $credoCallbackUrl }}" readonly disabled>
+                    <span class="input-group-text bg-light text-muted"><i class="bi bi-link-45deg"></i></span>
+                </div>
+            </div>
+
+            @if($paystackPublicKey || $paystackSecretKey)
+            <hr class="my-3 border-light">
+            <h3 class="h6 fw-bold text-dark mb-3"><i class="bi bi-wallet2 me-1 text-primary"></i> Paystack Settings (.env)</h3>
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Paystack Public Key</label>
+                <input type="text" class="form-control bg-light text-dark font-monospace small" value="{{ $paystackPublicKey }}" readonly disabled>
+            </div>
+            <div class="mb-3">
+                <label class="form-label small fw-medium text-muted">Paystack Secret Key</label>
+                <input type="password" class="form-control bg-light text-dark font-monospace small" value="{{ $paystackSecretKey }}" readonly disabled>
+            </div>
+            @endif
         </div>
     </div>
 </div>
+
+<script>
+function toggleEnvSecretVisibility(inputId, btn) {
+    const input = document.getElementById(inputId);
+    const icon = btn.querySelector('i');
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'bi bi-eye-slash';
+    } else {
+        input.type = 'password';
+        icon.className = 'bi bi-eye';
+    }
+}
+</script>
 @endsection
