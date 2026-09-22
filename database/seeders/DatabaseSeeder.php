@@ -33,8 +33,8 @@ class DatabaseSeeder extends Seeder
             'brand_secondary_color' => '#d4af37',
             'brand_gradient_from' => '#004225',
             'brand_gradient_to' => '#d4af37',
-            'default_currency' => 'USD',
-            'payment_gateway' => 'credo',
+            'default_currency' => 'NGN',
+            'payment_gateway' => 'paystack',
             'payments_enabled' => true,
             'payment_mode' => 'live',
         ]);

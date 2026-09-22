@@ -156,7 +156,7 @@ class ClientController extends Controller
             'status' => 'Application Submitted',
         ], $serviceRequest, $client);
 
-        \App\Services\EmailNotificationService::send('new_application_admin', config('mail.from.address', 'support@kisltd.com.ng'), [
+        \App\Services\EmailNotificationService::send('new_application_admin', config('mail.from.address', 'support@dootor-enterprises.com'), [
             'full_name' => $client->name,
             'service_name' => $service->name,
             'reference_number' => $referenceNumber,
@@ -267,7 +267,7 @@ class ClientController extends Controller
             'status' => 'Application Submitted',
         ], $serviceRequest, $client);
 
-        \App\Services\EmailNotificationService::send('new_application_admin', config('mail.from.address', 'support@kisltd.com.ng'), [
+        \App\Services\EmailNotificationService::send('new_application_admin', config('mail.from.address', 'support@dootor-enterprises.com'), [
             'full_name' => $client->name,
             'service_name' => $service->name,
             'reference_number' => $referenceNumber,

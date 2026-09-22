@@ -26,7 +26,8 @@ Route::post('/contact', [PublicController::class, 'sendContact'])->name('contact
 // Public Vendor Storefront Link
 Route::get('/v/{vendor}', [PublicController::class, 'vendorStorefront'])->name('vendor.storefront');
 
-// Credo Payment Callback Route
+// Payment Callback Routes
+Route::get('/payment/paystack/callback', [PaymentController::class, 'paystackCallback'])->name('payment.paystack.callback');
 Route::get('/payment/credo/callback', [PaymentController::class, 'callback'])->name('payment.credo.callback');
 
 // Media / Storage File Fallback Route (for servers without symlink)
@@ -80,7 +81,9 @@ Route::post('/logout', [AuthController::class, 'logoutWeb'])->name('logout')->mi
 // Protected Monolith Dashboard Sections
 Route::middleware('auth')->group(function () {
 
-    // Payment Checkout Route
+    // Payment Checkout Routes
+    Route::post('/payment/checkout/{serviceRequest}', [PaymentController::class, 'initiatePayment'])->name('payment.checkout');
+    Route::post('/payment/paystack/checkout/{serviceRequest}', [PaymentController::class, 'initiatePayment'])->name('payment.paystack.checkout');
     Route::post('/payment/credo/checkout/{serviceRequest}', [PaymentController::class, 'initiatePayment'])->name('payment.credo.checkout');
 
     // In-App Support Routes

@@ -268,31 +268,38 @@
             </div>
         </div>
 
-        <!-- Credo Payment Checkout Card (Shown if unpaid or has balance) -->
+        <!-- Payment Checkout Card (Shown if unpaid or has balance) -->
         @if($request->payment_status !== 'Paid' || $request->outstanding_balance > 0)
-            <div class="card border-0 shadow-sm p-4 rounded-4 text-white" style="background: linear-gradient(135deg, #004225, #006637);">
-                <h5 class="fw-bold text-white mb-2"><i class="bi bi-credit-card me-2"></i> Credo Checkout</h5>
-                <p class="small text-white-50 mb-3">Pay securely online using credit/debit card or bank transfer via Credo Gateway.</p>
+            @php
+                $activeGw = strtolower($settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paystack'));
+                $gwLabel = $activeGw === 'credo' ? 'Credo' : 'Paystack';
+                $currencySymbol = ($settings->default_currency ?? config('services.payment.currency', 'NGN')) === 'NGN' ? '₦' : '$';
+                $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'NGN');
+            @endphp
+            <div class="card border-0 shadow-sm p-4 rounded-4 text-white mb-4" style="background: linear-gradient(135deg, #004225, #006637);">
+                <h5 class="fw-bold text-white mb-2"><i class="bi bi-credit-card me-2"></i> {{ $gwLabel }} Checkout</h5>
+                <p class="small text-white-50 mb-3">Pay securely online using credit/debit card or bank transfer via {{ $gwLabel }} Gateway.</p>
 
                 <div class="d-flex justify-content-between align-items-center bg-white bg-opacity-10 p-3 rounded-3 mb-4">
                     <span class="small text-white-50">Amount Due:</span>
-                    <span class="fw-bold fs-4 text-white">${{ number_format($request->outstanding_balance > 0 ? $request->outstanding_balance : $request->price, 2) }}</span>
+                    <span class="fw-bold fs-4 text-white">{{ $currencyCode }} {{ number_format($request->outstanding_balance > 0 ? $request->outstanding_balance : $request->price, 2) }}</span>
                 </div>
 
-                <form action="{{ route('payment.credo.checkout', $request->id) }}" method="POST" id="credoPayForm" onsubmit="return handleCredoPaySubmit(event, this)">
+                <form action="{{ route('payment.checkout', $request->id) }}" method="POST" id="payForm" onsubmit="return handlePaySubmit(event, this)">
                     @csrf
                     <input type="hidden" name="amount" value="{{ $request->outstanding_balance > 0 ? $request->outstanding_balance : $request->price }}">
-                    <button type="submit" id="credoPayBtn" onclick="triggerCredoSpinner(this)" class="btn btn-light w-100 py-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="color: #004225; transition: all 0.25s ease;">
+                    <input type="hidden" name="gateway" value="{{ $activeGw }}">
+                    <button type="submit" id="payBtn" onclick="triggerPaySpinner(this)" class="btn btn-light w-100 py-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="color: #004225; transition: all 0.25s ease;">
                         <i class="bi bi-lock-fill me-1"></i>
-                        <span>Pay Now with Credo</span>
+                        <span>Pay Now with {{ $gwLabel }}</span>
                     </button>
                 </form>
             </div>
 
             <script>
-                function resetCredoButton() {
-                    const btn = document.getElementById('credoPayBtn');
-                    const form = document.getElementById('credoPayForm');
+                function resetPayButton() {
+                    const btn = document.getElementById('payBtn');
+                    const form = document.getElementById('payForm');
                     if (form) {
                         form.dataset.submitting = 'false';
                     }
@@ -303,12 +310,12 @@
                         btn.classList.remove('shadow-lg');
                         btn.innerHTML = `
                             <i class="bi bi-lock-fill me-1"></i>
-                            <span>Pay Now with Credo</span>
+                            <span>Pay Now with {{ $gwLabel }}</span>
                         `;
                     }
                 }
 
-                function triggerCredoSpinner(btn) {
+                function triggerPaySpinner(btn) {
                     if (!btn || btn.dataset.spinning === 'true') return;
                     btn.dataset.spinning = 'true';
                     btn.style.pointerEvents = 'none';
@@ -319,12 +326,12 @@
                             <span class="spinner-border spinner-border-sm me-1" role="status" style="width: 1.25rem; height: 1.25rem; border-width: 2.5px; color: #004225 !important;"></span>
                             <span class="spinner-grow spinner-grow-sm me-1" role="status" style="width: 0.75rem; height: 0.75rem; animation-delay: 0.15s; color: #004225 !important;"></span>
                             <span class="spinner-grow spinner-grow-sm me-1" role="status" style="width: 0.5rem; height: 0.5rem; animation-delay: 0.3s; color: #004225 !important;"></span>
-                            <span class="fw-bold fs-6 ms-1" style="color: #004225;">Processing...</span>
+                            <span class="fw-bold fs-6 ms-1" style="color: #004225;">Connecting to {{ $gwLabel }}...</span>
                         </div>
                     `;
                 }
 
-                function handleCredoPaySubmit(event, form) {
+                function handlePaySubmit(event, form) {
                     if (form.dataset.submitting === 'true') {
                         event.preventDefault();
                         return false;
@@ -333,20 +340,19 @@
                     event.preventDefault();
                     form.dataset.submitting = 'true';
 
-                    const btn = document.getElementById('credoPayBtn');
-                    triggerCredoSpinner(btn);
+                    const btn = document.getElementById('payBtn');
+                    triggerPaySpinner(btn);
 
                     setTimeout(function() {
                         form.submit();
-                    }, 1800);
+                    }, 1200);
                 }
 
-                // Reset button if page is restored from browser back/forward cache (bfcache)
                 window.addEventListener('pageshow', function() {
-                    resetCredoButton();
+                    resetPayButton();
                 });
                 document.addEventListener('DOMContentLoaded', function() {
-                    resetCredoButton();
+                    resetPayButton();
                 });
             </script>
         @endif

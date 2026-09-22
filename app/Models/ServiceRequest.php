@@ -54,15 +54,7 @@ class ServiceRequest extends Model
 
         static::creating(function ($request) {
             if (empty($request->reference_number)) {
-                $serviceCode = 'SRV';
-                if ($request->service_id) {
-                    $svc = Service::find($request->service_id);
-                    if ($svc && !empty($svc->name)) {
-                        $words = explode(' ', strtoupper($svc->name));
-                        $serviceCode = count($words) > 1 ? substr($words[0], 0, 2) . substr($words[1], 0, 2) : substr($words[0], 0, 4);
-                    }
-                }
-                $request->reference_number = 'KIS-' . $serviceCode . '-' . date('Y') . '-' . str_pad((string) mt_rand(1, 999999), 6, '0', STR_PAD_LEFT);
+                $request->reference_number = \App\Services\ReferenceNumberGenerator::generate($request->service_id);
             }
         });
 

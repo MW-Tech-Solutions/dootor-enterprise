@@ -44,13 +44,16 @@ return [
     ],
 
     'paystack' => [
+        'base_url' => env('PAYSTACK_BASE_URL', 'https://api.paystack.co'),
         'public_key' => env('PAYSTACK_PUBLIC_KEY', ''),
         'secret_key' => env('PAYSTACK_SECRET_KEY', ''),
+        'mode' => env('PAYSTACK_PAYMENT_MODE', env('PAYMENT_MODE', 'live')),
+        'callback_url' => env('PAYSTACK_CALLBACK_URL') ?: env('PAYSTACK_FRONTEND_CALLBACK_URL'),
     ],
 
     'payment' => [
-        'gateway' => env('PAYMENT_GATEWAY', 'credo'),
-        'currency' => env('PORTAL_BASE_CURRENCY', 'USD'),
+        'gateway' => env('PAYMENT_GATEWAY', 'paystack'),
+        'currency' => env('PORTAL_BASE_CURRENCY', 'NGN'),
     ],
 
 ];

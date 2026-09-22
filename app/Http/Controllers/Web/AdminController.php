@@ -867,32 +867,48 @@ class AdminController extends Controller
             return redirect()->back()->with('error', "No application found matching reference '{$reference}'.");
         }
 
-        $credoService = new \App\Services\CredoService();
         $refToQuery = $serviceRequest->payment_reference ?: $serviceRequest->reference_number;
+        $gateway = strtolower((string) ($serviceRequest->payment_gateway ?: (config('services.payment.gateway') ?: 'paystack')));
 
-        $credoResult = $credoService->verifyTransaction($refToQuery);
+        $isSuccessful = false;
+        $resultMessage = '';
+        $usedGateway = 'Paystack';
 
-        if (!empty($credoResult['is_successful'])) {
+        if ($gateway === 'paystack' || str_starts_with($refToQuery, 'DOOTOR-') || str_starts_with($refToQuery, 'PSTK-')) {
+            $paystackService = new \App\Services\PaystackService();
+            $res = $paystackService->verifyTransaction($refToQuery);
+            $isSuccessful = !empty($res['is_successful']);
+            $resultMessage = $res['message'] ?? '';
+            $usedGateway = 'Paystack';
+        } else {
+            $credoService = new \App\Services\CredoService();
+            $res = $credoService->verifyTransaction($refToQuery);
+            $isSuccessful = !empty($res['is_successful']);
+            $resultMessage = $res['message'] ?? '';
+            $usedGateway = 'Credo';
+        }
+
+        if ($isSuccessful) {
             $serviceRequest->update([
                 'payment_status' => 'Paid',
                 'amount_paid' => $serviceRequest->price,
                 'outstanding_balance' => 0,
                 'status' => 'Payment Confirmed',
-                'payment_gateway' => $serviceRequest->payment_gateway ?: 'Credo',
+                'payment_gateway' => $usedGateway,
             ]);
 
-            $serviceRequest->syncStatusToWorkflowStage('Payment Confirmed', 'Payment verified directly via Credo Re-Query API by Admin.');
+            $serviceRequest->syncStatusToWorkflowStage('Payment Confirmed', "Payment verified directly via {$usedGateway} Re-Query API by Admin.");
 
             \App\Services\AuditLogger::log(
-                'credo_payment_verified',
+                'payment_verified',
                 'ServiceRequest',
                 (string) $serviceRequest->id,
                 $serviceRequest->reference_number,
                 ['old_status' => $serviceRequest->getOriginal('status'), 'old_payment_status' => $serviceRequest->getOriginal('payment_status')],
-                ['payment_status' => 'Paid', 'status' => 'Payment Confirmed']
+                ['payment_status' => 'Paid', 'status' => 'Payment Confirmed', 'payment_gateway' => $usedGateway]
             );
 
-            return redirect()->back()->with('success', "Credo Verification SUCCESSFUL! Payment confirmed for application {$serviceRequest->reference_number}. Database updated to Paid & Payment Confirmed.");
+            return redirect()->back()->with('success', "{$usedGateway} Verification SUCCESSFUL! Payment confirmed for application {$serviceRequest->reference_number}. Database updated to Paid & Payment Confirmed.");
         }
 
         $errMsg = $credoResult['message'] ?? 'Transaction not verified as paid on Credo.';

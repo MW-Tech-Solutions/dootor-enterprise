@@ -251,14 +251,19 @@
                 $total = $service->price + $service->service_fee + $service->processing_fee;
             @endphp
 
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <span class="fw-bold text-dark">Total Amount Due:</span>
-                <span class="fw-bold fs-4" style="color: #004225;">${{ number_format($total, 2) }}</span>
+            @php
+                $activeGw = strtolower($settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paystack'));
+                $gwLabel = $activeGw === 'credo' ? 'Credo' : 'Paystack';
+                $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'NGN');
+            @endphp
+            <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-3" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
+                <span class="fw-medium text-dark">Total Amount Due:</span>
+                <span class="fw-bold fs-4" style="color: #004225;">{{ $currencyCode }} {{ number_format($total, 2) }}</span>
             </div>
 
             <div class="p-3 bg-light rounded-3 small">
-                <span class="fw-semibold text-dark d-block mb-1"><i class="bi bi-shield-check text-success"></i> Credo Secured Checkout</span>
-                <span class="text-secondary small">Your payment is encrypted and safely processed via Credo Central Gateway.</span>
+                <span class="fw-semibold text-dark d-block mb-1"><i class="bi bi-shield-check text-success"></i> {{ $gwLabel }} Secured Checkout</span>
+                <span class="text-secondary small">Your payment is encrypted and safely processed via {{ $gwLabel }} Gateway.</span>
             </div>
         </div>
     </div>

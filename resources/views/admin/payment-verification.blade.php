@@ -41,7 +41,7 @@
             <h5 class="fw-bold text-dark mb-2">
                 <i class="bi bi-cpu text-primary me-2"></i> Direct Credo API Re-query Search
             </h5>
-            <p class="text-muted small mb-3">Enter an Application Reference (e.g. <code>KIS-BVRE-2026-113544</code>) or Credo Payment Reference to check Credo servers directly.</p>
+            <p class="text-muted small mb-3">Enter an Application Reference (e.g. <code>DOOTOR-BVRE-2026-113544</code>) or Payment Reference to check payment servers directly.</p>
             
             <form action="{{ route('admin.payment-verification.query') }}" method="POST" class="row g-3 align-items-center">
                 @csrf
