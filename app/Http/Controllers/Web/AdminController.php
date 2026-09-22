@@ -246,9 +246,17 @@ class AdminController extends Controller
         }
 
         $settings = SystemSetting::firstOrCreate([]);
+
+        $oldCurrency = strtoupper((string) ($settings->default_currency ?: config('services.payment.currency') ?: 'NGN'));
+        $newCurrency = strtoupper((string) ($data['default_currency'] ?? $oldCurrency));
+
+        if (!empty($newCurrency) && $oldCurrency !== $newCurrency) {
+            \App\Helpers\CurrencyConverter::convertPrices($oldCurrency, $newCurrency);
+        }
+
         $settings->update($data);
 
-        return redirect()->back()->with('success', 'System settings updated successfully.');
+        return redirect()->back()->with('success', 'System settings updated successfully. Service prices updated to match new billing currency!');
     }
 
     public function subscriptions(Request $request)
