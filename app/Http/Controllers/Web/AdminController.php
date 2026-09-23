@@ -977,32 +977,26 @@ class AdminController extends Controller
         $paystackMsg = $paystackRes['message'] ?? 'Transaction reference not found on Paystack.';
         $credoMsg = $credoRes['message'] ?? 'Transaction reference not found on Credo.';
 
-        $wasPaidInDb = ($serviceRequest->payment_status === 'Paid' || $serviceRequest->status === 'Payment Confirmed');
+        // Always update database record to Unpaid / Payment Pending because gateway API verification failed
+        $serviceRequest->update([
+            'payment_status' => 'Unpaid',
+            'amount_paid' => 0,
+            'outstanding_balance' => $serviceRequest->price,
+            'status' => 'Payment Pending',
+        ]);
 
-        if ($wasPaidInDb) {
-            // Update database record to Unpaid / Payment Pending because gateway verification failed
-            $serviceRequest->update([
-                'payment_status' => 'Unpaid',
-                'amount_paid' => 0,
-                'outstanding_balance' => $serviceRequest->price,
-                'status' => 'Payment Pending',
-            ]);
+        $serviceRequest->syncStatusToWorkflowStage('Payment Pending', 'Payment status updated to Unpaid after gateway API re-query failed to confirm payment.');
 
-            $serviceRequest->syncStatusToWorkflowStage('Payment Pending', 'Payment status reverted to Unpaid after gateway API re-query failed to confirm payment.');
+        \App\Services\AuditLogger::log(
+            'payment_unconfirmed_updated',
+            'ServiceRequest',
+            (string) $serviceRequest->id,
+            $serviceRequest->reference_number,
+            ['old_status' => $serviceRequest->getOriginal('status'), 'old_payment_status' => $serviceRequest->getOriginal('payment_status')],
+            ['payment_status' => 'Unpaid', 'status' => 'Payment Pending']
+        );
 
-            \App\Services\AuditLogger::log(
-                'payment_unconfirmed_reverted',
-                'ServiceRequest',
-                (string) $serviceRequest->id,
-                $serviceRequest->reference_number,
-                ['old_status' => 'Payment Confirmed', 'old_payment_status' => 'Paid'],
-                ['payment_status' => 'Unpaid', 'status' => 'Payment Pending']
-            );
-
-            return redirect()->back()->with('error', "Gateway API Verification FAILED! Neither Paystack nor Credo confirmed payment for '{$refToQuery}'. Database record has been UPDATED from Paid to Unpaid / Payment Pending. Details: [Paystack: {$paystackMsg}] | [Credo: {$credoMsg}]");
-        }
-
-        return redirect()->back()->with('error', "Gateway API Verification Failed: Payment for '{$refToQuery}' is NOT confirmed on Paystack or Credo. Details: [Paystack: {$paystackMsg}] | [Credo: {$credoMsg}]");
+        return redirect()->back()->with('error', "Gateway API Verification FAILED! Neither Paystack nor Credo confirmed payment for '{$refToQuery}'. Database record has been UPDATED to Unpaid / Payment Pending. Details: [Paystack: {$paystackMsg}] | [Credo: {$credoMsg}]");
     }
 
     /**
