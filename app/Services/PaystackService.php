@@ -139,12 +139,17 @@ class PaystackService
             if ($response->successful()) {
                 $data = $response->json();
                 $isSuccessful = (!empty($data['status']) && isset($data['data']['status']) && strtolower($data['data']['status']) === 'success');
+                $txStatus = strtolower((string) ($data['data']['status'] ?? 'unknown'));
+
+                $msg = $isSuccessful
+                    ? 'Paystack payment verified successfully.'
+                    : "Paystack transaction status is '{$txStatus}'. Payment not confirmed as paid.";
 
                 return [
                     'status' => true,
                     'is_successful' => $isSuccessful,
                     'data' => $data,
-                    'message' => $data['message'] ?? ($isSuccessful ? 'Transaction verified successfully.' : 'Transaction verification failed.'),
+                    'message' => $msg,
                 ];
             }
 
@@ -152,7 +157,7 @@ class PaystackService
             return [
                 'status' => false,
                 'is_successful' => false,
-                'message' => 'Paystack Verification Failed: ' . $msg,
+                'message' => 'Paystack API: ' . ($msg ?: 'Transaction reference not found on Paystack.'),
             ];
         } catch (\Throwable $e) {
             return [

@@ -161,11 +161,16 @@ class CredoService
                         $isSuccessful = (in_array($statusCode, ['00', '200', '0']) && in_array($txStatus, ['successful', 'success', 'paid', '00', '0']))
                             || in_array($txStatus, ['successful', 'success', 'paid']);
 
+                        $statusLabel = !empty($txStatus) ? ucfirst($txStatus) : 'Unconfirmed';
+                        $msg = $isSuccessful 
+                            ? 'Credo payment verified successfully.' 
+                            : "Credo transaction status is '{$statusLabel}'. Payment not confirmed as paid.";
+
                         return [
                             'status' => true,
                             'data' => $data,
                             'is_successful' => $isSuccessful,
-                            'message' => $data['message'] ?? ($isSuccessful ? 'Credo payment verified successfully.' : 'Credo payment status: ' . ($txStatus ?: 'unpaid')),
+                            'message' => $msg,
                         ];
                     }
                 } catch (\Throwable $e) {
