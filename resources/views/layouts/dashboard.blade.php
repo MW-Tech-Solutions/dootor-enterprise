@@ -13,6 +13,13 @@
         transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         font-weight: 500;
         margin-bottom: 3px;
+        white-space: nowrap;
+    }
+
+    .sidebar-link span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .sidebar-link i {
@@ -72,7 +79,7 @@
         if ($role === 'admin') {
             $navItems = [
                 ['href' => route('admin.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard'],
-                ['href' => route('admin.payment-verification'), 'icon' => 'bi-credit-card-2-front', 'label' => 'Credo Payment Verification'],
+                ['href' => route('admin.payment-verification'), 'icon' => 'bi-credit-card-2-front', 'label' => 'Payment Verification'],
                 ['href' => route('admin.work-queue'), 'icon' => 'bi-clock-history', 'label' => 'Staff Work Queue'],
                 ['href' => route('admin.subscriptions'), 'icon' => 'bi-file-earmark-check', 'label' => 'Service Applications & Uploads'],
                 ['href' => route('admin.users'), 'icon' => 'bi-people', 'label' => 'User Management'],
@@ -115,7 +122,7 @@
 @section('body')
 <div class="d-flex h-100 w-100 overflow-hidden" style="position: fixed; inset: 0;">
     <!-- Sidebar Navigation (Desktop) -->
-    <aside class="bg-white border-end d-none d-md-flex flex-column flex-shrink-0 p-3 h-100" style="width: 260px; z-index: 1040; overflow-y: auto;">
+    <aside class="bg-white border-end d-none d-md-flex flex-column flex-shrink-0 p-3 h-100" style="width: 280px; z-index: 1040; overflow-y: auto;">
         <div class="mb-4 px-3">
             <a href="/" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
                 @if($settings && $settings->logo_url)
@@ -234,7 +241,7 @@
 </div>
 
 <!-- Mobile Sidebar Drawer (Offcanvas) -->
-<div class="offcanvas offcanvas-start bg-light border-0" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="width: 250px; z-index: 1060 !important;">
+<div class="offcanvas offcanvas-start bg-light border-0" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="width: 280px; z-index: 1060 !important;">
     <div class="offcanvas-header border-bottom border-light">
         <h5 class="offcanvas-title d-flex align-items-center gap-2 text-dark" id="mobileSidebarLabel">
             @if($settings && $settings->logo_url)

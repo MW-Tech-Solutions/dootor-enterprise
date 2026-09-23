@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Credo Direct Payment Verification - Dootor Enterprises')
+@section('title', 'Payment Verification - Dootor Enterprises')
 
 @section('content')
 <div class="container-fluid p-0">
@@ -8,9 +8,9 @@
     <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between mb-4 gap-3">
         <div>
             <h3 class="fw-bold text-dark mb-1">
-                <i class="bi bi-credit-card-2-front text-success me-2"></i> Credo Payment Verification & Re-query
+                <i class="bi bi-credit-card-2-front text-success me-2"></i> Payment Verification & Re-query
             </h3>
-            <p class="text-muted small mb-0">Query Credo Central API directly to verify client payments and automatically update database records for unconfirmed or delayed transactions.</p>
+            <p class="text-muted small mb-0">Query payment gateway APIs directly to verify client payments and automatically update database records for unconfirmed or delayed transactions.</p>
         </div>
     </div>
 
@@ -35,11 +35,11 @@
         </div>
     @endif
 
-    <!-- Direct Credo API Query Card -->
+    <!-- Direct Gateway API Query Card -->
     <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
         <div class="card-body p-4">
             <h5 class="fw-bold text-dark mb-2">
-                <i class="bi bi-cpu text-primary me-2"></i> Direct Credo API Re-query Search
+                <i class="bi bi-cpu text-primary me-2"></i> Direct Gateway API Re-query Search
             </h5>
             <p class="text-muted small mb-3">Enter an Application Reference (e.g. <code>DOOTOR-BVRE-2026-113544</code>) or Payment Reference to check payment servers directly.</p>
             
@@ -48,12 +48,12 @@
                 <div class="col-md-9">
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-search"></i></span>
-                        <input type="text" name="reference" class="form-control bg-light border-start-0 py-2" placeholder="Paste Reference Number or Credo Payment Reference..." required>
+                        <input type="text" name="reference" class="form-control bg-light border-start-0 py-2" placeholder="Paste Reference Number or Gateway Payment Reference..." required>
                     </div>
                 </div>
                 <div class="col-md-3">
                     <button type="submit" class="btn text-white fw-semibold w-100 py-2" style="background-color: #004225; border-radius: 8px;">
-                        <i class="bi bi-arrow-repeat me-1"></i> Query Credo API Now
+                        <i class="bi bi-arrow-repeat me-1"></i> Query Gateway API Now
                     </button>
                 </div>
             </form>
@@ -91,7 +91,7 @@
                             <th>Gateway / Ref</th>
                             <th>Payment Status</th>
                             <th>Application Status</th>
-                            <th class="text-end">Credo Action</th>
+                            <th class="text-end">Gateway Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -133,8 +133,8 @@
                                     <form action="{{ route('admin.payment-verification.query') }}" method="POST" class="d-inline">
                                         @csrf
                                         <input type="hidden" name="reference" value="{{ $req->reference_number }}">
-                                        <button type="submit" class="btn btn-outline-dark btn-sm rounded-pill px-3" title="Check Credo API directly for this payment">
-                                            <i class="bi bi-arrow-repeat me-1"></i> Re-query Credo
+                                        <button type="submit" class="btn btn-outline-dark btn-sm rounded-pill px-3" title="Check Gateway API directly for this payment">
+                                            <i class="bi bi-arrow-repeat me-1"></i> Re-query Gateway
                                         </button>
                                     </form>
                                 </td>

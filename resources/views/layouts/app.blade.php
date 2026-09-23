@@ -99,6 +99,13 @@
             color: #475569 !important;
             text-decoration: none;
             transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .sidebar-link span {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .sidebar-link:hover {
