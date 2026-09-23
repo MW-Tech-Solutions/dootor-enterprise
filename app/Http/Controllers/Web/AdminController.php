@@ -73,10 +73,15 @@ class AdminController extends Controller
 
     public function users(Request $request)
     {
-        $query = User::query()->with(['kycProfile', 'storefrontSetting'])->latest();
+        $query = User::query()->with(['kycProfile', 'storefrontSetting', 'roles'])->latest();
 
         if ($role = $request->query('role')) {
-            $query->where('role', $role);
+            $query->where(function ($q) use ($role) {
+                $q->where('role', $role)
+                  ->orWhereHas('roles', function ($rQ) use ($role) {
+                      $rQ->where('slug', $role)->orWhere('name', $role)->orWhere('roles.id', $role);
+                  });
+            });
         }
 
         if ($status = $request->query('status')) {
@@ -84,17 +89,23 @@ class AdminController extends Controller
         }
 
         $users = $query->paginate(20)->withQueryString();
+        $roles = \App\Models\Role::where('is_active', true)->orderBy('name', 'asc')->get();
 
         return view('admin.users', [
             'users' => $users,
+            'roles' => $roles,
         ]);
     }
 
     public function updateUser(Request $request, User $user)
     {
+        $allRoleSlugs = \App\Models\Role::pluck('slug')->toArray();
+        $allRoleIds = \App\Models\Role::pluck('id')->toArray();
+        $allowedRoles = array_unique(array_merge(['admin', 'vendor', 'client', 'super_admin', 'manager', 'processing_officer', 'finance_officer'], $allRoleSlugs, array_map('strval', $allRoleIds)));
+
         $data = $request->validate([
             'status' => ['sometimes', Rule::in(['Approved', 'Pending', 'Rejected', 'Disabled'])],
-            'role' => ['sometimes', Rule::in(['admin', 'vendor', 'client', 'super_admin', 'manager', 'processing_officer', 'finance_officer'])],
+            'role' => ['sometimes', Rule::in($allowedRoles)],
             'first_name' => ['sometimes', 'string', 'max:255'],
             'last_name' => ['sometimes', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:50'],
@@ -110,9 +121,32 @@ class AdminController extends Controller
             }
         }
 
+        if (isset($data['role'])) {
+            $selectedVal = $data['role'];
+            $roleModel = null;
+            if (is_numeric($selectedVal)) {
+                $roleModel = \App\Models\Role::find((int) $selectedVal);
+            } else {
+                $roleModel = \App\Models\Role::where('slug', $selectedVal)->orWhere('name', $selectedVal)->first();
+            }
+
+            if ($roleModel) {
+                $user->roles()->sync([$roleModel->id]);
+                if (in_array($roleModel->slug, ['client', 'vendor'])) {
+                    $data['role'] = $roleModel->slug;
+                } else {
+                    $data['role'] = 'admin';
+                }
+            } else {
+                if (in_array($selectedVal, ['client', 'vendor'])) {
+                    $user->roles()->detach();
+                }
+            }
+        }
+
         $user->update($data);
 
-        return redirect()->back()->with('success', 'User updated successfully.');
+        return redirect()->back()->with('success', 'User profile and role updated successfully.');
     }
 
     public function deleteUser(User $user)

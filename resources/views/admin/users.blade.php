@@ -15,9 +15,18 @@
             <label for="filter-role" class="form-label small fw-medium text-secondary">Filter by Role</label>
             <select name="role" id="filter-role" class="form-select rounded-3">
                 <option value="">All Roles</option>
-                <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin</option>
-                <option value="vendor" {{ request('role') === 'vendor' ? 'selected' : '' }}>Vendor</option>
-                <option value="client" {{ request('role') === 'client' ? 'selected' : '' }}>Client</option>
+                <optgroup label="System Base Roles">
+                    <option value="admin" {{ request('role') === 'admin' ? 'selected' : '' }}>Admin (All Staff)</option>
+                    <option value="vendor" {{ request('role') === 'vendor' ? 'selected' : '' }}>Vendor</option>
+                    <option value="client" {{ request('role') === 'client' ? 'selected' : '' }}>Client</option>
+                </optgroup>
+                @if(isset($roles) && $roles->count() > 0)
+                <optgroup label="RBAC Roles (From Roles Page)">
+                    @foreach($roles as $r)
+                        <option value="{{ $r->slug }}" {{ request('role') === $r->slug || request('role') == $r->id ? 'selected' : '' }}>{{ $r->name }}</option>
+                    @endforeach
+                </optgroup>
+                @endif
             </select>
         </div>
         <div class="col-sm-4">
@@ -69,7 +78,14 @@
                             <td>{{ $user->email }}</td>
                             <td>{{ $user->phone ?? 'N/A' }}</td>
                             <td>
-                                <span class="text-uppercase small fw-semibold text-secondary">{{ $user->role }}</span>
+                                <div class="d-flex flex-wrap align-items-center gap-1">
+                                    <span class="badge bg-secondary-subtle text-secondary border rounded-pill px-2.5 py-1 text-uppercase small fw-semibold">{{ $user->role }}</span>
+                                    @foreach($user->roles as $assignedRole)
+                                        <span class="badge bg-success-subtle border border-success-subtle rounded-pill px-2.5 py-1 small fw-semibold" style="color: #004225 !important; background-color: #e6f4ea !important;">
+                                            <i class="bi bi-shield-check me-1"></i>{{ $assignedRole->name }}
+                                        </span>
+                                    @endforeach
+                                </div>
                             </td>
                             <td>
                                 @php
@@ -137,11 +153,27 @@
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="role-{{ $user->id }}" class="form-label small fw-medium">System Role</label>
-                                    <select name="role" id="role-{{ $user->id }}" class="form-select rounded-3">
-                                        <option value="admin" {{ $user->role === 'admin' ? 'selected' : '' }}>Admin</option>
-                                        <option value="client" {{ $user->role === 'client' ? 'selected' : '' }}>Client</option>
+                                    <label for="role-{{ $user->id }}" class="form-label small fw-medium">System &amp; RBAC Assigned Role</label>
+                                    @php
+                                        $userAssignedRoleIds = $user->roles->pluck('id')->toArray();
+                                    @endphp
+                                    <select name="role" id="role-{{ $user->id }}" class="form-select rounded-3 fw-medium">
+                                        <optgroup label="System Base Roles">
+                                            <option value="admin" {{ $user->role === 'admin' && empty($userAssignedRoleIds) ? 'selected' : '' }}>Admin (Default Admin)</option>
+                                            <option value="vendor" {{ $user->role === 'vendor' ? 'selected' : '' }}>Vendor</option>
+                                            <option value="client" {{ $user->role === 'client' ? 'selected' : '' }}>Client</option>
+                                        </optgroup>
+                                        @if(isset($roles) && $roles->count() > 0)
+                                        <optgroup label="RBAC Roles (From Roles Page)">
+                                            @foreach($roles as $r)
+                                                <option value="{{ $r->id }}" {{ in_array($r->id, $userAssignedRoleIds) || ($user->role === $r->slug) ? 'selected' : '' }}>
+                                                    {{ $r->name }} @if($r->description) ({{ Str::limit($r->description, 35) }}) @endif
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                        @endif
                                     </select>
+                                    <small class="text-muted d-block mt-1">Assigning an RBAC role grants all granular action permissions configured on the RBAC Roles Page.</small>
                                 </div>
                                 <div class="mb-3">
                                     <label for="status-{{ $user->id }}" class="form-label small fw-medium">Access Status</label>
