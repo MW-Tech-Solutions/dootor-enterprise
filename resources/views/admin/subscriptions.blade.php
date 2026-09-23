@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Service Applications & Upload Review')
+@section('title', 'Service Applications')
 
 @section('content')
 <div class="mb-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">

@@ -81,7 +81,7 @@
                 ['href' => route('admin.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard'],
                 ['href' => route('admin.payment-verification'), 'icon' => 'bi-credit-card-2-front', 'label' => 'Payment Verification'],
                 ['href' => route('admin.work-queue'), 'icon' => 'bi-clock-history', 'label' => 'Staff Work Queue'],
-                ['href' => route('admin.subscriptions'), 'icon' => 'bi-file-earmark-check', 'label' => 'Service Applications & Uploads'],
+                ['href' => route('admin.subscriptions'), 'icon' => 'bi-file-earmark-check', 'label' => 'Service Applications'],
                 ['href' => route('admin.users'), 'icon' => 'bi-people', 'label' => 'User Management'],
                 ['href' => route('admin.roles'), 'icon' => 'bi-shield-lock', 'label' => 'Roles & RBAC'],
                 ['href' => route('admin.services'), 'icon' => 'bi-box-seam', 'label' => 'Services Catalog'],
