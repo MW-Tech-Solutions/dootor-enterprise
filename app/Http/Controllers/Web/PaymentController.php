@@ -143,22 +143,11 @@ class PaymentController extends Controller
             }
         }
 
-        // Fallback for test mode or missing record
         if ($serviceRequest) {
-            $serviceRequest->update([
-                'payment_status' => 'Paid',
-                'amount_paid' => $serviceRequest->price,
-                'outstanding_balance' => 0,
-                'status' => 'Payment Confirmed',
-                'payment_gateway' => 'Paystack',
-                'payment_reference' => $reference ?: $serviceRequest->payment_reference,
-            ]);
-            $serviceRequest->syncStatusToWorkflowStage('Payment Confirmed', 'Payment processed via Paystack callback.');
-
             if (auth()->check()) {
-                return redirect()->route('client.request.details', $serviceRequest)->with('success', 'Payment status updated!');
+                return redirect()->route('client.request.details', $serviceRequest)->with('error', 'Paystack payment was not confirmed or was cancelled.');
             }
-            return redirect()->route('login')->with('success', 'Payment status updated!');
+            return redirect()->route('login')->with('error', 'Paystack payment was not confirmed or was cancelled.');
         }
 
         if (auth()->check()) {
@@ -212,20 +201,28 @@ class PaymentController extends Controller
         if ($serviceRequest) {
             $refToVerify = $transRef ?: ($reference ?: $serviceRequest->payment_reference);
             
-            $serviceRequest->update([
-                'payment_status' => 'Paid',
-                'amount_paid' => $serviceRequest->price,
-                'outstanding_balance' => 0,
-                'status' => 'Payment Confirmed',
-                'payment_gateway' => 'Credo',
-                'payment_reference' => $refToVerify ?: $serviceRequest->payment_reference,
-            ]);
-            $serviceRequest->syncStatusToWorkflowStage('Payment Confirmed', 'Payment confirmed via Credo Gateway callback.');
+            $verifyResult = $this->credoService->verifyTransaction($refToVerify);
+            if ($verifyResult['status'] && !empty($verifyResult['is_successful'])) {
+                $serviceRequest->update([
+                    'payment_status' => 'Paid',
+                    'amount_paid' => $serviceRequest->price,
+                    'outstanding_balance' => 0,
+                    'status' => 'Payment Confirmed',
+                    'payment_gateway' => 'Credo',
+                    'payment_reference' => $refToVerify ?: $serviceRequest->payment_reference,
+                ]);
+                $serviceRequest->syncStatusToWorkflowStage('Payment Confirmed', 'Payment confirmed via Credo Gateway callback.');
+
+                if (auth()->check()) {
+                    return redirect()->route('client.request.details', $serviceRequest)->with('success', 'Credo payment confirmed successfully!');
+                }
+                return redirect()->route('login')->with('success', 'Credo payment confirmed successfully! Please log in to view details.');
+            }
 
             if (auth()->check()) {
-                return redirect()->route('client.request.details', $serviceRequest)->with('success', 'Payment confirmed successfully!');
+                return redirect()->route('client.request.details', $serviceRequest)->with('error', 'Credo Payment Verification Failed: ' . ($verifyResult['message'] ?? 'Payment not confirmed.'));
             }
-            return redirect()->route('login')->with('success', 'Payment confirmed successfully! Please log in to view details.');
+            return redirect()->route('login')->with('error', 'Credo Payment Verification Failed: ' . ($verifyResult['message'] ?? 'Payment not confirmed.'));
         }
 
         if (auth()->check()) {

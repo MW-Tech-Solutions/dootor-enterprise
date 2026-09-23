@@ -919,24 +919,57 @@ class AdminController extends Controller
         }
 
         $refToQuery = $serviceRequest->payment_reference ?: $serviceRequest->reference_number;
-        $gateway = strtolower((string) ($serviceRequest->payment_gateway ?: (config('services.payment.gateway') ?: 'paystack')));
+        $storedGateway = strtolower((string) ($serviceRequest->payment_gateway ?? ''));
 
         $isSuccessful = false;
         $resultMessage = '';
-        $usedGateway = 'Paystack';
+        $usedGateway = '';
 
-        if ($gateway === 'paystack' || str_starts_with($refToQuery, 'DOOTOR-') || str_starts_with($refToQuery, 'PSTK-')) {
-            $paystackService = new \App\Services\PaystackService();
-            $res = $paystackService->verifyTransaction($refToQuery);
-            $isSuccessful = !empty($res['is_successful']);
-            $resultMessage = $res['message'] ?? '';
-            $usedGateway = 'Paystack';
+        $paystackService = new \App\Services\PaystackService();
+        $credoService = new \App\Services\CredoService();
+
+        // Determine primary gateway to check
+        if ($storedGateway === 'credo' || str_starts_with($refToQuery, 'CREDO-')) {
+            $primaryGateway = 'Credo';
+        } elseif ($storedGateway === 'paystack' || str_starts_with($refToQuery, 'PSTK-')) {
+            $primaryGateway = 'Paystack';
         } else {
-            $credoService = new \App\Services\CredoService();
+            $systemSetting = SystemSetting::first();
+            $defaultGw = strtolower((string) ($systemSetting->payment_gateway ?? config('services.payment.gateway') ?? 'paystack'));
+            $primaryGateway = ($defaultGw === 'credo') ? 'Credo' : 'Paystack';
+        }
+
+        // 1. Try Primary Gateway
+        if ($primaryGateway === 'Credo') {
             $res = $credoService->verifyTransaction($refToQuery);
             $isSuccessful = !empty($res['is_successful']);
             $resultMessage = $res['message'] ?? '';
             $usedGateway = 'Credo';
+
+            // If not successful on Credo, try Paystack fallback
+            if (!$isSuccessful) {
+                $resFallback = $paystackService->verifyTransaction($refToQuery);
+                if (!empty($resFallback['is_successful'])) {
+                    $isSuccessful = true;
+                    $resultMessage = $resFallback['message'] ?? '';
+                    $usedGateway = 'Paystack';
+                }
+            }
+        } else {
+            $res = $paystackService->verifyTransaction($refToQuery);
+            $isSuccessful = !empty($res['is_successful']);
+            $resultMessage = $res['message'] ?? '';
+            $usedGateway = 'Paystack';
+
+            // If not successful on Paystack, try Credo fallback
+            if (!$isSuccessful) {
+                $resFallback = $credoService->verifyTransaction($refToQuery);
+                if (!empty($resFallback['is_successful'])) {
+                    $isSuccessful = true;
+                    $resultMessage = $resFallback['message'] ?? '';
+                    $usedGateway = 'Credo';
+                }
+            }
         }
 
         if ($isSuccessful) {
@@ -962,8 +995,8 @@ class AdminController extends Controller
             return redirect()->back()->with('success', "{$usedGateway} Verification SUCCESSFUL! Payment confirmed for application {$serviceRequest->reference_number}. Database updated to Paid & Payment Confirmed.");
         }
 
-        $errMsg = $credoResult['message'] ?? 'Transaction not verified as paid on Credo.';
-        return redirect()->back()->with('error', "Credo API Result: Payment for '{$refToQuery}' is NOT confirmed on Credo. Status Message: {$errMsg}");
+        $errMsg = $resultMessage ?: "Payment for '{$refToQuery}' is NOT confirmed on payment gateways (Paystack/Credo).";
+        return redirect()->back()->with('error', "Gateway API Verification Failed: {$errMsg}");
     }
 
     /**

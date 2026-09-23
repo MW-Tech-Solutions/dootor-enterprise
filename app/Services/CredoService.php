@@ -156,19 +156,16 @@ class CredoService
                     if ($response->successful()) {
                         $data = $response->json();
                         $statusCode = (string) ($data['status'] ?? $data['statusCode'] ?? $data['data']['status'] ?? '');
-                        $txStatus = strtolower((string) ($data['data']['status'] ?? $data['status'] ?? ''));
+                        $txStatus = strtolower((string) ($data['data']['status'] ?? $data['status'] ?? $data['data']['paymentStatus'] ?? ''));
                         
-                        $isSuccessful = in_array($statusCode, ['00', '200', '0']) 
-                            || $txStatus === 'successful' 
-                            || $txStatus === 'success' 
-                            || $txStatus === 'paid'
-                            || !empty($data['data']['businessAmount']);
+                        $isSuccessful = (in_array($statusCode, ['00', '200', '0']) && in_array($txStatus, ['successful', 'success', 'paid', '00', '0']))
+                            || in_array($txStatus, ['successful', 'success', 'paid']);
 
                         return [
                             'status' => true,
                             'data' => $data,
                             'is_successful' => $isSuccessful,
-                            'message' => $data['message'] ?? 'Transaction details fetched successfully.',
+                            'message' => $data['message'] ?? ($isSuccessful ? 'Credo payment verified successfully.' : 'Credo payment status: ' . ($txStatus ?: 'unpaid')),
                         ];
                     }
                 } catch (\Throwable $e) {
