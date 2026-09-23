@@ -226,10 +226,42 @@
         @endforeach
     </div>
     
-    <!-- Individual Service Pagination Controls -->
-    <div class="d-flex justify-content-center mt-4">
-        {{ $serviceRequests->links() }}
-    </div>
+    <!-- Individual Service Application Pagination Controls -->
+    @if($serviceRequests->hasPages())
+        <div class="card border-0 shadow-sm p-3 rounded-4 bg-white mt-4">
+            <div class="d-flex flex-column flex-sm-row align-items-center justify-content-between gap-3">
+                <div class="small text-secondary fw-medium">
+                    Showing <span class="fw-bold text-dark">{{ $serviceRequests->firstItem() }}</span> to <span class="fw-bold text-dark">{{ $serviceRequests->lastItem() }}</span> of <span class="fw-bold text-dark">{{ $serviceRequests->total() }}</span> applications
+                </div>
+
+                <div class="d-flex align-items-center gap-2">
+                    @if ($serviceRequests->onFirstPage())
+                        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 opacity-50" disabled>
+                            <i class="bi bi-chevron-left me-1"></i> Previous
+                        </button>
+                    @else
+                        <a href="{{ $serviceRequests->previousPageUrl() }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 fw-semibold">
+                            <i class="bi bi-chevron-left me-1"></i> Previous
+                        </a>
+                    @endif
+
+                    <div class="px-2 small font-monospace fw-bold text-dark">
+                        Page {{ $serviceRequests->currentPage() }} / {{ $serviceRequests->lastPage() }}
+                    </div>
+
+                    @if ($serviceRequests->hasMorePages())
+                        <a href="{{ $serviceRequests->nextPageUrl() }}" class="btn text-white btn-sm rounded-pill px-3 fw-semibold" style="background-color: #004225;">
+                            Next <i class="bi bi-chevron-right ms-1"></i>
+                        </a>
+                    @else
+                        <button class="btn btn-outline-secondary btn-sm rounded-pill px-3 opacity-50" disabled>
+                            Next <i class="bi bi-chevron-right ms-1"></i>
+                        </button>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
 @else
     <div class="card border-0 shadow-sm p-5 rounded-4 text-center bg-white">
         <i class="bi bi-inbox display-4 text-muted mb-3"></i>
