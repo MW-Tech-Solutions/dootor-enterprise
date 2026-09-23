@@ -903,6 +903,11 @@ class AdminController extends Controller
      */
     public function queryCredoPayment(Request $request)
     {
+        $user = auth()->user();
+        if (!$user || (!$user->hasPermission('applications.update') && !$user->hasPermission('applications.status.update') && !$user->hasPermission('services.pricing.update'))) {
+            return redirect()->back()->with('error', 'Access Denied: Your assigned role does not have permission to re-query transactions.');
+        }
+
         $data = $request->validate([
             'reference' => ['required', 'string', 'max:255'],
         ]);

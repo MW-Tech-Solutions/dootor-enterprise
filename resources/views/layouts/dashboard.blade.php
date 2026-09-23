@@ -77,25 +77,29 @@
         ];
     } else {
         if ($role === 'admin') {
-            $navItems = [
-                ['href' => route('admin.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard'],
-                ['href' => route('admin.payment-verification'), 'icon' => 'bi-credit-card-2-front', 'label' => 'Payment Verification'],
-                ['href' => route('admin.work-queue'), 'icon' => 'bi-clock-history', 'label' => 'Staff Work Queue'],
-                ['href' => route('admin.subscriptions'), 'icon' => 'bi-file-earmark-check', 'label' => 'Service Applications'],
-                ['href' => route('admin.users'), 'icon' => 'bi-people', 'label' => 'User Management'],
-                ['href' => route('admin.roles'), 'icon' => 'bi-shield-lock', 'label' => 'Roles & RBAC'],
-                ['href' => route('admin.services'), 'icon' => 'bi-box-seam', 'label' => 'Services Catalog'],
-                ['href' => route('admin.service-documents'), 'icon' => 'bi-card-checklist', 'label' => 'Service Checklists'],
-                ['href' => route('admin.document-types'), 'icon' => 'bi-file-earmark-plus', 'label' => 'Document Templates'],
-                ['href' => route('admin.email-templates'), 'icon' => 'bi-envelope-paper', 'label' => 'Email Templates'],
-                ['href' => Route::has('admin.email-broadcast') ? route('admin.email-broadcast') : url('/admin/email-broadcast'), 'icon' => 'bi-send-check', 'label' => 'Send Broadcast Email'],
-                ['href' => route('admin.audit-logs'), 'icon' => 'bi-journal-code', 'label' => 'Audit Logs'],
-                ['href' => route('admin.reports'), 'icon' => 'bi-graph-up', 'label' => 'Reports & Analytics'],
-                ['href' => route('support.index'), 'icon' => 'bi-headset', 'label' => 'Support Desk'],
-                ['href' => route('admin.profile'), 'icon' => 'bi-person-badge', 'label' => 'My Profile'],
-                ['href' => route('admin.settings'), 'icon' => 'bi-sliders', 'label' => 'Settings'],
+            $allNavItems = [
+                ['href' => route('admin.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard', 'permission' => null],
+                ['href' => route('admin.payment-verification'), 'icon' => 'bi-credit-card-2-front', 'label' => 'Payment Verification', 'permission' => 'applications.view'],
+                ['href' => route('admin.work-queue'), 'icon' => 'bi-clock-history', 'label' => 'Staff Work Queue', 'permission' => 'applications.view'],
+                ['href' => route('admin.subscriptions'), 'icon' => 'bi-file-earmark-check', 'label' => 'Service Applications', 'permission' => 'applications.view'],
+                ['href' => route('admin.users'), 'icon' => 'bi-people', 'label' => 'User Management', 'permission' => 'users.view'],
+                ['href' => route('admin.roles'), 'icon' => 'bi-shield-lock', 'label' => 'Roles & RBAC', 'permission' => 'roles.view'],
+                ['href' => route('admin.services'), 'icon' => 'bi-box-seam', 'label' => 'Services Catalog', 'permission' => 'services.view'],
+                ['href' => route('admin.service-documents'), 'icon' => 'bi-card-checklist', 'label' => 'Service Checklists', 'permission' => 'documents.view'],
+                ['href' => route('admin.document-types'), 'icon' => 'bi-file-earmark-plus', 'label' => 'Document Templates', 'permission' => 'documents.view'],
+                ['href' => route('admin.email-templates'), 'icon' => 'bi-envelope-paper', 'label' => 'Email Templates', 'permission' => 'email.view'],
+                ['href' => Route::has('admin.email-broadcast') ? route('admin.email-broadcast') : url('/admin/email-broadcast'), 'icon' => 'bi-send-check', 'label' => 'Send Broadcast Email', 'permission' => 'email.send'],
+                ['href' => route('admin.audit-logs'), 'icon' => 'bi-journal-code', 'label' => 'Audit Logs', 'permission' => 'audit.view'],
+                ['href' => route('admin.reports'), 'icon' => 'bi-graph-up', 'label' => 'Reports & Analytics', 'permission' => 'reports.view'],
+                ['href' => route('support.index'), 'icon' => 'bi-headset', 'label' => 'Support Desk', 'permission' => null],
+                ['href' => route('admin.profile'), 'icon' => 'bi-person-badge', 'label' => 'My Profile', 'permission' => null],
+                ['href' => route('admin.settings'), 'icon' => 'bi-sliders', 'label' => 'Settings', 'permission' => 'settings.view'],
             ];
-            $settingsPath = route('admin.settings');
+
+            $navItems = array_values(array_filter($allNavItems, function ($item) use ($user) {
+                return empty($item['permission']) || $user->hasPermission($item['permission']);
+            }));
+            $settingsPath = $user->hasPermission('settings.view') ? route('admin.settings') : '';
         } elseif ($role === 'vendor') {
             $navItems = [
                 ['href' => route('vendor.dashboard'), 'icon' => 'bi-grid', 'label' => 'Dashboard'],

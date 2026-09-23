@@ -111,24 +111,30 @@ class User extends Authenticatable
 
     public function hasPermission(string $permissionSlug): bool
     {
-        // Global Super Admin access
+        $assignedRoles = $this->roles;
+
+        // If user has specific assigned RBAC roles, strictly enforce them
+        if ($assignedRoles->isNotEmpty()) {
+            foreach ($assignedRoles as $role) {
+                if (in_array($role->slug, ['super-admin', 'administrator'])) {
+                    return true;
+                }
+                if ($role->permissions()->where('slug', $permissionSlug)->exists()) {
+                    return true;
+                }
+            }
+
+            // Check direct permission overrides
+            if ($this->directPermissions()->where('slug', $permissionSlug)->exists()) {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Fallback for unassigned super admins
         if ($this->role === 'admin') {
             return true;
-        }
-
-        // Check if user has direct permission override
-        if ($this->directPermissions()->where('slug', $permissionSlug)->exists()) {
-            return true;
-        }
-
-        // Check if user has permission through any assigned role
-        foreach ($this->roles as $role) {
-            if ($role->slug === 'super-admin') {
-                return true;
-            }
-            if ($role->permissions()->where('slug', $permissionSlug)->exists()) {
-                return true;
-            }
         }
 
         return false;
@@ -136,7 +142,7 @@ class User extends Authenticatable
 
     public function isAdmin(): bool
     {
-        return $this->role === 'admin' || $this->roles()->where('slug', 'super-admin')->exists();
+        return $this->role === 'admin' || $this->roles()->whereIn('slug', ['super-admin', 'administrator'])->exists();
     }
 
     public function isVendor(): bool

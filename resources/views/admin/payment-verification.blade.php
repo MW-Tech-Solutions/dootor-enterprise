@@ -35,6 +35,11 @@
         </div>
     @endif
 
+@php
+    $canRequery = auth()->user()->hasPermission('applications.update') || auth()->user()->hasPermission('applications.status.update') || auth()->user()->hasPermission('services.pricing.update');
+@endphp
+
+    @if($canRequery)
     <!-- Direct Gateway API Query Card -->
     <div class="card border-0 shadow-sm rounded-4 mb-4 bg-white">
         <div class="card-body p-4">
@@ -59,6 +64,7 @@
             </form>
         </div>
     </div>
+    @endif
 
     <!-- Filter & Table Card -->
     <div class="card border-0 shadow-sm rounded-4 bg-white">
@@ -130,13 +136,17 @@
                                     <span class="badge bg-dark text-white px-2 py-1 rounded-pill small">{{ $req->status }}</span>
                                 </td>
                                 <td class="text-end">
-                                    <form action="{{ route('admin.payment-verification.query') }}" method="POST" class="d-inline">
-                                        @csrf
-                                        <input type="hidden" name="reference" value="{{ $req->reference_number }}">
-                                        <button type="submit" class="btn btn-outline-dark btn-sm rounded-pill px-3" title="Check Gateway API directly for this payment">
-                                            <i class="bi bi-arrow-repeat me-1"></i> Re-query Gateway
-                                        </button>
-                                    </form>
+                                    @if($canRequery)
+                                        <form action="{{ route('admin.payment-verification.query') }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="reference" value="{{ $req->reference_number }}">
+                                            <button type="submit" class="btn btn-outline-dark btn-sm rounded-pill px-3" title="Check Gateway API directly for this payment">
+                                                <i class="bi bi-arrow-repeat me-1"></i> Re-query Gateway
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="badge bg-light text-secondary border px-3 py-1 rounded-pill"><i class="bi bi-eye me-1"></i> Read Only</span>
+                                    @endif
                                 </td>
                             </tr>
                         @empty
