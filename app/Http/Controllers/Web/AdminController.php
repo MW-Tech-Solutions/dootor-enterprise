@@ -296,28 +296,37 @@ class AdminController extends Controller
     public function subscriptions(Request $request)
     {
         $search = $request->query('search');
-        $query = User::where('role', 'client')->with(['clientRequests.service', 'clientRequests.requestDocuments', 'clientRequests.assignedStaff'])->latest();
+        $perPage = (int) $request->query('per_page', 1);
+        if (!in_array($perPage, [1, 2, 5, 10, 20, 50])) {
+            $perPage = 1;
+        }
+
+        $query = ServiceRequest::query()
+            ->with(['client', 'service', 'requestDocuments', 'assignedStaff', 'currentStage', 'stageHistories'])
+            ->latest();
 
         if ($search) {
             $query->where(function ($q) use ($search) {
-                $q->where('first_name', 'like', "%{$search}%")
-                  ->orWhere('last_name', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%")
-                  ->orWhereHas('clientRequests', function ($qr) use ($search) {
-                      $qr->where('id', $search)
-                         ->orWhere('reference_number', 'like', "%{$search}%")
-                         ->orWhere('payment_reference', 'like', "%{$search}%")
-                         ->orWhere('service_name', 'like', "%{$search}%");
+                $q->where('id', $search)
+                  ->orWhere('reference_number', 'like', "%{$search}%")
+                  ->orWhere('payment_reference', 'like', "%{$search}%")
+                  ->orWhere('service_name', 'like', "%{$search}%")
+                  ->orWhereHas('client', function ($qc) use ($search) {
+                      $qc->where('first_name', 'like', "%{$search}%")
+                         ->orWhere('last_name', 'like', "%{$search}%")
+                         ->orWhere('email', 'like', "%{$search}%")
+                         ->orWhere('phone', 'like', "%{$search}%");
                   });
             });
         }
 
-        $users = $query->paginate(20)->withQueryString();
+        $serviceRequests = $query->paginate($perPage)->withQueryString();
         $staffMembers = User::whereIn('role', ['admin', 'manager', 'processing_officer', 'super_admin'])->get();
 
         return view('admin.subscriptions', [
-            'users' => $users,
+            'serviceRequests' => $serviceRequests,
             'search' => $search,
+            'perPage' => $perPage,
             'staffMembers' => $staffMembers,
         ]);
     }
