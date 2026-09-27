@@ -94,146 +94,156 @@
 <!-- High Contrast Premium Stats Row -->
 <div class="row g-4 mb-4">
     <!-- Card 1: Total Registered Clients -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-gradient">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <span class="small fw-bold text-white text-uppercase tracking-wider" style="font-size: 11px; opacity: 0.95;">Total Clients</span>
-                <div class="rounded-circle p-2 bg-white shadow-sm d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
-                    <i class="bi bi-people-fill fs-5" style="color: #004225;"></i>
+    @if(auth()->user()->hasPermission('users.view'))
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-gradient">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="small fw-bold text-white text-uppercase tracking-wider" style="font-size: 11px; opacity: 0.95;">Total Clients</span>
+                    <div class="rounded-circle p-2 bg-white shadow-sm d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <i class="bi bi-people-fill fs-5" style="color: #004225;"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="display-6 fw-bold text-white">{{ number_format($total_users) }}</span>
+                    <span class="badge bg-white fw-bold rounded-pill px-3 py-1.5 shadow-sm" style="color: #004225 !important; font-size: 11px;">Active Base</span>
                 </div>
             </div>
-            <div class="d-flex align-items-center justify-content-between">
-                <span class="display-6 fw-bold text-white">{{ number_format($total_users) }}</span>
-                <span class="badge bg-white fw-bold rounded-pill px-3 py-1.5 shadow-sm" style="color: #004225 !important; font-size: 11px;">Active Base</span>
-            </div>
         </div>
-    </div>
+    @endif
 
     <!-- Card 2: Active Services Catalog -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-white">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <span class="small fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 11px;">Active Services</span>
-                <div class="rounded-circle p-2 icon-box-emerald d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
-                    <i class="bi bi-gear-wide-connected fs-5"></i>
+    @if(auth()->user()->hasPermission('services.view'))
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-white">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="small fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 11px;">Active Services</span>
+                    <div class="rounded-circle p-2 icon-box-emerald d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <i class="bi bi-gear-wide-connected fs-5"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="display-6 fw-bold text-dark">{{ number_format($active_services) }}</span>
+                    <span class="badge bg-success bg-opacity-10 text-success fw-bold rounded-pill px-3 py-1.5" style="font-size: 11px;"><i class="bi bi-check-circle-fill me-1"></i> Live</span>
                 </div>
             </div>
-            <div class="d-flex align-items-center justify-content-between">
-                <span class="display-6 fw-bold text-dark">{{ number_format($active_services) }}</span>
-                <span class="badge bg-success bg-opacity-10 text-success fw-bold rounded-pill px-3 py-1.5" style="font-size: 11px;"><i class="bi bi-check-circle-fill me-1"></i> Live</span>
-            </div>
         </div>
-    </div>
+    @endif
 
     <!-- Card 3: Pending Applications -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-white">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <span class="small fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 11px;">Pending Processing</span>
-                <div class="rounded-circle p-2 icon-box-amber d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
-                    <i class="bi bi-hourglass-split fs-5"></i>
+    @if(auth()->user()->hasPermission('applications.view'))
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-white">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="small fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 11px;">Pending Processing</span>
+                    <div class="rounded-circle p-2 icon-box-amber d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <i class="bi bi-hourglass-split fs-5"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="display-6 fw-bold text-dark">{{ number_format($pending_requests) }}</span>
+                    <span class="badge bg-warning bg-opacity-10 text-warning fw-bold rounded-pill px-3 py-1.5" style="font-size: 11px;"><i class="bi bi-clock-history me-1"></i> Action Req.</span>
                 </div>
             </div>
-            <div class="d-flex align-items-center justify-content-between">
-                <span class="display-6 fw-bold text-dark">{{ number_format($pending_requests) }}</span>
-                <span class="badge bg-warning bg-opacity-10 text-warning fw-bold rounded-pill px-3 py-1.5" style="font-size: 11px;"><i class="bi bi-clock-history me-1"></i> Action Req.</span>
-            </div>
         </div>
-    </div>
 
-    <!-- Card 4: Total Application Orders -->
-    <div class="col-md-3">
-        <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-white">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <span class="small fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 11px;">Total Applications</span>
-                <div class="rounded-circle p-2 icon-box-blue d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
-                    <i class="bi bi-journal-check fs-5"></i>
+        <!-- Card 4: Total Application Orders -->
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm p-4 rounded-4 stat-card-white">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <span class="small fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 11px;">Total Applications</span>
+                    <div class="rounded-circle p-2 icon-box-blue d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                        <i class="bi bi-journal-check fs-5"></i>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center justify-content-between">
+                    <span class="display-6 fw-bold text-dark">{{ number_format($total_requests) }}</span>
+                    <span class="badge bg-primary bg-opacity-10 text-primary fw-bold rounded-pill px-3 py-1.5" style="font-size: 11px;">Volume</span>
                 </div>
             </div>
-            <div class="d-flex align-items-center justify-content-between">
-                <span class="display-6 fw-bold text-dark">{{ number_format($total_requests) }}</span>
-                <span class="badge bg-primary bg-opacity-10 text-primary fw-bold rounded-pill px-3 py-1.5" style="font-size: 11px;">Volume</span>
-            </div>
         </div>
-    </div>
+    @endif
 </div>
 
 <div class="row g-4 mb-4">
     <!-- Recent Service Requests -->
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="h5 fw-bold text-dark mb-0">Recent Applications</h2>
-                <a href="{{ route('admin.subscriptions') }}" class="btn text-white btn-sm rounded-pill px-3 fw-semibold" style="background-color: #004225;">Manage Applications</a>
-            </div>
+    @if(auth()->user()->hasPermission('applications.view'))
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="h5 fw-bold text-dark mb-0">Recent Applications</h2>
+                    <a href="{{ route('admin.subscriptions') }}" class="btn text-white btn-sm rounded-pill px-3 fw-semibold" style="background-color: #004225;">Manage Applications</a>
+                </div>
 
-            @if(count($recent_requests) > 0)
-                <div class="table-responsive">
-                    <table class="table align-middle">
-                        <thead>
-                            <tr class="text-secondary small">
-                                <th>Client Name</th>
-                                <th>Service Requested</th>
-                                <th>Reference</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach($recent_requests as $request)
-                                <tr>
-                                    <td>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 11px; background-color: #004225;">
-                                                {{ strtoupper(substr($request->client->first_name ?? 'C', 0, 1)) }}
-                                            </div>
-                                            <div>
-                                                <span class="fw-semibold text-dark d-block" style="font-size: 13px;">{{ $request->client_name }}</span>
-                                                <span class="text-muted small" style="font-size: 11px;">{{ $request->client_email }}</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="small fw-semibold text-dark">{{ $request->service_name }}</td>
-                                    <td>
-                                        <span class="font-monospace small fw-bold text-primary">{{ $request->reference_number ?? ('DE-' . $request->id) }}</span>
-                                    </td>
-                                    <td>
-                                        @php
-                                            $statusClass = match($request->status) {
-                                                'Completed' => 'bg-success text-white',
-                                                'Processing' => 'bg-info text-dark',
-                                                'Cancelled' => 'bg-danger text-white',
-                                                default => 'bg-warning text-dark'
-                                            };
-                                        @endphp
-                                        <span class="badge {{ $statusClass }} rounded-pill px-2.5 py-1" style="font-size: 10px;">{{ $request->status }}</span>
-                                    </td>
+                @if(count($recent_requests) > 0)
+                    <div class="table-responsive">
+                        <table class="table align-middle">
+                            <thead>
+                                <tr class="text-secondary small">
+                                    <th>Client Name</th>
+                                    <th>Service Requested</th>
+                                    <th>Reference</th>
+                                    <th>Status</th>
                                 </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            @else
-                <div class="text-center py-5 my-auto">
-                    <i class="bi bi-journal-x fs-1 text-muted"></i>
-                    <p class="text-secondary mt-2 small">No service requests yet.</p>
-                </div>
-            @endif
+                            </thead>
+                            <tbody>
+                                @foreach($recent_requests as $request)
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 11px; background-color: #004225;">
+                                                    {{ strtoupper(substr($request->client->first_name ?? 'C', 0, 1)) }}
+                                                </div>
+                                                <div>
+                                                    <span class="fw-semibold text-dark d-block" style="font-size: 13px;">{{ $request->client_name }}</span>
+                                                    <span class="text-muted small" style="font-size: 11px;">{{ $request->client_email }}</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="small fw-semibold text-dark">{{ $request->service_name }}</td>
+                                        <td>
+                                            <span class="font-monospace small fw-bold text-primary">{{ $request->reference_number ?? ('DE-' . $request->id) }}</span>
+                                        </td>
+                                        <td>
+                                            @php
+                                                $statusClass = match($request->status) {
+                                                    'Completed' => 'bg-success text-white',
+                                                    'Processing' => 'bg-info text-dark',
+                                                    'Cancelled' => 'bg-danger text-white',
+                                                    default => 'bg-warning text-dark'
+                                                };
+                                            @endphp
+                                            <span class="badge {{ $statusClass }} rounded-pill px-2.5 py-1" style="font-size: 10px;">{{ $request->status }}</span>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <div class="text-center py-5 my-auto">
+                        <i class="bi bi-journal-x fs-1 text-muted"></i>
+                        <p class="text-secondary mt-2 small">No service requests yet.</p>
+                    </div>
+                @endif
+            </div>
         </div>
-    </div>
+    @endif
 
     <!-- Quick Shortcuts -->
-    <div class="col-lg-4">
+    <div class="{{ auth()->user()->hasPermission('applications.view') ? 'col-lg-4' : 'col-lg-12' }}">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white h-100">
             <h2 class="h5 fw-bold text-dark mb-4">Quick Actions</h2>
             
             <div class="d-grid gap-2 mb-2">
-                <a href="{{ route('admin.subscriptions') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-semibold d-block shortcut-title small">Client Subscriptions</span>
-                        <span class="shortcut-desc extra-small">Search clients and manage processing stages</span>
-                    </div>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
+                @if(auth()->user()->hasPermission('applications.view'))
+                    <a href="{{ route('admin.subscriptions') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">Client Subscriptions</span>
+                            <span class="shortcut-desc extra-small">Search clients and manage processing stages</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
 
                 <a href="{{ route('support.index') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
                     <div>
@@ -243,21 +253,25 @@
                     <i class="bi bi-chevron-right"></i>
                 </a>
 
-                <a href="{{ route('admin.reports') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-semibold d-block shortcut-title small">Reports & Analytics</span>
-                        <span class="shortcut-desc extra-small">Export revenue CSV and review metrics</span>
-                    </div>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
+                @if(auth()->user()->hasPermission('reports.view'))
+                    <a href="{{ route('admin.reports') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">Reports & Analytics</span>
+                            <span class="shortcut-desc extra-small">Export revenue CSV and review metrics</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
 
-                <a href="{{ route('admin.settings') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="fw-semibold d-block shortcut-title small">White-Label Branding</span>
-                        <span class="shortcut-desc extra-small">Upload logo, themes, and Credo keys</span>
-                    </div>
-                    <i class="bi bi-chevron-right"></i>
-                </a>
+                @if(auth()->user()->hasPermission('settings.view'))
+                    <a href="{{ route('admin.settings') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">White-Label Branding</span>
+                            <span class="shortcut-desc extra-small">Upload logo, themes, and Credo keys</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
             </div>
         </div>
     </div>

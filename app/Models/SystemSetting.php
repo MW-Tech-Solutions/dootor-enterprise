@@ -44,6 +44,8 @@ class SystemSetting extends Model
         'template_client_registration',
         'template_payment_confirmation',
         'template_service_update',
+        'terms_conditions',
+        'refund_policy',
     ];
 
     protected function casts(): array

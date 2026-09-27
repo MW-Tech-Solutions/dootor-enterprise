@@ -72,7 +72,14 @@
                                             {{ strtoupper(substr($user->first_name, 0, 1)) }}
                                         </div>
                                     @endif
-                                    <span class="fw-semibold text-dark">{{ $user->first_name }} {{ $user->last_name }}</span>
+                                    <div>
+                                        <span class="fw-semibold text-dark d-block">{{ $user->first_name }} {{ $user->last_name }}</span>
+                                        @if($user->staff_file_number)
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle font-monospace" style="font-size: 10px; color: #004225 !important; background-color: #e6f4ea !important;">
+                                                <i class="bi bi-person-badge me-1"></i>{{ $user->staff_file_number }}
+                                            </span>
+                                        @endif
+                                    </div>
                                 </div>
                             </td>
                             <td>{{ $user->email }}</td>
@@ -102,6 +109,11 @@
                             <td class="small text-secondary">{{ $user->created_at->format('M d, Y') }}</td>
                             <td>
                                 <div class="d-flex gap-1">
+                                    @if($user->role !== 'client')
+                                        <button class="btn btn-outline-success btn-sm rounded-pill px-2.5" type="button" data-bs-toggle="modal" data-bs-target="#staffPerfModal-{{ $user->id }}" style="font-size: 11px; color: #004225; border-color: #004225;">
+                                            <i class="bi bi-graph-up me-1"></i> History
+                                        </button>
+                                    @endif
                                     <!-- Modify Button Trigger -->
                                     <button class="btn btn-outline-dark btn-sm rounded-pill px-3" type="button" data-bs-toggle="modal" data-bs-target="#editUserModal-{{ $user->id }}">Modify</button>
                                     
@@ -118,6 +130,86 @@
                 </tbody>
             </table>
         </div>
+
+        <!-- Staff Performance Modals -->
+        @foreach($users as $user)
+            @if($user->role !== 'client')
+                <div class="modal fade" id="staffPerfModal-{{ $user->id }}" tabindex="-1" aria-labelledby="staffPerfModalLabel-{{ $user->id }}" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content border-0 shadow-lg rounded-4">
+                            <div class="modal-header text-white py-3 px-4 border-bottom" style="background-color: #004225;">
+                                <div>
+                                    <h5 class="modal-title fw-bold text-white fs-6" id="staffPerfModalLabel-{{ $user->id }}">
+                                        <i class="bi bi-person-badge-fill me-2"></i> Staff Performance &amp; Work History
+                                    </h5>
+                                    <span class="badge bg-white bg-opacity-20 text-white font-monospace small">
+                                        Staff File #: {{ $user->staff_file_number ?? 'DE/STF/2026/000001' }}
+                                    </span>
+                                </div>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body p-4">
+                                <div class="d-flex align-items-center gap-3 mb-4 p-3 bg-light rounded-3 border">
+                                    <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold fs-4" style="width: 48px; height: 48px; background-color: #004225;">
+                                        {{ strtoupper(substr($user->first_name, 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold text-dark mb-0 fs-5">{{ $user->name }}</h6>
+                                        <span class="text-secondary small">{{ $user->email }} | {{ ucfirst($user->role) }}</span>
+                                    </div>
+                                </div>
+
+                                <div class="row g-3 mb-4">
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded-3 bg-white text-center">
+                                            <span class="text-muted small fw-medium d-block mb-1">Assigned Applications</span>
+                                            <h4 class="fw-bold text-dark mb-0">{{ $user->assigned_count ?? 0 }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded-3 bg-white text-center">
+                                            <span class="text-success small fw-medium d-block mb-1">Completed Applications</span>
+                                            <h4 class="fw-bold text-success mb-0" style="color: #004225 !important;">{{ $user->completed_count ?? 0 }}</h4>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="p-3 border rounded-3 bg-white text-center">
+                                            <span class="text-warning small fw-medium d-block mb-1">Pending Processing</span>
+                                            <h4 class="fw-bold text-warning mb-0">{{ $user->pending_count ?? 0 }}</h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h6 class="fw-bold text-dark mb-3"><i class="bi bi-clock-history me-1"></i> Recent Staff Activity Audit Logs</h6>
+                                @if(isset($user->recent_activity) && $user->recent_activity->count() > 0)
+                                    <div class="list-group list-group-flush border rounded-3">
+                                        @foreach($user->recent_activity as $act)
+                                            <div class="list-group-item p-3">
+                                                <div class="d-flex justify-content-between align-items-center mb-1">
+                                                    <span class="fw-bold text-dark small">{{ ucwords(str_replace('_', ' ', $act->action)) }}</span>
+                                                    <span class="text-muted font-monospace" style="font-size: 11px;">{{ $act->created_at->format('M d, Y H:i:s') }}</span>
+                                                </div>
+                                                <div class="small text-secondary">
+                                                    Target: {{ $act->target_type }} #{{ $act->target_id }} @if($act->reference_number) (Ref: {{ $act->reference_number }}) @endif
+                                                </div>
+                                                <div class="small text-muted font-monospace" style="font-size: 10px;">
+                                                    IP: {{ $act->ip_address }} | Staff File #: {{ $user->staff_file_number }}
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="p-3 bg-light text-center text-muted small rounded-3">No activity logs recorded for this staff account yet.</div>
+                                @endif
+                            </div>
+                            <div class="modal-footer border-top bg-light">
+                                <button type="button" class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endif
+        @endforeach
 
         <!-- Edit User Modals (Placed outside table container to prevent stacking context bugs) -->
         @foreach($users as $user)

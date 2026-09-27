@@ -1,6 +1,8 @@
 /**
- * African Dynamic Location Loader
- * Strictly dynamic fetching of African Countries and their real Administrative Divisions from CountriesNow API
+ * Global Dynamic Location Loader for DOOTOR ENTERPRISES
+ * Handles dynamic fetching of States, Provinces, Regions & Counties
+ * Default Country Applying From: Canada
+ * Default Country Requested Service: Nigeria
  */
 
 (function () {
@@ -12,12 +14,16 @@
             divisions: {}
         },
 
-        // Fallback division terms
+        // Division Terms Mapping
         terms: {
+            'Canada': 'Province / Territory',
             'Nigeria': 'State',
-            'Kenya': 'County',
-            'South Africa': 'Province',
+            'United States': 'State',
+            'United Kingdom': 'County / Region',
+            'United Arab Emirates': 'Emirate',
             'Ghana': 'Region',
+            'South Africa': 'Province',
+            'Kenya': 'County',
             'Ethiopia': 'Region',
             'Tanzania': 'Region',
             'Uganda': 'District',
@@ -27,9 +33,37 @@
             'Algeria': 'Province / Wilaya',
             'Egypt': 'Governorate',
             'Benin': 'Department',
-            'Botswana': 'District',
             'Zambia': 'Province',
             'Zimbabwe': 'Province'
+        },
+
+        // Embedded Fallback Division Data
+        fallbackDivisions: {
+            'Canada': [
+                'Alberta', 'British Columbia', 'Manitoba', 'New Brunswick', 
+                'Newfoundland and Labrador', 'Nova Scotia', 'Ontario', 
+                'Prince Edward Island', 'Quebec', 'Saskatchewan', 
+                'Northwest Territories', 'Nunavut', 'Yukon'
+            ],
+            'Nigeria': [
+                'Abia', 'Adamawa', 'Akwa Ibom', 'Anambra', 'Bauchi', 'Bayelsa', 'Benue', 'Borno', 
+                'Cross River', 'Delta', 'Ebonyi', 'Edo', 'Ekiti', 'Enugu', 'FCT - Abuja', 'Gombe', 
+                'Imo', 'Jigawa', 'Kaduna', 'Kano', 'Katsina', 'Kebbi', 'Kogi', 'Kwara', 'Lagos', 
+                'Nasarawa', 'Niger', 'Ogun', 'Ondo', 'Osun', 'Oyo', 'Plateau', 'Rivers', 'Sokoto', 
+                'Taraba', 'Yobe', 'Zamfara'
+            ],
+            'United States': [
+                'California', 'Texas', 'New York', 'Florida', 'Illinois', 'Pennsylvania', 
+                'Ohio', 'Georgia', 'North Carolina', 'Michigan', 'Virginia', 'Washington', 
+                'Maryland', 'Massachusetts', 'New Jersey'
+            ],
+            'United Kingdom': [
+                'Greater London', 'Greater Manchester', 'West Midlands', 'West Yorkshire', 
+                'Scotland', 'Wales', 'Northern Ireland', 'Kent', 'Essex', 'Hampshire'
+            ],
+            'United Arab Emirates': [
+                'Dubai', 'Abu Dhabi', 'Sharjah', 'Ajman', 'Ras Al Khaimah', 'Fujairah', 'Umm Al Quwain'
+            ]
         },
 
         getEndpoint: function (type) {
@@ -59,7 +93,7 @@
 
         init: function (container) {
             const root = container || document;
-            const countrySelects = root.querySelectorAll('.african-country-select, [data-african-country]');
+            const countrySelects = root.querySelectorAll('.african-country-select, [data-african-country], select[name="country_applying_from"], select[name="country"]');
 
             countrySelects.forEach(countrySelect => {
                 if (countrySelect.dataset.africanInit === 'true') return;
@@ -98,18 +132,21 @@
 
         setupCountrySelect: function (countrySelect, divisionSelect, labelEl) {
             const self = this;
-            const initialCountry = countrySelect.dataset.selected || countrySelect.value || 'Nigeria';
+            const isApplyingFrom = countrySelect.name === 'country_applying_from' || countrySelect.id === 'country_applying_from';
+            const defaultCountry = isApplyingFrom ? 'Canada' : (countrySelect.dataset.selected || countrySelect.value || 'Canada');
 
-            this.ensureCountriesLoaded(countrySelect, initialCountry, function () {
+            this.ensureCountriesLoaded(countrySelect, defaultCountry, function () {
                 if (divisionSelect) {
                     const initialDivision = divisionSelect.dataset.selected || divisionSelect.value || '';
-                    self.loadDivisions(countrySelect.value || 'Nigeria', divisionSelect, labelEl, initialDivision);
+                    const currentCountry = countrySelect.value || defaultCountry;
+                    self.loadDivisions(currentCountry, divisionSelect, labelEl, initialDivision);
                 }
             });
 
             countrySelect.addEventListener('change', function () {
-                const selectedCountry = countrySelect.value || 'Nigeria';
+                const selectedCountry = countrySelect.value || 'Canada';
                 if (divisionSelect) {
+                    // Reset division selection when user changes country
                     self.loadDivisions(selectedCountry, divisionSelect, labelEl, '');
                 }
             });
@@ -119,8 +156,12 @@
             const self = this;
 
             if (countrySelect.options.length > 5) {
-                if (selectedValue) countrySelect.value = selectedValue;
-                if (!countrySelect.value) countrySelect.value = 'Nigeria';
+                if (selectedValue && Array.from(countrySelect.options).some(o => o.value.toLowerCase() === selectedValue.toLowerCase())) {
+                    countrySelect.value = selectedValue;
+                }
+                if (!countrySelect.value && countrySelect.options.length > 0) {
+                    countrySelect.selectedIndex = 0;
+                }
                 if (callback) callback();
                 return;
             }
@@ -143,44 +184,55 @@
                     if (callback) callback();
                 })
                 .catch(err => {
-                    console.warn('[AfricanLocationLoader] Failed to fetch African countries list:', err);
+                    console.warn('[GlobalLocationLoader] API fetch notice, using select options:', err);
                     if (callback) callback();
                 });
         },
 
         populateCountryDropdown: function (select, countries, selectedValue) {
-            const previousVal = selectedValue || select.value || 'Nigeria';
+            const previousVal = selectedValue || select.value || 'Canada';
             select.innerHTML = '';
 
             countries.forEach(c => {
+                const cName = typeof c === 'string' ? c : c.name;
                 const opt = document.createElement('option');
-                opt.value = c.name;
-                opt.textContent = c.name;
+                opt.value = cName;
+                opt.textContent = cName;
                 if (c.code) opt.setAttribute('data-code', c.code);
                 if (c.term) opt.setAttribute('data-term', c.term);
-                if (c.name.toLowerCase() === previousVal.toLowerCase() || (previousVal === '' && c.name === 'Nigeria')) {
+                if (cName.toLowerCase() === previousVal.toLowerCase()) {
                     opt.selected = true;
                 }
                 select.appendChild(opt);
             });
 
-            if (!select.value) {
-                select.value = 'Nigeria';
+            if (!select.value && select.options.length > 0) {
+                select.selectedIndex = 0;
             }
         },
 
         loadDivisions: function (countryName, divisionSelect, labelEl, selectedDivision) {
             const self = this;
-            const term = this.terms[countryName] || 'State / Region';
+            const term = this.terms[countryName] || 'State / Province / Region';
 
             this.updateLabel(labelEl, countryName, term);
 
+            // 1. Check in-memory cache
             if (this.cache.divisions[countryName]) {
                 const cachedData = this.cache.divisions[countryName];
                 this.populateDivisionDropdown(divisionSelect, cachedData.divisions, cachedData.term || term, selectedDivision);
                 return;
             }
 
+            // 2. Check embedded fallbacks (Instant response for Canada, Nigeria, UK, US, UAE)
+            if (this.fallbackDivisions[countryName]) {
+                const divisions = this.fallbackDivisions[countryName];
+                this.cache.divisions[countryName] = { term: term, divisions: divisions };
+                this.populateDivisionDropdown(divisionSelect, divisions, term, selectedDivision);
+                return;
+            }
+
+            // 3. Dynamic API Fetch for other countries
             divisionSelect.disabled = true;
             divisionSelect.innerHTML = `<option value="">Loading ${term}s...</option>`;
 
@@ -196,50 +248,44 @@
                         self.updateLabel(labelEl, countryName, data.term || term);
                         self.populateDivisionDropdown(divisionSelect, data.divisions || [], data.term || term, selectedDivision);
                     } else {
-                        throw new Error('Invalid API response');
+                        throw new Error('Invalid division payload');
                     }
                 })
                 .catch(err => {
-                    console.error('[AfricanLocationLoader] Error loading divisions from ' + url + ':', err);
+                    console.warn('[GlobalLocationLoader] API fetch note for ' + countryName + ':', err);
                     divisionSelect.disabled = false;
-                    divisionSelect.innerHTML = `<option value="">Unable to load ${term}s. Click to retry</option>`;
-
-                    const retryHandler = function () {
-                        divisionSelect.removeEventListener('click', retryHandler);
-                        self.loadDivisions(countryName, divisionSelect, labelEl, selectedDivision);
-                    };
-                    divisionSelect.addEventListener('click', retryHandler, { once: true });
+                    const fallback = self.fallbackDivisions[countryName] || [];
+                    self.populateDivisionDropdown(divisionSelect, fallback, term, selectedDivision);
                 });
         },
 
         updateLabel: function (labelEl, countryName, term) {
             if (!labelEl) return;
-            const displayTerm = term || this.terms[countryName] || 'State / Region';
+            const displayTerm = term || this.terms[countryName] || 'State / Province / Region';
             labelEl.textContent = displayTerm;
         },
 
         populateDivisionDropdown: function (select, divisions, term, selectedDivision) {
             select.disabled = false;
-            select.innerHTML = `<option value="">Select ${term || 'State / Region'}</option>`;
+            select.innerHTML = `<option value="">Select ${term || 'State / Province / Region'}</option>`;
 
             let matchFound = false;
-            divisions.forEach(div => {
-                const opt = document.createElement('option');
-                opt.value = div;
-                opt.textContent = div;
-                if (selectedDivision && (div.toLowerCase() === selectedDivision.toLowerCase())) {
-                    opt.selected = true;
-                    matchFound = true;
-                }
-                select.appendChild(opt);
-            });
+            if (Array.isArray(divisions)) {
+                divisions.forEach(div => {
+                    const opt = document.createElement('option');
+                    opt.value = div;
+                    opt.textContent = div;
+                    if (selectedDivision && (div.toLowerCase() === selectedDivision.toLowerCase())) {
+                        opt.selected = true;
+                        matchFound = true;
+                    }
+                    select.appendChild(opt);
+                });
+            }
 
-            if (selectedDivision && !matchFound) {
-                const customOpt = document.createElement('option');
-                customOpt.value = selectedDivision;
-                customOpt.textContent = selectedDivision;
-                customOpt.selected = true;
-                select.appendChild(customOpt);
+            // If selectedDivision does NOT belong to this country's division list (e.g. Benue for Canada), do NOT append it!
+            if (!matchFound) {
+                select.value = "";
             }
         }
     };

@@ -9,13 +9,17 @@ class Service extends Model
 {
     protected $fillable = [
         'name',
+        'parent_id',
         'category',
         'price',
         'service_fee',
         'processing_fee',
         'processing_days',
         'description',
+        'short_description',
         'image_url',
+        'icon',
+        'is_primary',
         'required_documents',
         'custom_fields',
         'status',
@@ -28,9 +32,20 @@ class Service extends Model
             'service_fee' => 'float',
             'processing_fee' => 'float',
             'processing_days' => 'integer',
+            'is_primary' => 'boolean',
             'required_documents' => 'array',
             'custom_fields' => 'array',
         ];
+    }
+
+    public function parent(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(self::class, 'parent_id');
+    }
+
+    public function subServices(): HasMany
+    {
+        return $this->hasMany(self::class, 'parent_id')->where('status', 'Active');
     }
 
     public function vendorServices(): HasMany

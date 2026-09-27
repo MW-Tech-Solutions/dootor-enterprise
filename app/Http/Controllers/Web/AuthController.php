@@ -94,30 +94,48 @@ class AuthController extends Controller
     {
         $data = $request->validate([
             'first_name' => ['required', 'string', 'min:2', 'max:255'],
+            'middle_name' => ['nullable', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'country' => ['required', 'string', Rule::in(\App\Services\AfricanLocationService::countryNames())],
+            'country_applying_from' => ['required', 'string', 'max:255'],
+            'country_service_requested' => ['required', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'terms_check' => ['accepted'],
+            'refund_check' => ['accepted'],
         ]);
 
-        if (!empty($data['state']) && !\App\Services\AfricanLocationService::isValidPair($data['country'], $data['state'])) {
-            throw ValidationException::withMessages([
-                'state' => ["The selected state/region does not belong to {$data['country']}."],
-            ]);
-        }
-
+        $data['country'] = $data['country_applying_from'];
         $data['role'] = 'client';
-        $data['status'] = 'Approved'; // Clients are auto-approved
+        $data['status'] = 'Approved';
         $data['password'] = Hash::make($data['password']);
 
         $user = User::create($data);
 
+        // 1. Audit Log
+        \App\Services\AuditLogger::log('client_registered', 'User', (string) $user->id, $user->name, null, [
+            'email' => $user->email,
+            'country_applying_from' => $user->country_applying_from,
+            'country_service_requested' => $user->country_service_requested,
+        ]);
+
+        // 2. Admin Notification Email
+        $adminEmail = config('mail.from.address', 'admin@dootor-enterprises.com');
+        \App\Services\EmailNotificationService::send('new_client_registration_admin', $adminEmail, [
+            'full_name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone ?? 'N/A',
+            'country_applying_from' => $user->country_applying_from,
+            'country_service_requested' => $user->country_service_requested,
+            'client_id' => $user->id,
+        ], null, $user);
+
         Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->route('client.dashboard')->with('success', 'Welcome to the platform!');
+        return redirect()->route('client.dashboard')->with('success', 'Welcome to ' . config('app.name', 'DOOTOR ENTERPRISES') . '! Your client account has been created successfully.');
     }
 
     public function showForgotPassword()
@@ -267,6 +285,19 @@ class AuthController extends Controller
             }
             return redirect()->route('vendor.dashboard');
         } else {
+            // Check for unfinished active draft applications (Requirement #9 & #10)
+            $drafts = $user->clientRequests()
+                ->whereIn('status', ['Draft', 'In Progress'])
+                ->latest('updated_at')
+                ->get();
+
+            if ($drafts->count() === 1) {
+                $draft = $drafts->first();
+                $step = max(1, (int) ($draft->current_step ?? 1));
+                session()->flash('info', 'Welcome back! We restored your unfinished application (' . $draft->reference_number . '). You can continue or return to your dashboard.');
+                return redirect()->route('client.application.step', ['serviceRequest' => $draft->id, 'step' => $step]);
+            }
+
             return redirect()->route('client.dashboard');
         }
     }

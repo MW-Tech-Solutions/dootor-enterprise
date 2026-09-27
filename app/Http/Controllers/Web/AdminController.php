@@ -89,6 +89,15 @@ class AdminController extends Controller
         }
 
         $users = $query->paginate(20)->withQueryString();
+        $users->getCollection()->transform(function ($u) {
+            if ($u->role !== 'client') {
+                $u->assigned_count = \App\Models\ServiceRequest::where('assigned_staff_id', $u->id)->count();
+                $u->completed_count = \App\Models\ServiceRequest::where('assigned_staff_id', $u->id)->where('status', 'Completed')->count();
+                $u->pending_count = \App\Models\ServiceRequest::where('assigned_staff_id', $u->id)->whereNotIn('status', ['Completed', 'Rejected', 'Cancelled'])->count();
+                $u->recent_activity = \App\Models\AuditLog::where('user_id', $u->id)->latest()->take(5)->get();
+            }
+            return $u;
+        });
         $roles = \App\Models\Role::where('is_active', true)->orderBy('name', 'asc')->get();
 
         return view('admin.users', [
@@ -248,6 +257,8 @@ class AdminController extends Controller
             'credo_public_key' => ['nullable', 'string'],
             'credo_secret_key' => ['nullable', 'string'],
             'credo_base_url' => ['nullable', 'string'],
+            'terms_conditions' => ['nullable', 'string'],
+            'refund_policy' => ['nullable', 'string'],
         ]);
 
         if ($request->hasFile('logo_file')) {
@@ -296,14 +307,25 @@ class AdminController extends Controller
     public function subscriptions(Request $request)
     {
         $search = $request->query('search');
-        $perPage = (int) $request->query('per_page', 1);
-        if (!in_array($perPage, [1, 2, 5, 10, 20, 50])) {
-            $perPage = 1;
+        $filter = $request->query('filter', 'all');
+        $perPage = (int) $request->query('per_page', 10);
+        if (!in_array($perPage, [5, 10, 20, 50])) {
+            $perPage = 10;
         }
 
         $query = ServiceRequest::query()
-            ->with(['client', 'service', 'requestDocuments', 'assignedStaff', 'currentStage', 'stageHistories'])
+            ->with(['client', 'service', 'subService', 'requestDocuments', 'assignedStaff', 'currentStage', 'assignmentHistories.newStaff'])
             ->latest();
+
+        if ($filter === 'unassigned') {
+            $query->whereNull('assigned_staff_id');
+        } elseif ($filter === 'assigned') {
+            $query->whereNotNull('assigned_staff_id');
+        } elseif ($filter === 'submitted') {
+            $query->whereIn('status', ['Application Submitted', 'Awaiting Assignment']);
+        } elseif ($filter === 'drafts') {
+            $query->whereIn('status', ['Draft', 'In Progress']);
+        }
 
         if ($search) {
             $query->where(function ($q) use ($search) {
@@ -321,99 +343,96 @@ class AdminController extends Controller
         }
 
         $serviceRequests = $query->paginate($perPage)->withQueryString();
-        $staffMembers = User::whereIn('role', ['admin', 'manager', 'processing_officer', 'super_admin'])->get();
+        
+        $staffMembers = User::where(function ($q) {
+            $q->whereIn('role', ['admin', 'manager', 'processing_officer', 'super_admin'])
+              ->orWhereHas('roles');
+        })->where('role', '!=', 'client')->orderBy('first_name')->get();
+
+        $stats = [
+            'total' => ServiceRequest::count(),
+            'unassigned' => ServiceRequest::whereNull('assigned_staff_id')->count(),
+            'assigned' => ServiceRequest::whereNotNull('assigned_staff_id')->count(),
+            'submitted' => ServiceRequest::whereIn('status', ['Application Submitted', 'Awaiting Assignment'])->count(),
+            'drafts' => ServiceRequest::whereIn('status', ['Draft', 'In Progress'])->count(),
+        ];
 
         return view('admin.subscriptions', [
             'serviceRequests' => $serviceRequests,
             'search' => $search,
+            'filter' => $filter,
             'perPage' => $perPage,
             'staffMembers' => $staffMembers,
+            'stats' => $stats,
         ]);
+    }
+
+    public function assignStaff(Request $request, ServiceRequest $serviceRequest)
+    {
+        $data = $request->validate([
+            'assigned_staff_id' => ['required', 'exists:users,id'],
+            'assignment_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $staff = User::findOrFail($data['assigned_staff_id']);
+        $oldStaffId = $serviceRequest->assigned_staff_id;
+
+        $newStatus = in_array($serviceRequest->status, ['Draft', 'Application Submitted', 'Awaiting Assignment']) ? 'Assigned' : $serviceRequest->status;
+
+        $serviceRequest->update([
+            'assigned_staff_id' => $staff->id,
+            'assigned_at' => now(),
+            'status' => $newStatus,
+        ]);
+
+        // Record Assignment History
+        \App\Models\AssignmentHistory::create([
+            'service_request_id' => $serviceRequest->id,
+            'previous_staff_id' => $oldStaffId,
+            'new_staff_id' => $staff->id,
+            'assigned_by_id' => auth()->id(),
+            'notes' => $data['assignment_notes'] ?? null,
+            'assigned_at' => now(),
+        ]);
+
+        // Record Audit Log with Staff File Number
+        \App\Services\AuditLogger::log(
+            'application_assigned',
+            'ServiceRequest',
+            (string) $serviceRequest->id,
+            $serviceRequest->reference_number,
+            ['assigned_staff_id' => $oldStaffId],
+            [
+                'assigned_staff_id' => $staff->id,
+                'staff_name' => $staff->name,
+                'staff_file_number' => $staff->staff_file_number,
+                'notes' => $data['assignment_notes'] ?? null
+            ]
+        );
+
+        // Send Email Notification to Assigned Staff
+        \App\Services\EmailNotificationService::send(
+            'application_assigned_staff',
+            $staff->email,
+            [
+                'staff_name' => $staff->name,
+                'staff_file_number' => $staff->staff_file_number ?? 'N/A',
+                'reference_number' => $serviceRequest->reference_number,
+                'client_name' => $serviceRequest->client_name,
+                'service_name' => $serviceRequest->service_name,
+                'assigned_by' => auth()->user()->name,
+                'notes' => $data['assignment_notes'] ?? 'None',
+            ],
+            $serviceRequest,
+            $staff
+        );
+
+        return redirect()->back()->with('success', "Application {$serviceRequest->reference_number} assigned to {$staff->name} ({$staff->staff_file_number}) successfully.");
     }
 
     public function updateSubscriptionStatus(Request $request, ServiceRequest $serviceRequest)
     {
-        $data = $request->validate([
-            'status' => ['required', Rule::in([
-                'Awaiting Payment', 'Payment Confirmed', 'Documents Under Review', 
-                'Verification in Progress', 'Processing', 'Awaiting External Agency', 
-                'Action Required', 'Ready for Collection', 'Completed', 'Cancelled', 'Rejected'
-            ])],
-            'assigned_staff_id' => ['nullable', 'exists:users,id'],
-            'assigned_role_id' => ['nullable', 'exists:roles,id'],
-            'stage_id' => ['nullable', 'exists:service_workflow_stages,id'],
-            'admin_notes' => ['nullable', 'string', 'max:2000'],
-            'is_user_visible' => ['nullable', 'boolean'],
-        ]);
-
-        $oldStatus = $serviceRequest->status;
-        $oldStaffId = $serviceRequest->assigned_staff_id;
-
-        $updateData = [
-            'status' => $data['status'],
-            'assigned_staff_id' => $data['assigned_staff_id'] ?? $serviceRequest->assigned_staff_id,
-            'assigned_role_id' => $data['assigned_role_id'] ?? $serviceRequest->assigned_role_id,
-        ];
-
-        if (!empty($data['stage_id'])) {
-            $stage = \App\Models\ServiceWorkflowStage::find($data['stage_id']);
-            if ($stage) {
-                $updateData['current_stage_id'] = $stage->id;
-                $updateData['current_stage_name'] = $stage->stage_name;
-            }
-        }
-
-        $serviceRequest->update($updateData);
-
-        // Record Stage History
-        $isPublic = $request->has('is_user_visible');
-        \App\Models\ApplicationStageHistory::create([
-            'service_request_id' => $serviceRequest->id,
-            'stage_id' => $serviceRequest->current_stage_id,
-            'stage_name' => $serviceRequest->current_stage_name ?? $serviceRequest->status,
-            'status' => $serviceRequest->status,
-            'changed_by_user_id' => auth()->id(),
-            'notes' => $data['admin_notes'] ?? null,
-            'is_user_visible' => $isPublic,
-        ]);
-
-        // Record Internal or Public Note
-        if (!empty($data['admin_notes'])) {
-            \App\Models\ApplicationNote::create([
-                'service_request_id' => $serviceRequest->id,
-                'user_id' => auth()->id(),
-                'note' => $data['admin_notes'],
-                'is_internal' => !$isPublic,
-            ]);
-        }
-
-        // Record Audit Log
-        \App\Services\AuditLogger::log(
-            'application_status_updated',
-            'ServiceRequest',
-            (string) $serviceRequest->id,
-            $serviceRequest->reference_number,
-            ['status' => $oldStatus, 'assigned_staff_id' => $oldStaffId],
-            ['status' => $serviceRequest->status, 'assigned_staff_id' => $serviceRequest->assigned_staff_id]
-        );
-
-        // Send Email Notification to Applicant
-        \App\Services\EmailNotificationService::send(
-            'stage_updated_user',
-            $serviceRequest->client_email,
-            [
-                'full_name' => $serviceRequest->client_name,
-                'service_name' => $serviceRequest->service_name,
-                'reference_number' => $serviceRequest->reference_number,
-                'current_stage' => $serviceRequest->current_stage_name ?? $serviceRequest->status,
-                'status' => $serviceRequest->status,
-                'notes' => $isPublic && !empty($data['admin_notes']) ? "<p><strong>Notes from Officer:</strong> " . e($data['admin_notes']) . "</p>" : '',
-            ],
-            $serviceRequest,
-            $serviceRequest->client
-        );
-
-        return redirect()->back()->with('success', 'Application stage, status, and notes updated successfully.');
+        return $this->assignStaff($request, $serviceRequest);
     }
 
     public function updateDocumentStatus(Request $request, \App\Models\RequestDocument $document)
@@ -431,19 +450,19 @@ class AdminController extends Controller
 
         $serviceRequest = $document->serviceRequest;
         if ($serviceRequest && $data['status'] === 'Accepted') {
-            // Auto update request status to Documents Under Review if still in initial state
             if ($serviceRequest->status === 'Application Submitted') {
                 $serviceRequest->update(['status' => 'Documents Under Review']);
             }
         }
 
+        $user = auth()->user();
         \App\Services\AuditLogger::log(
             'document_status_updated',
             'RequestDocument',
             (string) $document->id,
             $document->document_name,
             ['status' => $oldStatus],
-            ['status' => $document->status]
+            ['status' => $document->status, 'staff_file_number' => $user->staff_file_number, 'notes' => $data['admin_notes'] ?? null]
         );
 
         return redirect()->back()->with('success', 'Document status for "' . $document->document_name . '" updated to ' . $data['status'] . '.');
@@ -591,6 +610,10 @@ class AdminController extends Controller
 
     public function rolesStore(Request $request)
     {
+        if (!$request->user()->hasPermission('roles.manage') && !$request->user()->hasPermission('roles.view')) {
+            abort(403, 'Unauthorized action. Permission required: roles.manage');
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
@@ -610,13 +633,33 @@ class AdminController extends Controller
             $role->permissions()->sync($data['permissions']);
         }
 
-        \App\Services\AuditLogger::log('role_created', 'Role', (string) $role->id, null, null, ['name' => $role->name]);
+        \Illuminate\Support\Facades\Cache::forget("role_permissions_{$role->id}");
+
+        \App\Services\AuditLogger::log('role_created', 'Role', (string) $role->id, null, null, [
+            'name' => $role->name,
+            'slug' => $role->slug,
+            'permissions' => $role->permissions->pluck('slug')->toArray(),
+        ]);
 
         return redirect()->back()->with('success', 'Role ' . $role->name . ' created successfully.');
     }
 
     public function rolesUpdate(Request $request, \App\Models\Role $role)
     {
+        if (!$request->user()->hasPermission('roles.manage') && !$request->user()->hasPermission('roles.view')) {
+            abort(403, 'Unauthorized action. Permission required: roles.manage');
+        }
+
+        // Protect Super Admin role from unauthorized non-super-admin updates
+        if ($role->slug === 'super-admin') {
+            $isSuperAdmin = $request->user()->roles()->where('slug', 'super-admin')->exists()
+                || ($request->user()->role === 'admin' && !$request->user()->roles()->exists());
+
+            if (!$isSuperAdmin) {
+                return redirect()->back()->with('error', 'Only Super Administrators can modify the Super Admin role.');
+            }
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
@@ -625,27 +668,48 @@ class AdminController extends Controller
             'permissions.*' => ['exists:permissions,id'],
         ]);
 
-        $oldVal = $role->toArray();
+        $oldPermissions = $role->permissions->pluck('slug')->toArray();
+
         $role->update([
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'is_active' => $request->has('is_active'),
         ]);
 
-        $role->permissions()->sync($data['permissions'] ?? []);
+        // CRITICAL: Exact synchronization with selected permission IDs. Unchecked permissions are detached.
+        $selectedPermissions = $data['permissions'] ?? [];
+        $role->permissions()->sync($selectedPermissions);
 
-        \App\Services\AuditLogger::log('role_updated', 'Role', (string) $role->id, null, $oldVal, $role->toArray());
+        // Invalidate permission cache so changes take effect immediately across all active user sessions
+        \Illuminate\Support\Facades\Cache::forget("role_permissions_{$role->id}");
+
+        $newPermissions = $role->fresh()->permissions->pluck('slug')->toArray();
+
+        \App\Services\AuditLogger::log('role_permissions_updated', 'Role', (string) $role->id, null, [
+            'name' => $role->name,
+            'permissions' => $oldPermissions,
+        ], [
+            'name' => $role->name,
+            'permissions' => $newPermissions,
+        ]);
 
         return redirect()->back()->with('success', 'Role ' . $role->name . ' updated successfully.');
     }
 
-    public function rolesDelete(\App\Models\Role $role)
+    public function rolesDelete(Request $request, \App\Models\Role $role)
     {
+        if (!$request->user()->hasPermission('roles.manage') && !$request->user()->hasPermission('roles.view')) {
+            abort(403, 'Unauthorized action. Permission required: roles.manage');
+        }
+
         if ($role->slug === 'super-admin') {
-            return redirect()->back()->with('error', 'Super Admin role cannot be deleted.');
+            return redirect()->back()->with('error', 'The Super Admin role is protected and cannot be deleted.');
         }
 
         \App\Services\AuditLogger::log('role_deleted', 'Role', (string) $role->id, null, ['name' => $role->name], null);
+        
+        $role->permissions()->detach();
+        $role->users()->detach();
         $role->delete();
 
         return redirect()->back()->with('success', 'Role deleted successfully.');
@@ -653,6 +717,10 @@ class AdminController extends Controller
 
     public function assignUserPermissions(Request $request, User $user)
     {
+        if (!$request->user()->hasPermission('users.assign_permissions') && !$request->user()->hasPermission('users.assign_roles') && !$request->user()->hasPermission('roles.manage') && !$request->user()->hasPermission('roles.view')) {
+            abort(403, 'Unauthorized action. Permission required: users.assign_permissions');
+        }
+
         $data = $request->validate([
             'roles' => ['nullable', 'array'],
             'roles.*' => ['exists:roles,id'],
@@ -660,12 +728,26 @@ class AdminController extends Controller
             'direct_permissions.*' => ['exists:permissions,id'],
         ]);
 
+        $oldRoles = $user->roles->pluck('name')->toArray();
+        $oldDirectPerms = $user->directPermissions->pluck('slug')->toArray();
+
         $user->roles()->sync($data['roles'] ?? []);
         $user->directPermissions()->sync($data['direct_permissions'] ?? []);
 
-        \App\Services\AuditLogger::log('user_permissions_updated', 'User', (string) $user->id, null, null, [
-            'roles' => $data['roles'] ?? [],
-            'direct_permissions' => $data['direct_permissions'] ?? [],
+        // Also update legacy role column if assigning standard staff/admin roles
+        if (!empty($data['roles'])) {
+            $firstRole = \App\Models\Role::find($data['roles'][0]);
+            if ($firstRole && in_array($firstRole->slug, ['super-admin', 'administrator', 'service-manager', 'application-officer', 'document-verification-officer', 'finance-officer', 'customer-support', 'content-manager', 'email-manager', 'read-only-staff'])) {
+                $user->update(['role' => 'admin']);
+            }
+        }
+
+        \App\Services\AuditLogger::log('user_permissions_updated', 'User', (string) $user->id, null, [
+            'roles' => $oldRoles,
+            'direct_permissions' => $oldDirectPerms,
+        ], [
+            'roles' => $user->fresh()->roles->pluck('name')->toArray(),
+            'direct_permissions' => $user->fresh()->directPermissions->pluck('slug')->toArray(),
         ]);
 
         return redirect()->back()->with('success', 'User roles and direct permissions updated for ' . $user->name);
@@ -678,18 +760,199 @@ class AdminController extends Controller
         $roleIds = $user->roles->pluck('id')->toArray();
 
         $query = ServiceRequest::with(['client', 'service', 'currentStage', 'assignedStaff', 'assignedRole'])
-            ->where(function ($q) use ($user, $roleIds) {
+            ->latest();
+
+        // If not super_admin / manager, scope to user's assigned work
+        if (!$user->hasPermission('applications.update') && $user->role !== 'admin' && $user->role !== 'super_admin') {
+            $query->where(function ($q) use ($user, $roleIds) {
                 $q->where('assigned_staff_id', $user->id);
                 if (!empty($roleIds)) {
                     $q->orWhereIn('assigned_role_id', $roleIds);
                 }
-            })
-            ->latest();
+            });
+        }
 
-        $myTasks = $query->paginate(15);
+        if ($search = $request->query('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->where('reference_number', 'like', "%{$search}%")
+                  ->orWhere('client_name', 'like', "%{$search}%")
+                  ->orWhere('client_email', 'like', "%{$search}%")
+                  ->orWhere('service_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($statusFilter = $request->query('status')) {
+            $query->where('status', $statusFilter);
+        }
+
+        $myTasks = $query->paginate(15)->withQueryString();
         $pendingDocVerifications = RequestDocument::where('status', 'Pending')->count();
 
         return view('admin.work-queue', compact('myTasks', 'pendingDocVerifications'));
+    }
+
+    public function processWorkQueue(ServiceRequest $serviceRequest)
+    {
+        $serviceRequest->load([
+            'client',
+            'service.workflowStages',
+            'subService',
+            'requestDocuments',
+            'currentStage',
+            'stageHistories.changedBy',
+            'notes.user',
+            'assignmentHistories.previousStaff',
+            'assignmentHistories.newStaff',
+            'assignmentHistories.assignedBy'
+        ]);
+
+        $user = auth()->user();
+        \App\Services\AuditLogger::log(
+            'application_inspected_work_queue',
+            'ServiceRequest',
+            (string) $serviceRequest->id,
+            $serviceRequest->reference_number,
+            null,
+            ['staff_file_number' => $user->staff_file_number]
+        );
+
+        $workflowStages = $serviceRequest->service?->workflowStages()->orderBy('sort_order', 'asc')->get() ?? collect();
+        $staffMembers = User::where('role', '!=', 'client')->orderBy('first_name')->get();
+
+        return view('admin.work-queue-process', compact('serviceRequest', 'workflowStages', 'staffMembers'));
+    }
+
+    public function updateWorkQueueStatus(Request $request, ServiceRequest $serviceRequest)
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in([
+                'Draft', 'In Progress', 'Application Submitted', 'Awaiting Assignment',
+                'Assigned', 'Payment Confirmed', 'Documents Under Review', 
+                'Verification in Progress', 'Processing', 'Awaiting External Agency', 
+                'Action Required', 'Escalated', 'Returned', 'Ready for Collection', 
+                'Completed', 'Cancelled', 'Rejected'
+            ])],
+            'stage_id' => ['nullable', 'exists:service_workflow_stages,id'],
+            'admin_notes' => ['nullable', 'string', 'max:2000'],
+            'is_user_visible' => ['nullable', 'boolean'],
+            'assigned_staff_id' => ['nullable', 'exists:users,id'],
+        ]);
+
+        $oldStatus = $serviceRequest->status;
+        $oldStaffId = $serviceRequest->assigned_staff_id;
+        $user = auth()->user();
+
+        $updateData = [
+            'status' => $data['status'],
+        ];
+
+        if (!empty($data['assigned_staff_id']) && $data['assigned_staff_id'] != $oldStaffId) {
+            $updateData['assigned_staff_id'] = $data['assigned_staff_id'];
+            $updateData['assigned_at'] = now();
+
+            \App\Models\AssignmentHistory::create([
+                'service_request_id' => $serviceRequest->id,
+                'previous_staff_id' => $oldStaffId,
+                'new_staff_id' => $data['assigned_staff_id'],
+                'assigned_by_id' => $user->id,
+                'notes' => 'Reassigned during work queue processing.',
+                'assigned_at' => now(),
+            ]);
+        }
+
+        if (!empty($data['stage_id'])) {
+            $stage = \App\Models\ServiceWorkflowStage::find($data['stage_id']);
+            if ($stage) {
+                $updateData['current_stage_id'] = $stage->id;
+                $updateData['current_stage_name'] = $stage->stage_name;
+            }
+        }
+
+        $serviceRequest->update($updateData);
+
+        $isPublic = $request->has('is_user_visible');
+
+        // Record Stage History
+        \App\Models\ApplicationStageHistory::create([
+            'service_request_id' => $serviceRequest->id,
+            'stage_id' => $serviceRequest->current_stage_id,
+            'stage_name' => $serviceRequest->current_stage_name ?? $serviceRequest->status,
+            'status' => $serviceRequest->status,
+            'changed_by_user_id' => $user->id,
+            'notes' => $data['admin_notes'] ?? null,
+            'is_user_visible' => $isPublic,
+        ]);
+
+        // Record Application Note
+        if (!empty($data['admin_notes'])) {
+            \App\Models\ApplicationNote::create([
+                'service_request_id' => $serviceRequest->id,
+                'user_id' => $user->id,
+                'note' => $data['admin_notes'],
+                'is_internal' => !$isPublic,
+            ]);
+        }
+
+        // Record Audit Log with Staff File Number
+        \App\Services\AuditLogger::log(
+            'application_status_updated_work_queue',
+            'ServiceRequest',
+            (string) $serviceRequest->id,
+            $serviceRequest->reference_number,
+            ['status' => $oldStatus],
+            [
+                'status' => $serviceRequest->status,
+                'staff_file_number' => $user->staff_file_number,
+                'notes' => $data['admin_notes'] ?? null,
+                'is_user_visible' => $isPublic
+            ]
+        );
+
+        // Send Email Notification to Client if visible
+        if ($isPublic && $serviceRequest->client_email) {
+            \App\Services\EmailNotificationService::send(
+                'stage_updated_user',
+                $serviceRequest->client_email,
+                [
+                    'full_name' => $serviceRequest->client_name,
+                    'service_name' => $serviceRequest->service_name,
+                    'reference_number' => $serviceRequest->reference_number,
+                    'current_stage' => $serviceRequest->current_stage_name ?? $serviceRequest->status,
+                    'status' => $serviceRequest->status,
+                    'notes' => !empty($data['admin_notes']) ? "<p><strong>Notes from Officer:</strong> " . e($data['admin_notes']) . "</p>" : '',
+                ],
+                $serviceRequest,
+                $serviceRequest->client
+            );
+        }
+
+        return redirect()->back()->with('success', "Application status updated to '{$serviceRequest->status}'. Audit log created under Staff File #{$user->staff_file_number}.");
+    }
+
+    public function verifyWorkQueueDocument(Request $request, RequestDocument $document)
+    {
+        $data = $request->validate([
+            'status' => ['required', Rule::in(['Pending', 'Received', 'Accepted', 'Requires Correction', 'Rejected'])],
+            'admin_notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        $oldStatus = $document->status;
+        $document->update([
+            'status' => $data['status'],
+            'admin_notes' => $data['admin_notes'] ?? $document->admin_notes,
+        ]);
+
+        $user = auth()->user();
+        \App\Services\AuditLogger::log(
+            'document_verified_work_queue',
+            'RequestDocument',
+            (string) $document->id,
+            $document->document_name,
+            ['status' => $oldStatus],
+            ['status' => $document->status, 'staff_file_number' => $user->staff_file_number, 'notes' => $data['admin_notes'] ?? null]
+        );
+
+        return redirect()->back()->with('success', "Document '{$document->document_name}' marked as {$data['status']}.");
     }
 
     // --- Email Template Management ---
@@ -762,12 +1025,24 @@ class AdminController extends Controller
         $data = $request->validate([
             'required_documents' => ['nullable', 'array'],
             'required_documents.*' => ['string'],
+            'compulsory_docs' => ['nullable', 'array'],
+            'compulsory_docs.*' => ['string'],
         ]);
 
-        $requiredDocs = $data['required_documents'] ?? [];
+        $selectedDocs = $data['required_documents'] ?? [];
+        $compulsoryDocs = $data['compulsory_docs'] ?? [];
+
+        $structuredList = [];
+        foreach ($selectedDocs as $docName) {
+            $isCompulsory = in_array($docName, $compulsoryDocs, true);
+            $structuredList[] = [
+                'name' => $docName,
+                'is_compulsory' => $isCompulsory,
+            ];
+        }
 
         $service->update([
-            'required_documents' => $requiredDocs,
+            'required_documents' => $structuredList,
         ]);
 
         return redirect()->back()->with('success', 'Required documents checklist updated for ' . $service->name . '.');

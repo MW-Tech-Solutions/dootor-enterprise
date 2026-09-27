@@ -138,7 +138,7 @@ class ComprehensivePortalSeeder extends Seeder
         ];
 
         foreach ($rolesData as $rData) {
-            $role = Role::updateOrCreate(
+            $role = Role::firstOrCreate(
                 ['slug' => $rData['slug']],
                 [
                     'name' => $rData['name'],
@@ -147,23 +147,25 @@ class ComprehensivePortalSeeder extends Seeder
                 ]
             );
 
-            $pIds = [];
-            foreach ($rData['permissions'] as $pSlug) {
-                if (isset($permissionModels[$pSlug])) {
-                    $pIds[] = $permissionModels[$pSlug]->id;
+            // CRITICAL SECURITY REQUIREMENT: Default permissions MUST ONLY be assigned when the role is first created.
+            // If the role already exists and has been customized by an Administrator, preserve its database permissions.
+            if ($role->wasRecentlyCreated) {
+                $pIds = [];
+                foreach ($rData['permissions'] as $pSlug) {
+                    if (isset($permissionModels[$pSlug])) {
+                        $pIds[] = $permissionModels[$pSlug]->id;
+                    }
                 }
+                $role->permissions()->sync($pIds);
             }
-            $role->permissions()->sync($pIds);
         }
 
-        // 3. Attach Super Admin role to existing 'admin' role users
+        // 3. Attach Super Admin role to designated primary admin user
         $superAdminRole = Role::where('slug', 'super-admin')->first();
         if ($superAdminRole) {
-            $adminUsers = User::where('role', 'admin')->get();
-            foreach ($adminUsers as $adminUser) {
-                if (!$adminUser->roles()->where('role_id', $superAdminRole->id)->exists()) {
-                    $adminUser->roles()->attach($superAdminRole->id);
-                }
+            $primaryAdmin = User::where('email', 'admin@test.com')->first();
+            if ($primaryAdmin && !$primaryAdmin->roles()->where('role_id', $superAdminRole->id)->exists()) {
+                $primaryAdmin->roles()->attach($superAdminRole->id);
             }
         }
 
@@ -229,6 +231,35 @@ class ComprehensivePortalSeeder extends Seeder
                 </div>',
                 'variables_description' => '{full_name}, {service_name}, {reference_number}, {current_stage}, {status}, {notes}, {company_name}, {dashboard_link}',
             ],
+            [
+                'code' => 'new_client_registration_admin',
+                'title' => 'New Client Account Created (Admin Notification)',
+                'subject' => 'New Client Registration – {company_name}',
+                'body_html' => '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #004225;">New Client Registration</h2>
+                    <p>A new client account has been registered on <strong>{company_name}</strong>.</p>
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8fafc; border: 1px solid #cbd5e1;">
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Client Name:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{full_name}</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Email:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{email}</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Phone:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{phone}</td></tr>
+                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Applying From:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{country_applying_from}</td></tr>
+                        <tr><td style="padding: 10px; font-weight: bold;">Service Country:</td><td style="padding: 10px;">{country_service_requested}</td></tr>
+                    </table>
+                </div>',
+                'variables_description' => '{full_name}, {email}, {phone}, {country_applying_from}, {country_service_requested}, {company_name}',
+            ],
+            [
+                'code' => 'application_assigned_staff',
+                'title' => 'Application Assignment Notice (Staff)',
+                'subject' => 'Application Assigned: {reference_number} – {service_name}',
+                'body_html' => '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
+                    <h2 style="color: #004225;">New Application Assigned</h2>
+                    <p>Application <strong>{reference_number}</strong> ({service_name}) has been assigned to you for processing.</p>
+                    <p>Applicant: <strong>{full_name}</strong></p>
+                    <p>Log in to your Staff Work Queue to review documents and take action.</p>
+                </div>',
+                'variables_description' => '{full_name}, {service_name}, {reference_number}, {company_name}',
+            ],
         ];
 
         foreach ($emailTemplates as $tmplData) {
@@ -244,19 +275,121 @@ class ComprehensivePortalSeeder extends Seeder
             );
         }
 
-        // 5. Seed Default Workflow Stages for Existing Services
-        $services = Service::all();
-        if ($services->isEmpty()) {
-            // Create default services if table is empty
-            $sampleServices = [
-                ['name' => 'International Passport Processing', 'category' => 'Immigration', 'price' => 150000, 'service_fee' => 120000, 'processing_fee' => 30000, 'processing_days' => 14, 'description' => 'Fast-track international passport application and renewal service.'],
-                ['name' => 'CAC Business Name Registration', 'category' => 'Corporate Services', 'price' => 50000, 'service_fee' => 35000, 'processing_fee' => 15000, 'processing_days' => 5, 'description' => 'Complete Corporate Affairs Commission business name reservation and registration.'],
-                ['name' => 'Document Authentication & Legalization', 'category' => 'Legal Services', 'price' => 85000, 'service_fee' => 70000, 'processing_fee' => 15000, 'processing_days' => 7, 'description' => 'Official authentication of academic and legal credentials with relevant ministries.'],
-            ];
-            foreach ($sampleServices as $sData) {
-                $services->push(Service::create($sData));
-            }
-        }
+        // 5. Seed Primary & Sub-services
+        $primaryServices = [
+            [
+                'name' => 'Passport Services',
+                'category' => 'Passport',
+                'is_primary' => true,
+                'icon' => 'bi-passport',
+                'price' => 150000,
+                'service_fee' => 120000,
+                'processing_fee' => 30000,
+                'processing_days' => 14,
+                'short_description' => 'Complete official international passport renewal, fresh application, lost passport replacement, and data modifications.',
+                'description' => 'Full service international passport processing including fresh applications, renewals, lost passport handling, and change of data.',
+                'sub_services' => [
+                    ['name' => 'Fresh / Renewal Application', 'price' => 150000, 'short_description' => 'New passport issuing or standard renewal of expired passport booklet.'],
+                    ['name' => 'Change of Application Data', 'price' => 175000, 'short_description' => 'Modification of name, marital status, or date of birth on passport records.'],
+                    ['name' => 'Lost Case Replacement', 'price' => 200000, 'short_description' => 'Official replacement for lost, stolen, or damaged international passports.'],
+                ],
+            ],
+            [
+                'name' => 'NIN Services',
+                'category' => 'NIN',
+                'is_primary' => true,
+                'icon' => 'bi-person-badge',
+                'price' => 45000,
+                'service_fee' => 35000,
+                'processing_fee' => 10000,
+                'processing_days' => 3,
+                'short_description' => 'National Identification Number (NIN) pre-enrollment, adult/child registration, and data modifications.',
+                'description' => 'National Identity Management Commission (NIMC) NIN pre-enrollment for adults, children, and demographic corrections.',
+                'sub_services' => [
+                    ['name' => 'Adult Pre-Enrollment Application', 'price' => 45000, 'short_description' => 'Pre-enrollment registration for adults aged 16 and above.'],
+                    ['name' => 'Child Pre-Enrollment Application', 'price' => 35000, 'short_description' => 'Pre-enrollment registration for minors under 16 years.'],
+                    ['name' => 'NIN Modifications', 'price' => 55000, 'short_description' => 'Correction of name, date of birth, address, or phone number on NIN database.'],
+                ],
+            ],
+            [
+                'name' => 'Emergency Travel Certificate',
+                'category' => 'Consular',
+                'is_primary' => true,
+                'icon' => 'bi-airplane-engines',
+                'price' => 120000,
+                'service_fee' => 100000,
+                'processing_fee' => 20000,
+                'processing_days' => 2,
+                'short_description' => 'Expedited one-way emergency travel document for urgent travel obligations.',
+                'description' => 'Official Emergency Travel Certificate (ETC) processing for citizens requiring immediate emergency travel.',
+                'sub_services' => [],
+            ],
+            [
+                'name' => 'Authorization Letter / Power of Attorney',
+                'category' => 'Consular',
+                'is_primary' => true,
+                'icon' => 'bi-file-earmark-check',
+                'price' => 85000,
+                'service_fee' => 70000,
+                'processing_fee' => 15000,
+                'processing_days' => 5,
+                'short_description' => 'Consular legalization and attestation of power of attorney and legal authorization letters.',
+                'description' => 'Official consular authentication and attestation for legal powers of attorney and authorization instruments.',
+                'sub_services' => [],
+            ],
+            [
+                'name' => 'Waiver / Appointment Reschedule',
+                'category' => 'Consular',
+                'is_primary' => true,
+                'icon' => 'bi-calendar-event',
+                'price' => 60000,
+                'service_fee' => 50000,
+                'processing_fee' => 10000,
+                'processing_days' => 2,
+                'short_description' => 'Fast-track biometric appointment waiver or priority appointment rescheduling.',
+                'description' => 'Official consular appointment waiver request and emergency scheduling priority.',
+                'sub_services' => [],
+            ],
+            [
+                'name' => 'Same Day Collection',
+                'category' => 'Express Services',
+                'is_primary' => true,
+                'icon' => 'bi-clock-history',
+                'price' => 95000,
+                'service_fee' => 75000,
+                'processing_fee' => 20000,
+                'processing_days' => 1,
+                'short_description' => 'Ultra-express same day retrieval and collection of completed consular documents.',
+                'description' => 'Same day dispatch and physical retrieval of processed passports, certificates, and legal documents.',
+                'sub_services' => [],
+            ],
+            [
+                'name' => 'Police Clearance Certificate',
+                'category' => 'Legal & Security',
+                'is_primary' => false,
+                'icon' => 'bi-shield-check',
+                'price' => 95000,
+                'service_fee' => 80000,
+                'processing_fee' => 15000,
+                'processing_days' => 7,
+                'short_description' => 'Official Police Character Certificate issued by Criminal Investigation Department.',
+                'description' => 'Character clearance certificate processing for international visa, employment, or immigration purposes.',
+                'sub_services' => [],
+            ],
+            [
+                'name' => 'Birth Certificate Attestation',
+                'category' => 'Attestation',
+                'is_primary' => false,
+                'icon' => 'bi-award',
+                'price' => 50000,
+                'service_fee' => 40000,
+                'processing_fee' => 10000,
+                'processing_days' => 5,
+                'short_description' => 'Authentication of birth certificates with Ministry of Foreign Affairs & Ministry of Education.',
+                'description' => 'Attestation and legalization of birth certificates for international legal recognition.',
+                'sub_services' => [],
+            ],
+        ];
 
         $standardStages = [
             ['stage_name' => 'Application Submitted', 'description' => 'Application received and registered in portal.', 'status_key' => 'Submitted', 'sort_order' => 1],
@@ -268,11 +401,20 @@ class ComprehensivePortalSeeder extends Seeder
             ['stage_name' => 'Completed', 'description' => 'Service application successfully completed and delivered.', 'status_key' => 'Completed', 'sort_order' => 7],
         ];
 
-        foreach ($services as $service) {
-            if ($service->workflowStages()->count() === 0) {
+        foreach ($primaryServices as $pData) {
+            $subData = $pData['sub_services'] ?? [];
+            unset($pData['sub_services']);
+
+            $mainService = Service::updateOrCreate(
+                ['name' => $pData['name']],
+                array_merge($pData, ['status' => 'Active'])
+            );
+
+            // Create workflow stages for main service
+            if ($mainService->workflowStages()->count() === 0) {
                 foreach ($standardStages as $stage) {
                     ServiceWorkflowStage::create([
-                        'service_id' => $service->id,
+                        'service_id' => $mainService->id,
                         'stage_name' => $stage['stage_name'],
                         'description' => $stage['description'],
                         'status_key' => $stage['status_key'],
@@ -280,6 +422,40 @@ class ComprehensivePortalSeeder extends Seeder
                         'is_user_visible' => true,
                         'notification_enabled' => true,
                     ]);
+                }
+            }
+
+            // Create Sub-services
+            foreach ($subData as $sItem) {
+                $subService = Service::updateOrCreate(
+                    ['name' => $sItem['name'], 'parent_id' => $mainService->id],
+                    [
+                        'parent_id' => $mainService->id,
+                        'category' => $mainService->category,
+                        'price' => $sItem['price'],
+                        'service_fee' => (float) ($sItem['price'] * 0.8),
+                        'processing_fee' => (float) ($sItem['price'] * 0.2),
+                        'processing_days' => $mainService->processing_days,
+                        'short_description' => $sItem['short_description'],
+                        'description' => $sItem['short_description'],
+                        'icon' => $mainService->icon,
+                        'is_primary' => false,
+                        'status' => 'Active',
+                    ]
+                );
+
+                if ($subService->workflowStages()->count() === 0) {
+                    foreach ($standardStages as $stage) {
+                        ServiceWorkflowStage::create([
+                            'service_id' => $subService->id,
+                            'stage_name' => $stage['stage_name'],
+                            'description' => $stage['description'],
+                            'status_key' => $stage['status_key'],
+                            'sort_order' => $stage['sort_order'],
+                            'is_user_visible' => true,
+                            'notification_enabled' => true,
+                        ]);
+                    }
                 }
             }
         }

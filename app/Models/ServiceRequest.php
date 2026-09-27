@@ -9,12 +9,26 @@ use Illuminate\Support\Str;
 
 class ServiceRequest extends Model
 {
+    const STATUS_DRAFT = 'Draft';
+    const STATUS_IN_PROGRESS = 'In Progress';
+    const STATUS_SUBMITTED = 'Submitted';
+    const STATUS_AWAITING_ASSIGNMENT = 'Awaiting Assignment';
+    const STATUS_ASSIGNED = 'Assigned';
+    const STATUS_UNDER_REVIEW = 'Under Review';
+    const STATUS_INFO_REQUIRED = 'Additional Information Required';
+    const STATUS_PROCESSING = 'Processing';
+    const STATUS_COMPLETED = 'Completed';
+    const STATUS_REJECTED = 'Rejected';
+    const STATUS_CANCELLED = 'Cancelled';
+
     protected $fillable = [
         'reference_number',
         'application_method',
         'service_id',
-        'vendor_service_id',
+        'sub_service_id',
         'service_name',
+        'sub_service_name',
+        'vendor_service_id',
         'price',
         'amount_paid',
         'outstanding_balance',
@@ -27,7 +41,11 @@ class ServiceRequest extends Model
         'client_id',
         'client_name',
         'client_email',
+        'country_applying_from',
+        'country_service_requested',
         'status',
+        'current_step',
+        'progress_percent',
         'payment_reference',
         'payment_gateway',
         'payment_status',
@@ -35,6 +53,10 @@ class ServiceRequest extends Model
         'form_data',
         'passport_photo_path',
         'manual_form_path',
+        'last_saved_at',
+        'assigned_at',
+        'submitted_at',
+        'admin_notified_draft_at',
     ];
 
     protected function casts(): array
@@ -43,8 +65,14 @@ class ServiceRequest extends Model
             'price' => 'float',
             'amount_paid' => 'float',
             'outstanding_balance' => 'float',
+            'current_step' => 'integer',
+            'progress_percent' => 'integer',
             'documents' => 'array',
             'form_data' => 'array',
+            'last_saved_at' => 'datetime',
+            'assigned_at' => 'datetime',
+            'submitted_at' => 'datetime',
+            'admin_notified_draft_at' => 'datetime',
         ];
     }
 
@@ -160,6 +188,16 @@ class ServiceRequest extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(User::class, 'client_id');
+    }
+
+    public function subService(): BelongsTo
+    {
+        return $this->belongsTo(Service::class, 'sub_service_id');
+    }
+
+    public function assignmentHistories(): HasMany
+    {
+        return $this->hasMany(AssignmentHistory::class, 'service_request_id')->orderBy('created_at', 'desc');
     }
 
     public function requestDocuments(): HasMany

@@ -96,74 +96,97 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->middleware('role:admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         
-        Route::get('/approvals', [AdminController::class, 'approvals'])->name('admin.approvals');
-        Route::post('/approvals/{vendor}/approve', [AdminController::class, 'approveVendor'])->name('admin.approvals.approve');
-        Route::post('/approvals/{vendor}/reject', [AdminController::class, 'rejectVendor'])->name('admin.approvals.reject');
-        
-        Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
-        Route::patch('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.user.update');
-        Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
-        
-        Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('admin.subscriptions');
-        Route::patch('/subscriptions/{serviceRequest}', [AdminController::class, 'updateSubscriptionStatus'])->name('admin.subscription.update');
-        Route::patch('/documents/{document}/status', [AdminController::class, 'updateDocumentStatus'])->name('admin.document.status');
-        
-        Route::get('/services', [AdminController::class, 'services'])->name('admin.services');
-        Route::post('/services', [AdminController::class, 'storeService'])->name('admin.services.store');
-        Route::patch('/services/{service}', [AdminController::class, 'updateService'])->name('admin.service.update');
-        Route::delete('/services/{service}', [AdminController::class, 'deleteService'])->name('admin.service.delete');
-        
-        // Modular Dynamic Form Builder Routes
-        Route::get('/services/{service}/form-builder', [AdminController::class, 'formBuilder'])->name('admin.service.form-builder');
-        Route::post('/services/{service}/form-builder', [AdminController::class, 'saveFormFields'])->name('admin.service.form-builder.save');
-        Route::delete('/form-fields/{field}', [AdminController::class, 'deleteFormField'])->name('admin.service.form-field.delete');
+        // Applications & Vendor Approvals
+        Route::middleware('permission:applications.view')->group(function () {
+            Route::get('/approvals', [AdminController::class, 'approvals'])->name('admin.approvals');
+            Route::post('/approvals/{vendor}/approve', [AdminController::class, 'approveVendor'])->name('admin.approvals.approve');
+            Route::post('/approvals/{vendor}/reject', [AdminController::class, 'rejectVendor'])->name('admin.approvals.reject');
+            Route::get('/subscriptions', [AdminController::class, 'subscriptions'])->name('admin.subscriptions');
+            Route::post('/subscriptions/{serviceRequest}/assign', [AdminController::class, 'assignStaff'])->name('admin.subscription.assign');
+            Route::patch('/subscriptions/{serviceRequest}', [AdminController::class, 'updateSubscriptionStatus'])->name('admin.subscription.update');
+            Route::get('/work-queue', [AdminController::class, 'workQueue'])->name('admin.work-queue');
+            Route::get('/work-queue/{serviceRequest}/process', [AdminController::class, 'processWorkQueue'])->name('admin.work-queue.process');
+            Route::post('/work-queue/{serviceRequest}/update', [AdminController::class, 'updateWorkQueueStatus'])->name('admin.work-queue.update');
+            Route::post('/work-queue/document/{document}/verify', [AdminController::class, 'verifyWorkQueueDocument'])->name('admin.work-queue.document.verify');
+            Route::get('/payment-verification', [AdminController::class, 'paymentVerification'])->name('admin.payment-verification');
+            Route::post('/payment-verification/query', [AdminController::class, 'queryCredoPayment'])->name('admin.payment-verification.query');
+        });
 
-        // Service Workflow Stage Builder Routes
-        Route::get('/services/{service}/workflow', [AdminController::class, 'workflowBuilder'])->name('admin.service.workflow');
-        Route::post('/services/{service}/workflow', [AdminController::class, 'saveWorkflowStages'])->name('admin.service.workflow.save');
-        Route::delete('/workflow-stages/{stage}', [AdminController::class, 'deleteWorkflowStage'])->name('admin.service.workflow.delete');
+        // User Management
+        Route::middleware('permission:users.view')->group(function () {
+            Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+            Route::patch('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.user.update');
+            Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
+        });
 
-        // Modular Roles & Dynamic Granular RBAC Routes
-        Route::get('/roles', [AdminController::class, 'rolesIndex'])->name('admin.roles');
-        Route::post('/roles', [AdminController::class, 'rolesStore'])->name('admin.roles.store');
-        Route::patch('/roles/{role}', [AdminController::class, 'rolesUpdate'])->name('admin.roles.update');
-        Route::delete('/roles/{role}', [AdminController::class, 'rolesDelete'])->name('admin.roles.delete');
-        Route::post('/users/{user}/permissions', [AdminController::class, 'assignUserPermissions'])->name('admin.user.permissions');
+        // Roles & Dynamic Granular RBAC
+        Route::middleware('permission:roles.view')->group(function () {
+            Route::get('/roles', [AdminController::class, 'rolesIndex'])->name('admin.roles');
+            Route::post('/roles', [AdminController::class, 'rolesStore'])->name('admin.roles.store');
+            Route::patch('/roles/{role}', [AdminController::class, 'rolesUpdate'])->name('admin.roles.update');
+            Route::delete('/roles/{role}', [AdminController::class, 'rolesDelete'])->name('admin.roles.delete');
+            Route::post('/users/{user}/permissions', [AdminController::class, 'assignUserPermissions'])->name('admin.user.permissions');
+        });
 
-        // Staff Work Queue Route
-        Route::get('/work-queue', [AdminController::class, 'workQueue'])->name('admin.work-queue');
+        // Services Catalog & Builder Workflows
+        Route::middleware('permission:services.view')->group(function () {
+            Route::get('/services', [AdminController::class, 'services'])->name('admin.services');
+            Route::post('/services', [AdminController::class, 'storeService'])->name('admin.services.store');
+            Route::patch('/services/{service}', [AdminController::class, 'updateService'])->name('admin.service.update');
+            Route::delete('/services/{service}', [AdminController::class, 'deleteService'])->name('admin.service.delete');
+            
+            Route::get('/services/{service}/form-builder', [AdminController::class, 'formBuilder'])->name('admin.service.form-builder');
+            Route::post('/services/{service}/form-builder', [AdminController::class, 'saveFormFields'])->name('admin.service.form-builder.save');
+            Route::delete('/form-fields/{field}', [AdminController::class, 'deleteFormField'])->name('admin.service.form-field.delete');
 
-        // Email Templates & Notification Logs Routes
-        Route::get('/email-templates', [AdminController::class, 'emailTemplates'])->name('admin.email-templates');
-        Route::patch('/email-templates/{template}', [AdminController::class, 'updateEmailTemplate'])->name('admin.email-templates.update');
+            Route::get('/services/{service}/workflow', [AdminController::class, 'workflowBuilder'])->name('admin.service.workflow');
+            Route::post('/services/{service}/workflow', [AdminController::class, 'saveWorkflowStages'])->name('admin.service.workflow.save');
+            Route::delete('/workflow-stages/{stage}', [AdminController::class, 'deleteWorkflowStage'])->name('admin.service.workflow.delete');
+        });
 
-        // Admin Email Broadcast Routes
-        Route::get('/email-broadcast', [AdminController::class, 'emailBroadcast'])->name('admin.email-broadcast');
-        Route::post('/email-broadcast/send', [AdminController::class, 'sendEmailBroadcast'])->name('admin.email-broadcast.send');
+        // Documents & Checklists
+        Route::middleware('permission:documents.view')->group(function () {
+            Route::get('/service-documents', [AdminController::class, 'serviceDocuments'])->name('admin.service-documents');
+            Route::patch('/service-documents/{service}', [AdminController::class, 'updateServiceDocuments'])->name('admin.service-documents.update');
 
-        // System Audit Logs Route
-        Route::get('/audit-logs', [AdminController::class, 'auditLogs'])->name('admin.audit-logs');
-        
-        Route::get('/service-documents', [AdminController::class, 'serviceDocuments'])->name('admin.service-documents');
-        Route::patch('/service-documents/{service}', [AdminController::class, 'updateServiceDocuments'])->name('admin.service-documents.update');
+            Route::get('/document-types', [AdminController::class, 'documentTypes'])->name('admin.document-types');
+            Route::post('/document-types', [AdminController::class, 'storeDocumentType'])->name('admin.document-types.store');
+            Route::patch('/document-types/{documentType}', [AdminController::class, 'updateDocumentType'])->name('admin.document-types.update');
+            Route::post('/document-types/{documentType}/assign-services', [AdminController::class, 'assignDocumentToServices'])->name('admin.document-types.assign-services');
+            Route::delete('/document-types/{documentType}', [AdminController::class, 'deleteDocumentType'])->name('admin.document-types.delete');
+            Route::patch('/documents/{document}/status', [AdminController::class, 'updateDocumentStatus'])->name('admin.document.status');
+        });
 
-        Route::get('/document-types', [AdminController::class, 'documentTypes'])->name('admin.document-types');
-        Route::post('/document-types', [AdminController::class, 'storeDocumentType'])->name('admin.document-types.store');
-        Route::patch('/document-types/{documentType}', [AdminController::class, 'updateDocumentType'])->name('admin.document-types.update');
-        Route::post('/document-types/{documentType}/assign-services', [AdminController::class, 'assignDocumentToServices'])->name('admin.document-types.assign-services');
-        Route::delete('/document-types/{documentType}', [AdminController::class, 'deleteDocumentType'])->name('admin.document-types.delete');
-        
-        Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
-        Route::get('/reports/export-csv', [ReportController::class, 'exportCsv'])->name('admin.reports.export');
+        // Email Templates
+        Route::middleware('permission:email.view')->group(function () {
+            Route::get('/email-templates', [AdminController::class, 'emailTemplates'])->name('admin.email-templates');
+            Route::patch('/email-templates/{template}', [AdminController::class, 'updateEmailTemplate'])->name('admin.email-templates.update');
+        });
 
-        Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
-        Route::post('/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
+        // Broadcast Email
+        Route::middleware('permission:email.send')->group(function () {
+            Route::get('/email-broadcast', [AdminController::class, 'emailBroadcast'])->name('admin.email-broadcast');
+            Route::post('/email-broadcast/send', [AdminController::class, 'sendEmailBroadcast'])->name('admin.email-broadcast.send');
+        });
 
-        // Credo Direct Payment Verification & Re-query Route
-        Route::get('/payment-verification', [AdminController::class, 'paymentVerification'])->name('admin.payment-verification');
-        Route::post('/payment-verification/query', [AdminController::class, 'queryCredoPayment'])->name('admin.payment-verification.query');
+        // Audit Logs
+        Route::middleware('permission:audit.view')->group(function () {
+            Route::get('/audit-logs', [AdminController::class, 'auditLogs'])->name('admin.audit-logs');
+        });
 
-        // Admin Profile Management Routes
+        // Reports & Analytics
+        Route::middleware('permission:reports.view')->group(function () {
+            Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
+            Route::get('/reports/export-csv', [ReportController::class, 'exportCsv'])->name('admin.reports.export');
+        });
+
+        // Settings
+        Route::middleware('permission:settings.view')->group(function () {
+            Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
+            Route::post('/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
+        });
+
+        // Profile Management
         Route::get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
         Route::post('/profile', [AdminController::class, 'updateProfile'])->name('admin.profile.update');
         Route::post('/profile/password', [AdminController::class, 'updatePassword'])->name('admin.profile.password');
@@ -207,6 +230,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/services/{service}/download-form', [ClientController::class, 'downloadForm'])->name('client.service.download-form');
         Route::post('/services/{service}/submit-manual', [ClientController::class, 'submitManual'])->name('client.service.submit-manual');
         
+        // Step-based Application & Auto-Save System (Requirements #6, #7, #8, #9, #10)
+        Route::get('/application/{serviceRequest}/step/{step}', [ClientController::class, 'applicationStep'])->name('client.application.step');
+        Route::post('/application/{serviceRequest}/autosave', [ClientController::class, 'autoSave'])->name('client.application.autosave');
+        Route::post('/application/{serviceRequest}/upload-document', [ClientController::class, 'uploadDocument'])->name('client.application.upload-document');
+        Route::delete('/application/document/{document}', [ClientController::class, 'deleteDocument'])->name('client.application.delete-document');
+        Route::post('/application/{serviceRequest}/submit', [ClientController::class, 'submitApplication'])->name('client.application.submit');
+
         Route::get('/requests', [ClientController::class, 'requests'])->name('client.requests');
         Route::get('/requests/{serviceRequest}', [ClientController::class, 'requestDetails'])->name('client.request.details');
         Route::post('/requests/{serviceRequest}/payment', [ClientController::class, 'payRequest'])->name('client.request.payment');

@@ -12,10 +12,12 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -24,15 +26,20 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'first_name',
+        'middle_name',
         'last_name',
         'email',
         'password',
         'phone',
         'country',
+        'country_applying_from',
+        'country_service_requested',
         'state',
+        'city',
         'role',
         'status',
         'avatar_url',
+        'staff_file_number',
         'registered_by_vendor_id',
     ];
 
@@ -61,7 +68,7 @@ class User extends Authenticatable
 
     public function getNameAttribute(): string
     {
-        return trim($this->first_name.' '.$this->last_name);
+        return trim($this->first_name . ' ' . ($this->middle_name ? $this->middle_name . ' ' : '') . $this->last_name);
     }
 
     public function registeredByVendor(): BelongsTo
@@ -99,6 +106,16 @@ class User extends Authenticatable
         return $this->hasMany(ServiceRequest::class, 'client_id');
     }
 
+    public function assignedRequests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class, 'assigned_staff_id');
+    }
+
+    public function assignmentHistories(): HasMany
+    {
+        return $this->hasMany(AssignmentHistory::class, 'new_staff_id');
+    }
+
     public function roles(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'user_roles');
@@ -111,33 +128,64 @@ class User extends Authenticatable
 
     public function hasPermission(string $permissionSlug): bool
     {
-        $assignedRoles = $this->roles;
+        $assignedRoles = $this->relationLoaded('roles')
+            ? $this->roles
+            : $this->roles()->where('is_active', true)->get();
 
-        // If user has specific assigned RBAC roles, strictly enforce them
-        if ($assignedRoles->isNotEmpty()) {
-            foreach ($assignedRoles as $role) {
-                if (in_array($role->slug, ['super-admin', 'administrator'])) {
-                    return true;
-                }
-                if ($role->permissions()->where('slug', $permissionSlug)->exists()) {
-                    return true;
-                }
+        // 1. Super Admin role check - unrestricted system access
+        foreach ($assignedRoles as $role) {
+            if (isset($role->is_active) && !$role->is_active) {
+                continue;
             }
-
-            // Check direct permission overrides
-            if ($this->directPermissions()->where('slug', $permissionSlug)->exists()) {
+            if ($role->slug === 'super-admin') {
                 return true;
             }
-
-            return false;
         }
 
-        // Fallback for unassigned super admins
-        if ($this->role === 'admin') {
+        // 2. Base Admin fallback only if NO RBAC roles have been assigned to user yet
+        if ($assignedRoles->isEmpty() && $this->role === 'admin') {
             return true;
         }
 
-        return false;
+        if ($assignedRoles->isEmpty()) {
+            return false;
+        }
+
+        // 3. Compute active role permissions set (Union of all assigned active roles' permissions)
+        $rolePermissionSlugs = [];
+        foreach ($assignedRoles as $role) {
+            if (isset($role->is_active) && !$role->is_active) {
+                continue;
+            }
+
+            // Always query database directly to ensure database is authoritative source of truth (Requirement 15)
+            $perms = $role->permissions()->pluck('slug')->toArray();
+
+            foreach ($perms as $slug) {
+                $rolePermissionSlugs[$slug] = true;
+            }
+        }
+
+        // Enforce Requirement 9: Effective User Permissions ⊆ Role Permissions.
+        // A user CANNOT receive a permission that their assigned role itself is not authorized to have.
+        if (!isset($rolePermissionSlugs[$permissionSlug])) {
+            return false;
+        }
+
+        // 4. Handle direct user permissions restriction (if direct permissions are explicitly assigned)
+        $directPermsCount = $this->relationLoaded('directPermissions')
+            ? $this->directPermissions->count()
+            : $this->directPermissions()->count();
+
+        if ($directPermsCount > 0) {
+            $hasDirectPermission = $this->relationLoaded('directPermissions')
+                ? $this->directPermissions->contains('slug', $permissionSlug)
+                : $this->directPermissions()->where('slug', $permissionSlug)->exists();
+
+            return $hasDirectPermission;
+        }
+
+        return true;
     }
 
     public function isAdmin(): bool

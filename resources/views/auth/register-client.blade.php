@@ -127,16 +127,23 @@
                 @csrf
 
                 <!-- Name Fields -->
-                <div class="row g-2 mb-3">
-                    <div class="col-sm-6">
-                        <label for="first_name" class="form-label small fw-medium">First Name</label>
+                <div class="row g-2 mb-3 align-items-end">
+                    <div class="col-sm-4">
+                        <label for="first_name" class="form-label small fw-medium text-nowrap">First Name</label>
                         <input type="text" name="first_name" id="first_name" class="form-control bg-light rounded-3 @error('first_name') is-invalid @enderror" value="{{ old('first_name') }}" placeholder="Abiodun" style="border-color: #dee2e6;" required>
                         @error('first_name')
                             <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
                         @enderror
                     </div>
-                    <div class="col-sm-6">
-                        <label for="last_name" class="form-label small fw-medium">Last Name</label>
+                    <div class="col-sm-4">
+                        <label for="middle_name" class="form-label small fw-medium text-nowrap">Middle Name <span class="text-muted fw-normal" style="font-size: 11px;">(Optional)</span></label>
+                        <input type="text" name="middle_name" id="middle_name" class="form-control bg-light rounded-3 @error('middle_name') is-invalid @enderror" value="{{ old('middle_name') }}" placeholder="Kolawole" style="border-color: #dee2e6;">
+                        @error('middle_name')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-sm-4">
+                        <label for="last_name" class="form-label small fw-medium text-nowrap">Last Name</label>
                         <input type="text" name="last_name" id="last_name" class="form-control bg-light rounded-3 @error('last_name') is-invalid @enderror" value="{{ old('last_name') }}" placeholder="Okonkwo" style="border-color: #dee2e6;" required>
                         @error('last_name')
                             <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
@@ -144,47 +151,72 @@
                     </div>
                 </div>
 
-                <!-- Email -->
-                <div class="mb-3">
-                    <label for="email" class="form-label small fw-medium">Email Address</label>
-                    <input type="email" name="email" id="email" class="form-control bg-light rounded-3 @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="abiodun@dootor.com" style="border-color: #dee2e6;" required>
-                    @error('email')
-                        <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
-                    @enderror
+                <!-- Contact Fields -->
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-7">
+                        <label for="email" class="form-label small fw-medium">Email Address</label>
+                        <input type="email" name="email" id="email" class="form-control bg-light rounded-3 @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="abiodun@example.com" style="border-color: #dee2e6;" required>
+                        @error('email')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="col-sm-5">
+                        <label for="phone" class="form-label small fw-medium">Phone Number</label>
+                        <input type="text" name="phone" id="phone" class="form-control bg-light rounded-3 @error('phone') is-invalid @enderror" value="{{ old('phone') }}" placeholder="+1 (416) 555-0199" style="border-color: #dee2e6;">
+                        @error('phone')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
-                <!-- Phone -->
-                <div class="mb-3">
-                    <label for="phone" class="form-label small fw-medium">Phone Number</label>
-                    <input type="text" name="phone" id="phone" class="form-control bg-light rounded-3 @error('phone') is-invalid @enderror" value="{{ old('phone') }}" placeholder="+234..." style="border-color: #dee2e6;">
-                    @error('phone')
-                        <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
-                    @enderror
-                </div>
+                <!-- Location Distinction: Country Applying From vs Country for Requested Service -->
+                @php
+                    $allCountries = \App\Services\LocationService::allCountries();
+                    $oldApplyingFrom = old('country_applying_from', old('country', 'Canada'));
+                    $oldRequestedCountry = old('country_service_requested', 'Nigeria');
+                @endphp
 
-                <!-- Location Fields -->
                 <div class="row g-2 mb-3">
                     <div class="col-sm-6">
-                        <label for="country" class="form-label small fw-medium">Country (African Countries Only)</label>
-                        <select name="country" id="country" class="form-select african-country-select bg-light rounded-3 @error('country') is-invalid @enderror" data-selected="{{ old('country', 'Nigeria') }}" data-division-target="state" data-label-target="state_label" style="border-color: #dee2e6;" required>
-                            @php
-                                $afCountries = $africanCountries ?? \App\Services\AfricanLocationService::allCountries();
-                                $selectedCountry = old('country', 'Nigeria');
-                            @endphp
-                            @foreach($afCountries as $c)
-                                <option value="{{ $c['name'] }}" {{ $selectedCountry == $c['name'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                        <label for="country_applying_from" class="form-label small fw-medium">Country Applying From</label>
+                        <select name="country_applying_from" id="country_applying_from" class="form-select african-country-select bg-light rounded-3 @error('country_applying_from') is-invalid @enderror" data-selected="{{ $oldApplyingFrom }}" data-division-target="state" data-label-target="state_label" style="border-color: #dee2e6;" required>
+                            @foreach($allCountries as $c)
+                                <option value="{{ $c['name'] }}" {{ $oldApplyingFrom == $c['name'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
                             @endforeach
                         </select>
-                        @error('country')
+                        @error('country_applying_from')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-sm-6">
+                        <label for="country_service_requested" class="form-label small fw-medium">Country for Requested Service</label>
+                        <select name="country_service_requested" id="country_service_requested" class="form-select bg-light rounded-3 @error('country_service_requested') is-invalid @enderror" style="border-color: #dee2e6;" required>
+                            @foreach($allCountries as $c)
+                                <option value="{{ $c['name'] }}" {{ $oldRequestedCountry == $c['name'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
+                            @endforeach
+                        </select>
+                        @error('country_service_requested')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
+                <!-- Dynamic Administrative Division & City -->
+                <div class="row g-2 mb-3">
+                    <div class="col-sm-6">
+                        <label for="state" id="state_label" class="form-label small fw-medium african-division-label">State / Province / Region</label>
+                        <select name="state" id="state" class="form-select african-division-select bg-light rounded-3 @error('state') is-invalid @enderror" data-selected="{{ old('state') }}" style="border-color: #dee2e6;">
+                            <option value="">Loading Divisions...</option>
+                        </select>
+                        @error('state')
                             <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-sm-6">
-                        <label for="state" id="state_label" class="form-label small fw-medium african-division-label">State / Region</label>
-                        <select name="state" id="state" class="form-select african-division-select bg-light rounded-3 @error('state') is-invalid @enderror" data-selected="{{ old('state') }}" style="border-color: #dee2e6;" required>
-                            <option value="">Loading States...</option>
-                        </select>
-                        @error('state')
+                        <label for="city" class="form-label small fw-medium">City / Town</label>
+                        <input type="text" name="city" id="city" class="form-control bg-light rounded-3 @error('city') is-invalid @enderror" value="{{ old('city') }}" placeholder="e.g. Toronto, London, Lagos" style="border-color: #dee2e6;">
+                        @error('city')
                             <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
                         @enderror
                     </div>
@@ -205,6 +237,35 @@
                     </div>
                 </div>
 
+                <!-- Terms & Conditions and Refund Policy Agreement Checkboxes -->
+                <div class="p-3 bg-light rounded-3 border mb-4">
+                    <!-- Checkbox 1: Terms & Conditions -->
+                    <div class="form-check mb-2.5">
+                        <input class="form-check-input @error('terms_check') is-invalid @enderror" type="checkbox" name="terms_check" id="termsCheck" value="1" required {{ old('terms_check') ? 'checked' : '' }}>
+                        <label class="form-check-label small text-dark fw-medium" for="termsCheck">
+                            I have read and agree to the <a href="javascript:void(0)" class="text-brand-success fw-bold text-decoration-underline" data-bs-toggle="modal" data-bs-target="#termsModal">Terms &amp; Conditions</a>
+                        </label>
+                        <small class="d-block text-muted" style="font-size: 11px;">You must review and accept the official platform terms before creating an account.</small>
+                        @error('terms_check')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <hr class="my-2 border-secondary border-opacity-10">
+
+                    <!-- Checkbox 2: Refund Policy -->
+                    <div class="form-check">
+                        <input class="form-check-input @error('refund_check') is-invalid @enderror" type="checkbox" name="refund_check" id="refundCheck" value="1" required {{ old('refund_check') ? 'checked' : '' }}>
+                        <label class="form-check-label small text-dark fw-medium" for="refundCheck">
+                            I have read and agree to the <a href="javascript:void(0)" class="text-brand-success fw-bold text-decoration-underline" data-bs-toggle="modal" data-bs-target="#refundModal">Refund Policy</a>
+                        </label>
+                        <small class="d-block text-muted" style="font-size: 11px;">Review our policy regarding service cancellations, processing windows, and refund eligibility.</small>
+                        @error('refund_check')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+
                 <!-- Submit -->
                 <button type="submit" class="btn btn-brand-primary w-100 py-2.5 rounded-3 mb-3 d-flex align-items-center justify-content-center gap-2">
                     <span>Register as Client</span>
@@ -219,5 +280,79 @@
         </div>
     </div>
 </div>
+
+<!-- Terms & Conditions Modal -->
+<div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-3">
+                <h5 class="modal-title fw-bold text-dark mb-0 fs-6" id="termsModalLabel">
+                    <i class="bi bi-shield-check me-2 text-success"></i> Platform Terms &amp; Conditions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-secondary small" style="line-height: 1.6;">
+                @php
+                    $sysSettings = \App\Models\SystemSetting::first();
+                    $termsContent = $sysSettings->terms_conditions ?? '';
+                @endphp
+                @if(!empty(trim($termsContent)))
+                    {!! $termsContent !!}
+                @else
+                    <h5>1. Platform Usage & Services</h5>
+                    <p>By creating a client account on DOOTOR ENTERPRISES, you agree to submit authentic application details and supporting documents for official vetting, consultation, and document authentication services.</p>
+                    <h5>2. Client Obligations</h5>
+                    <p>Applicants are responsible for ensuring all provided identity information, names, contact numbers, and uploaded files are accurate, complete, and valid.</p>
+                    <h5>3. Confidentiality & Data Protection</h5>
+                    <p>DOOTOR ENTERPRISES handles all personal data and document records under strict confidentiality protocols. Data is only accessible by assigned processing officers and authorized administrators.</p>
+                    <h5>4. Disclaimer</h5>
+                    <p>DOOTOR ENTERPRISES is an independent document consultancy enterprise and is not a government annex or official embassy branch.</p>
+                @endif
+            </div>
+            <div class="modal-footer bg-light border-top py-2.5">
+                <button type="button" class="btn btn-brand-primary btn-sm rounded-pill px-4" data-bs-dismiss="modal" onclick="document.getElementById('termsCheck').checked = true;">
+                    <i class="bi bi-check-circle me-1"></i> I Accept Terms &amp; Conditions
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Refund Policy Modal -->
+<div class="modal fade" id="refundModal" tabindex="-1" aria-labelledby="refundModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-3">
+                <h5 class="modal-title fw-bold text-dark mb-0 fs-6" id="refundModalLabel">
+                    <i class="bi bi-cash-stack me-2 text-success"></i> Official Refund &amp; Cancellation Policy
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-secondary small" style="line-height: 1.6;">
+                @php
+                    $refundContent = $sysSettings->refund_policy ?? '';
+                @endphp
+                @if(!empty(trim($refundContent)))
+                    {!! $refundContent !!}
+                @else
+                    <h5>1. Processing & Cancellation Window</h5>
+                    <p>Clients may request a full refund prior to service assignment or initial application review. Once document processing or officer assignment has commenced, partial administrative processing fees apply.</p>
+                    <h5>2. Refund Eligibility</h5>
+                    <p>Full refunds are granted if DOOTOR ENTERPRISES is unable to initiate processing for your request within the designated service timeline due to internal operational issues.</p>
+                    <h5>3. Non-Refundable Items</h5>
+                    <p>Government statutory filing fees or official third-party courier dispatch costs already disbursed on behalf of the applicant are non-refundable.</p>
+                    <h5>4. Requesting a Refund</h5>
+                    <p>To request a refund, please contact customer support through your client dashboard support portal with your application reference number.</p>
+                @endif
+            </div>
+            <div class="modal-footer bg-light border-top py-2.5">
+                <button type="button" class="btn btn-brand-primary btn-sm rounded-pill px-4" data-bs-dismiss="modal" onclick="document.getElementById('refundCheck').checked = true;">
+                    <i class="bi bi-check-circle me-1"></i> I Accept Refund Policy
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="{{ asset('js/location-loader.js') }}"></script>
 @endsection

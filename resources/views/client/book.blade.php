@@ -127,14 +127,29 @@
                             <!-- Required Supporting Documents Checklist -->
                             <div class="mb-4">
                                 <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">2. Upload Required Supporting Documents</h6>
-                                @if($service->required_documents && count($service->required_documents) > 0)
+                                @php
+                                    $rawReqDocs = $service->required_documents;
+                                    if (empty($rawReqDocs) && isset($service->parent) && !empty($service->parent->required_documents)) {
+                                        $rawReqDocs = $service->parent->required_documents;
+                                    }
+                                @endphp
+                                @if(is_array($rawReqDocs) && count($rawReqDocs) > 0)
                                     <div class="row g-3">
-                                        @foreach($service->required_documents as $docName)
-                                            @php $slug = \Illuminate\Support\Str::slug($docName, '_'); @endphp
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-semibold text-dark">{{ $docName }} <span class="text-danger">*</span></label>
-                                                <input type="file" name="documents[{{ $slug }}]" class="form-control rounded-3" required>
-                                            </div>
+                                        @foreach($rawReqDocs as $docItem)
+                                            @php
+                                                $docName = is_array($docItem) ? ($docItem['name'] ?? '') : (string)$docItem;
+                                                $isCompulsory = is_array($docItem) ? ($docItem['is_compulsory'] ?? true) : true;
+                                                $slug = \Illuminate\Support\Str::slug($docName, '_');
+                                            @endphp
+                                            @if(!empty(trim($docName)))
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold text-dark">
+                                                        {{ $docName }}
+                                                        @if($isCompulsory) <span class="text-danger">*</span> @else <span class="text-muted extra-small">(Optional)</span> @endif
+                                                    </label>
+                                                    <input type="file" name="documents[{{ $slug }}]" class="form-control rounded-3" {{ $isCompulsory ? 'required' : '' }}>
+                                                </div>
+                                            @endif
                                         @endforeach
                                     </div>
                                 @else
@@ -191,13 +206,22 @@
                                         <input type="file" name="passport_photo" class="form-control rounded-3" accept="image/jpeg,image/png">
                                     </div>
 
-                                    @if($service->required_documents && count($service->required_documents) > 0)
-                                        @foreach($service->required_documents as $docName)
-                                            @php $slug = \Illuminate\Support\Str::slug($docName, '_'); @endphp
-                                            <div class="col-md-6">
-                                                <label class="form-label small fw-semibold text-dark">{{ $docName }}</label>
-                                                <input type="file" name="documents[{{ $slug }}]" class="form-control rounded-3">
-                                            </div>
+                                    @if(is_array($rawReqDocs) && count($rawReqDocs) > 0)
+                                        @foreach($rawReqDocs as $docItem)
+                                            @php
+                                                $docName = is_array($docItem) ? ($docItem['name'] ?? '') : (string)$docItem;
+                                                $isCompulsory = is_array($docItem) ? ($docItem['is_compulsory'] ?? true) : true;
+                                                $slug = \Illuminate\Support\Str::slug($docName, '_');
+                                            @endphp
+                                            @if(!empty(trim($docName)))
+                                                <div class="col-md-6">
+                                                    <label class="form-label small fw-semibold text-dark">
+                                                        {{ $docName }}
+                                                        @if($isCompulsory) <span class="text-danger">*</span> @else <span class="text-muted extra-small">(Optional)</span> @endif
+                                                    </label>
+                                                    <input type="file" name="documents[{{ $slug }}]" class="form-control rounded-3" {{ $isCompulsory ? 'required' : '' }}>
+                                                </div>
+                                            @endif
                                         @endforeach
                                     @endif
                                 </div>

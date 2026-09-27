@@ -101,6 +101,55 @@
     </div>
 </div>
 
+<!-- Active Unfinished Draft Applications Section (Requirement #10) -->
+@if(isset($drafts) && $drafts->count() > 0)
+    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4" style="border-left: 5px solid #d4af37 !important;">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <span class="badge bg-warning text-dark px-2.5 py-1 rounded-pill small fw-bold text-uppercase mb-1">
+                    <i class="bi bi-clock-history me-1"></i> Auto-Saved Unfinished Work
+                </span>
+                <h2 class="h5 fw-bold text-dark mb-0">Continue Your Active Applications</h2>
+            </div>
+            <span class="text-muted small fw-semibold">{{ $drafts->count() }} Drafts Pending</span>
+        </div>
+
+        <div class="row g-3">
+            @foreach($drafts as $draft)
+                <div class="col-12 col-md-6">
+                    <div class="p-3 border rounded-3 bg-light h-100 d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="font-monospace fw-bold text-success small" style="color: #004225 !important;">{{ $draft->reference_number }}</span>
+                                <span class="badge bg-secondary-subtle text-dark small" style="font-size: 11px;">Step {{ $draft->current_step ?? 1 }} of 4</span>
+                            </div>
+                            <h3 class="h6 fw-bold text-dark mb-1">{{ $draft->service_name }}</h3>
+                            @if($draft->sub_service_name)
+                                <p class="text-muted small mb-2">{{ $draft->sub_service_name }}</p>
+                            @endif
+                            <div class="progress mb-2" style="height: 6px;">
+                                <div class="progress-bar bg-success" role="progressbar" style="width: {{ $draft->progress_percent ?? 25 }}%; background-color: #004225 !important;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between text-muted" style="font-size: 11px;">
+                                <span>Started: {{ $draft->created_at->format('M d, Y') }}</span>
+                                <span>Last Saved: {{ $draft->updated_at->diffForHumans() }}</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-3 border-top mt-3 d-flex justify-content-between align-items-center">
+                            <span class="text-muted" style="font-size: 11px;"><i class="bi bi-shield-check text-success"></i> Draft Secured</span>
+                            <a href="{{ route('client.application.step', ['serviceRequest' => $draft->id, 'step' => max(1, $draft->current_step ?? 1)]) }}" class="btn btn-brand-primary btn-sm rounded-pill px-3">
+                                <span>Continue Application</span>
+                                <i class="bi bi-arrow-right ms-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    </div>
+@endif
+
 <!-- Applications Table Card -->
 <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
     <div class="d-flex justify-content-between align-items-center mb-4">

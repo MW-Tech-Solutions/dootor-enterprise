@@ -25,21 +25,46 @@
     if (is_string($rawAssigned)) {
         $rawAssigned = json_decode($rawAssigned, true) ?: [];
     }
-    $currentAssigned = is_array($rawAssigned) ? array_map('trim', $rawAssigned) : [];
 
-    $isDocAssigned = function($typeName) use ($currentAssigned) {
-        if (in_array($typeName, $currentAssigned)) {
-            return true;
-        }
-        $cleanType = strtolower(preg_replace('/[^a-z0-9]/i', '', $typeName));
-        foreach ($currentAssigned as $assignedItem) {
-            $cleanAssigned = strtolower(preg_replace('/[^a-z0-9]/i', '', $assignedItem));
-            if ($cleanType === $cleanAssigned) return true;
-            if (strlen($cleanAssigned) > 3 && (str_contains($cleanType, $cleanAssigned) || str_contains($cleanAssigned, $cleanType))) {
-                return true;
+    $parsedChecklist = [];
+    if (is_array($rawAssigned)) {
+        foreach ($rawAssigned as $item) {
+            if (is_array($item)) {
+                $dName = $item['name'] ?? ($item['document_name'] ?? '');
+                $isComp = isset($item['is_compulsory']) ? (bool)$item['is_compulsory'] : true;
+            } else {
+                $dName = (string)$item;
+                $isComp = true;
+            }
+            if (!empty(trim($dName))) {
+                $parsedChecklist[trim(strtolower($dName))] = [
+                    'name' => trim($dName),
+                    'is_compulsory' => $isComp,
+                ];
             }
         }
+    }
+
+    $isDocAssigned = function($typeName) use ($parsedChecklist) {
+        $cleanType = trim(strtolower($typeName));
+        if (isset($parsedChecklist[$cleanType])) return true;
+        $cleanNoAlpha = preg_replace('/[^a-z0-9]/i', '', $cleanType);
+        foreach ($parsedChecklist as $key => $data) {
+            $cleanKey = preg_replace('/[^a-z0-9]/i', '', $key);
+            if ($cleanNoAlpha === $cleanKey) return true;
+        }
         return false;
+    };
+
+    $isDocCompulsory = function($typeName) use ($parsedChecklist) {
+        $cleanType = trim(strtolower($typeName));
+        if (isset($parsedChecklist[$cleanType])) return $parsedChecklist[$cleanType]['is_compulsory'];
+        $cleanNoAlpha = preg_replace('/[^a-z0-9]/i', '', $cleanType);
+        foreach ($parsedChecklist as $key => $data) {
+            $cleanKey = preg_replace('/[^a-z0-9]/i', '', $key);
+            if ($cleanNoAlpha === $cleanKey) return $data['is_compulsory'];
+        }
+        return true;
     };
 
     $tickedCount = 0;
@@ -96,7 +121,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
                 <div>
                     <h5 class="fw-bold text-dark mb-0">2. Assign Document Requirements</h5>
-                    <span class="small text-muted">Check all documents client must upload for {{ $selectedService->name }}</span>
+                    <span class="small text-muted">Check required documents for {{ $selectedService->name }} and select if compulsory or optional</span>
                 </div>
                 <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill" onclick="toggleAllCheckboxes(true)">Select All</button>
             </div>
@@ -116,14 +141,23 @@
                             @foreach($types as $docType)
                             @php
                                 $isChecked = $isDocAssigned($docType->name);
+                                $isComp = $isDocCompulsory($docType->name);
                             @endphp
                             <div class="col-md-6">
                                 <div class="p-3 border rounded-3 h-100 bg-white hover-shadow transition" style="border-color: {{ $isChecked ? '#004225' : '#e2e8f0' }}; background-color: {{ $isChecked ? 'rgba(0, 66, 37, 0.03)' : '#ffffff' }};">
-                                    <div class="form-check">
-                                        <input class="form-check-input doc-checkbox" type="checkbox" name="required_documents[]" value="{{ $docType->name }}" id="docCheck{{ $docType->id }}" {{ $isChecked ? 'checked' : '' }}>
-                                        <label class="form-check-label fw-bold text-dark small ms-1" for="docCheck{{ $docType->id }}">
-                                            {{ $docType->name }}
-                                        </label>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div class="form-check">
+                                            <input class="form-check-input doc-checkbox" type="checkbox" name="required_documents[]" value="{{ $docType->name }}" id="docCheck{{ $docType->id }}" {{ $isChecked ? 'checked' : '' }}>
+                                            <label class="form-check-label fw-bold text-dark small ms-1" for="docCheck{{ $docType->id }}">
+                                                {{ $docType->name }}
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch ms-2 mb-0" title="Toggle Compulsory vs Optional">
+                                            <input class="form-check-input" type="checkbox" name="compulsory_docs[]" value="{{ $docType->name }}" id="compSwitch{{ $docType->id }}" {{ ($isChecked && $isComp) || (!$isChecked) ? 'checked' : '' }}>
+                                            <label class="form-check-label extra-small text-muted fw-semibold" for="compSwitch{{ $docType->id }}" style="font-size: 11px;">
+                                                Compulsory
+                                            </label>
+                                        </div>
                                     </div>
                                     @if($docType->description)
                                     <p class="small text-muted mb-0 mt-1 ms-4" style="font-size: 11.5px;">{{ $docType->description }}</p>

@@ -1,6 +1,4 @@
-@extends('layouts.app')
-
-@section('styles')
+<?php $__env->startSection('styles'); ?>
 <style>
     .sidebar-link {
         display: flex;
@@ -58,10 +56,10 @@
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
 </style>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('body')
-@php
+<?php $__env->startSection('body'); ?>
+<?php
     $user = Auth::user();
     $role = $user->role ?? 'client';
     $status = $user->status ?? 'Approved';
@@ -121,17 +119,17 @@
             $settingsPath = route('client.settings');
         }
     }
-@endphp
+?>
 
-@section('body')
+<?php $__env->startSection('body'); ?>
 <div class="d-flex h-100 w-100 overflow-hidden" style="position: fixed; inset: 0;">
     <!-- Sidebar Navigation (Desktop) -->
     <aside class="bg-white border-end d-none d-md-flex flex-column flex-shrink-0 p-3 h-100" style="width: 280px; z-index: 1040; overflow-y: auto;">
         <div class="mb-4 px-3">
             <a href="/" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
-                @if($settings && $settings->logo_url)
-                    <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
-                @else
+                <?php if($settings && $settings->logo_url): ?>
+                    <img src="<?php echo e(app_file_url($settings->logo_url)); ?>" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
+                <?php else: ?>
                     <svg width="30" height="30" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                         <!-- Stylized D (Gold) -->
                         <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogoDash)" />
@@ -146,36 +144,37 @@
                             </linearGradient>
                         </defs>
                     </svg>
-                @endif
-                <span class="fw-bold text-dark tracking-tight" style="font-size: 14.5px;">{{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}</span>
+                <?php endif; ?>
+                <span class="fw-bold text-dark tracking-tight" style="font-size: 14.5px;"><?php echo e($settings->platform_name ?? 'DOOTOR ENTERPRISES'); ?></span>
             </a>
         </div>
         
         <nav class="nav flex-column gap-1">
-            @foreach($navItems as $item)
-                <a href="{{ $item['href'] }}" class="sidebar-link {{ request()->url() == $item['href'] ? 'active' : '' }}">
-                    <i class="bi {{ $item['icon'] }} fs-5"></i>
-                    <span>{{ $item['label'] }}</span>
+            <?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <a href="<?php echo e($item['href']); ?>" class="sidebar-link <?php echo e(request()->url() == $item['href'] ? 'active' : ''); ?>">
+                    <i class="bi <?php echo e($item['icon']); ?> fs-5"></i>
+                    <span><?php echo e($item['label']); ?></span>
                 </a>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </nav>
 
         <div class="mt-auto pt-3 border-top border-light">
             <div class="p-2 d-flex align-items-center gap-2 sidebar-profile mb-2">
-                @if($user->avatar_url)
-                    <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
-                @else
+                <?php if($user->avatar_url): ?>
+                    <img src="<?php echo e(app_file_url($user->avatar_url)); ?>" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                <?php else: ?>
                     <div class="rounded-circle text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 13px; background-color: #d4af37 !important;">
-                        {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'M', 0, 1)) }}
+                        <?php echo e(strtoupper(substr($user->first_name ?? 'U', 0, 1))); ?><?php echo e(strtoupper(substr($user->last_name ?? 'M', 0, 1))); ?>
+
                     </div>
-                @endif
+                <?php endif; ?>
                 <div class="overflow-hidden">
-                    <span class="d-block text-dark fw-semibold small text-truncate" style="font-size: 12px;">{{ $user->first_name }} {{ $user->last_name }}</span>
-                    <span class="d-block text-secondary small text-truncate" style="font-size: 10.5px;">{{ ucfirst($role) }}</span>
+                    <span class="d-block text-dark fw-semibold small text-truncate" style="font-size: 12px;"><?php echo e($user->first_name); ?> <?php echo e($user->last_name); ?></span>
+                    <span class="d-block text-secondary small text-truncate" style="font-size: 10.5px;"><?php echo e(ucfirst($role)); ?></span>
                 </div>
             </div>
-            <form action="{{ route('logout') }}" method="POST" class="m-0">
-                @csrf
+            <form action="<?php echo e(route('logout')); ?>" method="POST" class="m-0">
+                <?php echo csrf_field(); ?>
                 <button class="btn btn-link sidebar-link w-100 text-start border-0 bg-transparent text-danger p-2" type="submit" style="color: #ef4444 !important;">
                     <i class="bi bi-box-arrow-right text-danger me-2" style="color: #ef4444 !important;"></i>
                     <span>Logout</span>
@@ -201,27 +200,28 @@
                     
                     <div class="dropdown">
                         <button class="btn btn-link p-0 d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            @if($user->avatar_url)
-                                <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
-                            @else
+                            <?php if($user->avatar_url): ?>
+                                <img src="<?php echo e(app_file_url($user->avatar_url)); ?>" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                            <?php else: ?>
                                 <div class="rounded-circle bg-gradient text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 14px;">
-                                    {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'M', 0, 1)) }}
+                                    <?php echo e(strtoupper(substr($user->first_name ?? 'U', 0, 1))); ?><?php echo e(strtoupper(substr($user->last_name ?? 'M', 0, 1))); ?>
+
                                 </div>
-                            @endif
-                            <span class="d-none d-sm-inline">{{ $user->first_name ?? '' }} {{ $user->last_name ?? '' }}</span>
+                            <?php endif; ?>
+                            <span class="d-none d-sm-inline"><?php echo e($user->first_name ?? ''); ?> <?php echo e($user->last_name ?? ''); ?></span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
-                            @if($role === 'admin')
-                                <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="bi bi-person-badge me-2"></i> Admin Profile</a></li>
-                            @endif
-                            @if(!$isPendingVendor && $settingsPath)
-                                <li><a class="dropdown-item" href="{{ $settingsPath }}"><i class="bi bi-gear me-2"></i> Settings</a></li>
-                            @endif
-                            <li><a class="dropdown-item" href="{{ route('support.index') }}"><i class="bi bi-question-circle me-2"></i> Support Desk</a></li>
+                            <?php if($role === 'admin'): ?>
+                                <li><a class="dropdown-item" href="<?php echo e(route('admin.profile')); ?>"><i class="bi bi-person-badge me-2"></i> Admin Profile</a></li>
+                            <?php endif; ?>
+                            <?php if(!$isPendingVendor && $settingsPath): ?>
+                                <li><a class="dropdown-item" href="<?php echo e($settingsPath); ?>"><i class="bi bi-gear me-2"></i> Settings</a></li>
+                            <?php endif; ?>
+                            <li><a class="dropdown-item" href="<?php echo e(route('support.index')); ?>"><i class="bi bi-question-circle me-2"></i> Support Desk</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form action="{{ route('logout') }}" method="POST" class="m-0">
-                                    @csrf
+                                <form action="<?php echo e(route('logout')); ?>" method="POST" class="m-0">
+                                    <?php echo csrf_field(); ?>
                                     <button class="dropdown-item text-danger" type="submit"><i class="bi bi-box-arrow-right me-2"></i> Logout</button>
                                 </form>
                             </li>
@@ -234,10 +234,10 @@
         <!-- Main Dashboard View Content -->
         <main class="container-fluid p-4 d-flex flex-column" style="min-height: calc(100vh - 60px);">
             <div class="flex-grow-1">
-                @yield('content')
+                <?php echo $__env->yieldContent('content'); ?>
             </div>
             <footer class="mt-4 pt-3 border-top text-muted small d-flex flex-column flex-sm-row justify-content-between align-items-center gap-2 opacity-75">
-                <div>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</div>
+                <div>&copy; <?php echo e(date('Y')); ?> <?php echo e($settings->platform_name ?? 'DOOTOR ENTERPRISES'); ?>. All rights reserved.</div>
                 <div>Developed by <a href="https://kisprojectslab.com" target="_blank" rel="noopener noreferrer" class="text-dark fw-semibold text-decoration-none border-bottom">KendatTech</a></div>
             </footer>
         </main>
@@ -248,9 +248,9 @@
 <div class="offcanvas offcanvas-start bg-light border-0" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="width: 280px; z-index: 1060 !important;">
     <div class="offcanvas-header border-bottom border-light">
         <h5 class="offcanvas-title d-flex align-items-center gap-2 text-dark" id="mobileSidebarLabel">
-            @if($settings && $settings->logo_url)
-                <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 28px; width: 28px; object-fit: contain;">
-            @else
+            <?php if($settings && $settings->logo_url): ?>
+                <img src="<?php echo e(app_file_url($settings->logo_url)); ?>" alt="Logo" class="rounded" style="height: 28px; width: 28px; object-fit: contain;">
+            <?php else: ?>
                 <svg width="26" height="26" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                     <!-- Stylized D (Gold) -->
                     <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogoDashMobile)" />
@@ -265,37 +265,38 @@
                         </linearGradient>
                     </defs>
                 </svg>
-            @endif
-            <span class="fw-bold">{{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}</span>
+            <?php endif; ?>
+            <span class="fw-bold"><?php echo e($settings->platform_name ?? 'DOOTOR ENTERPRISES'); ?></span>
         </h5>
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body d-flex flex-column py-3 px-2">
         <nav class="nav flex-column gap-1">
-            @foreach($navItems as $item)
-                <a href="{{ $item['href'] }}" class="sidebar-link {{ request()->url() == $item['href'] ? 'active' : '' }}">
-                    <i class="bi {{ $item['icon'] }} fs-5"></i>
-                    <span>{{ $item['label'] }}</span>
+            <?php $__currentLoopData = $navItems; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                <a href="<?php echo e($item['href']); ?>" class="sidebar-link <?php echo e(request()->url() == $item['href'] ? 'active' : ''); ?>">
+                    <i class="bi <?php echo e($item['icon']); ?> fs-5"></i>
+                    <span><?php echo e($item['label']); ?></span>
                 </a>
-            @endforeach
+            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
         </nav>
         
         <div class="mt-auto pt-3 border-top border-light px-2">
             <div class="p-2 d-flex align-items-center gap-2 sidebar-profile mb-2">
-                @if($user->avatar_url)
-                    <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
-                @else
+                <?php if($user->avatar_url): ?>
+                    <img src="<?php echo e(app_file_url($user->avatar_url)); ?>" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                <?php else: ?>
                     <div class="rounded-circle text-dark d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 13px; background-color: #d4af37 !important;">
-                        {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'M', 0, 1)) }}
+                        <?php echo e(strtoupper(substr($user->first_name ?? 'U', 0, 1))); ?><?php echo e(strtoupper(substr($user->last_name ?? 'M', 0, 1))); ?>
+
                     </div>
-                @endif
+                <?php endif; ?>
                 <div class="overflow-hidden">
-                    <span class="d-block text-dark fw-semibold small text-truncate" style="font-size: 12px;">{{ $user->first_name }} {{ $user->last_name }}</span>
-                    <span class="d-block text-secondary small text-truncate" style="font-size: 10.5px;">{{ ucfirst($role) }}</span>
+                    <span class="d-block text-dark fw-semibold small text-truncate" style="font-size: 12px;"><?php echo e($user->first_name); ?> <?php echo e($user->last_name); ?></span>
+                    <span class="d-block text-secondary small text-truncate" style="font-size: 10.5px;"><?php echo e(ucfirst($role)); ?></span>
                 </div>
             </div>
-            <form action="{{ route('logout') }}" method="POST" class="m-0">
-                @csrf
+            <form action="<?php echo e(route('logout')); ?>" method="POST" class="m-0">
+                <?php echo csrf_field(); ?>
                 <button class="btn btn-link sidebar-link w-100 text-start border-0 bg-transparent text-danger p-2" type="submit" style="color: #ef4444 !important;">
                     <i class="bi bi-box-arrow-right text-danger me-2" style="color: #ef4444 !important;"></i>
                     <span>Logout</span>
@@ -304,4 +305,6 @@
         </div>
     </div>
 </div>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\DOOTOR ENTERPRISES\resources\views/layouts/dashboard.blade.php ENDPATH**/ ?>
