@@ -183,9 +183,12 @@ class AdminController extends Controller
             'processing_days' => ['nullable', 'integer', 'min:1'],
             'description' => ['required', 'string'],
             'status' => ['sometimes', Rule::in(['Active', 'Inactive'])],
+            'is_primary' => ['nullable', 'boolean'],
             'required_documents' => ['nullable', 'array'],
             'custom_fields' => ['nullable', 'array'],
         ]);
+
+        $data['is_primary'] = $request->boolean('is_primary');
 
         Service::create($data);
 
@@ -203,9 +206,12 @@ class AdminController extends Controller
             'processing_days' => ['nullable', 'integer', 'min:1'],
             'description' => ['required', 'string'],
             'status' => ['sometimes', Rule::in(['Active', 'Inactive'])],
+            'is_primary' => ['nullable', 'boolean'],
             'required_documents' => ['nullable', 'array'],
             'custom_fields' => ['nullable', 'array'],
         ]);
+
+        $data['is_primary'] = $request->boolean('is_primary');
 
         $service->update($data);
 

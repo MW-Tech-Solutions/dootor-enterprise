@@ -33,7 +33,19 @@ class AppServiceProvider extends ServiceProvider
             } catch (\Exception $e) {
                 // Database might not be migrated yet
             }
-            $view->with('settings', $settings);
+            $currencyCode = strtoupper((string) ($settings->default_currency ?? config('services.payment.currency', 'NGN')));
+            $currencySymbol = match($currencyCode) {
+                'NGN' => '₦',
+                'USD' => '$',
+                'GBP' => '£',
+                'EUR' => '€',
+                'CAD' => 'CA$',
+                default => $currencyCode . ' ',
+            };
+
+            $view->with('settings', $settings)
+                 ->with('currencyCode', $currencyCode)
+                 ->with('currencySymbol', $currencySymbol);
         });
     }
 }

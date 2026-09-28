@@ -14,43 +14,64 @@
             <table class="table align-middle">
                 <thead>
                     <tr class="text-secondary small">
-                        <th>Request ID</th>
-                        <th>Service</th>
+                        <th>Application Ref</th>
+                        <th>Service Requested</th>
                         <th>Processor</th>
-                        <th>Price</th>
+                        <th>Transaction ID</th>
+                        <th>Price / Paid</th>
                         <th>Payment Status</th>
-                        <th>Processing Status</th>
-                        <th>Created</th>
+                        <th>Processing Stage</th>
+                        <th>Submitted</th>
                         <th>Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($requests as $request)
                         <tr>
-                            <td><span class="fw-semibold">#{{ $request->id }}</span></td>
-                            <td><span class="fw-semibold text-dark">{{ $request->service_name }}</span></td>
-                            <td>{{ $request->vendor_name }}</td>
-                            <td>{{ $settings->default_currency ?? 'USD' }} {{ number_format($request->price, 2) }}</td>
+                            <td>
+                                <span class="font-monospace fw-bold text-primary small">{{ $request->reference_number ?? ('DE-' . $request->id) }}</span>
+                            </td>
+                            <td>
+                                <span class="fw-semibold text-dark">{{ $request->service_name }}</span>
+                                @if($request->sub_service_name)
+                                    <br><span class="text-muted small">{{ $request->sub_service_name }}</span>
+                                @endif
+                            </td>
+                            <td><span class="small">{{ $request->vendor_name ?? 'Dooter Admin' }}</span></td>
+                            <td>
+                                @if($request->payment_reference)
+                                    <span class="badge bg-light text-dark font-monospace border small" title="Payment Reference"><i class="bi bi-receipt me-1 text-success"></i>{{ $request->payment_reference }}</span>
+                                @else
+                                    <span class="text-muted small">&mdash;</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ $currencySymbol }}{{ number_format($request->price, 2) }}</div>
+                                @if($request->amount_paid > 0)
+                                    <div class="text-success small" style="font-size: 11px;">Paid: {{ $currencySymbol }}{{ number_format($request->amount_paid, 2) }}</div>
+                                @endif
+                            </td>
                             <td>
                                 @if($request->payment_status === 'Paid')
-                                    <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Paid</span>
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                                @elseif($request->payment_status === 'Partial')
+                                    <span class="badge bg-info-subtle text-info rounded-pill px-2.5 py-1">Partial</span>
                                 @else
-                                    <span class="badge bg-warning-subtle text-warning rounded-pill px-2.5 py-1">Unpaid</span>
+                                    <span class="badge bg-warning-subtle text-warning rounded-pill px-2.5 py-1"><i class="bi bi-clock me-1"></i>Unpaid</span>
                                 @endif
                             </td>
                             <td>
                                 @php
-                                    $statusBadge = match($request->status) {
-                                        'Awaiting Payment' => 'bg-warning text-dark',
-                                        'Pending Documents' => 'bg-info text-white',
-                                        'Under Review' => 'bg-primary text-white',
-                                        'In Progress' => 'bg-secondary text-white',
-                                        'Completed' => 'bg-success text-white',
-                                        'Rejected' => 'bg-danger text-white',
-                                        default => 'bg-light text-dark'
+                                    $stageDisplay = $request->current_stage_name ?? $request->status;
+                                    $statusBadge = match(true) {
+                                        in_array($request->status, ['Completed', 'Approved', 'Verified']) => 'bg-success text-white',
+                                        in_array($request->status, ['Processing', 'In Progress', 'Under Review', 'Document Verification']) => 'bg-info text-dark',
+                                        in_array($request->status, ['Payment Confirmed', 'Submitted', 'Awaiting Assignment']) => 'bg-warning text-dark',
+                                        in_array($request->status, ['Cancelled', 'Rejected']) => 'bg-danger text-white',
+                                        default => 'bg-warning text-dark'
                                     };
                                 @endphp
-                                <span class="badge {{ $statusBadge }} rounded-pill px-2.5 py-1">{{ $request->status }}</span>
+                                <span class="badge {{ $statusBadge }} rounded-pill px-2.5 py-1">{{ $stageDisplay }}</span>
                             </td>
                             <td class="small text-secondary">{{ $request->created_at->format('M d, Y') }}</td>
                             <td>
@@ -60,7 +81,7 @@
                                         <form action="{{ route('client.request.delete', $request->id) }}" method="POST" class="m-0" onsubmit="return confirm('Are you sure you want to cancel this booking?');">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill"><i class="bi bi-trash"></i></button>
+                                            <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill" title="Delete Unpaid Application"><i class="bi bi-trash"></i></button>
                                         </form>
                                     @endif
                                 </div>

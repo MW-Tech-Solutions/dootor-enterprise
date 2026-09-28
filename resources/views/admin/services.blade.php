@@ -21,12 +21,17 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card border border-light h-100 p-3 rounded-3 bg-light d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            @if($service->status === 'Active')
-                                <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Active</span>
-                            @else
-                                <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-1">Inactive</span>
-                            @endif
-                            <span class="fw-bold text-dark">{{ $settings->default_currency ?? 'USD' }} {{ number_format($service->price, 2) }}</span>
+                            <div class="d-flex align-items-center gap-1">
+                                @if($service->status === 'Active')
+                                    <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Active</span>
+                                @else
+                                    <span class="badge bg-danger-subtle text-danger rounded-pill px-2.5 py-1">Inactive</span>
+                                @endif
+                                @if($service->is_primary)
+                                    <span class="badge bg-warning text-dark rounded-pill px-2.5 py-1"><i class="bi bi-star-fill me-1"></i>Primary</span>
+                                @endif
+                            </div>
+                            <span class="fw-bold text-dark">{{ $currencySymbol ?? '₦' }}{{ number_format($service->price, 2) }}</span>
                         </div>
                         
                         <h3 class="h6 fw-bold mb-1">{{ $service->name }}</h3>
@@ -76,7 +81,7 @@
                                         <input type="text" name="name" id="edit-name-{{ $service->id }}" class="form-control rounded-3" value="{{ old('name', $service->name) }}" required>
                                     </div>
                                     <div class="mb-3">
-                                        <label for="edit-price-{{ $service->id }}" class="form-label small fw-medium">Base Default Price ({{ $settings->default_currency ?? 'USD' }})</label>
+                                        <label for="edit-price-{{ $service->id }}" class="form-label small fw-medium">Base Default Price ({{ $currencyCode ?? 'NGN' }})</label>
                                         <input type="number" name="price" id="edit-price-{{ $service->id }}" step="0.01" min="0" class="form-control rounded-3" value="{{ old('price', $service->price) }}" required>
                                     </div>
                                     <div class="mb-3">
@@ -89,6 +94,12 @@
                                             <option value="Active" {{ $service->status === 'Active' ? 'selected' : '' }}>Active</option>
                                             <option value="Inactive" {{ $service->status === 'Inactive' ? 'selected' : '' }}>Inactive</option>
                                         </select>
+                                    </div>
+                                    <div class="mb-3 form-check form-switch bg-light p-3 rounded-3 border">
+                                        <input class="form-check-input ms-0 me-2" type="checkbox" name="is_primary" id="edit-is_primary-{{ $service->id }}" value="1" {{ old('is_primary', $service->is_primary) ? 'checked' : '' }}>
+                                        <label class="form-check-label small fw-bold text-dark" for="edit-is_primary-{{ $service->id }}">
+                                            Mark as Primary Service (Featured 6 Main Services)
+                                        </label>
                                     </div>
                                 </div>
                                 <div class="modal-footer border-top">
@@ -125,7 +136,7 @@
                         <input type="text" name="name" id="create-name" class="form-control rounded-3" placeholder="e.g. Birth Certificate (NPC)" required>
                     </div>
                     <div class="mb-3">
-                        <label for="create-price" class="form-label small fw-medium">Base Default Price ({{ $settings->default_currency ?? 'USD' }})</label>
+                        <label for="create-price" class="form-label small fw-medium">Base Default Price ({{ $currencyCode ?? 'NGN' }})</label>
                         <input type="number" name="price" id="create-price" step="0.01" min="0" class="form-control rounded-3" value="0.00" required>
                     </div>
                     <div class="mb-3">
@@ -138,6 +149,12 @@
                             <option value="Active">Active</option>
                             <option value="Inactive">Inactive</option>
                         </select>
+                    </div>
+                    <div class="mb-3 form-check form-switch bg-light p-3 rounded-3 border">
+                        <input class="form-check-input ms-0 me-2" type="checkbox" name="is_primary" id="create-is_primary" value="1">
+                        <label class="form-check-label small fw-bold text-dark" for="create-is_primary">
+                            Mark as Primary Service (Featured 6 Main Services)
+                        </label>
                     </div>
                 </div>
                 <div class="modal-footer border-top">

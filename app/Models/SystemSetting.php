@@ -56,4 +56,17 @@ class SystemSetting extends Model
             'smtp_port' => 'integer',
         ];
     }
+
+    public function getCurrencySymbolAttribute(): string
+    {
+        $code = strtoupper((string) ($this->default_currency ?? config('services.payment.currency', 'NGN')));
+        return match($code) {
+            'NGN' => '₦',
+            'USD' => '$',
+            'GBP' => '£',
+            'EUR' => '€',
+            'CAD' => 'CA$',
+            default => $code . ' ',
+        };
+    }
 }

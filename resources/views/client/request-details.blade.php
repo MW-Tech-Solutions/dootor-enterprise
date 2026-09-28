@@ -131,21 +131,30 @@
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Service Name</span>
                     <span class="fw-semibold text-dark fs-6">{{ $request->service_name }}</span>
+                    @if($request->sub_service_name)
+                        <span class="text-muted d-block small">({{ $request->sub_service_name }})</span>
+                    @endif
                 </div>
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Total Application Fee</span>
-                    <span class="fw-bold text-dark fs-6">${{ number_format($request->price, 2) }}</span>
+                    <span class="fw-bold text-dark fs-6">{{ $currencySymbol ?? '₦' }}{{ number_format($request->price, 2) }}</span>
                 </div>
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Amount Paid</span>
-                    <span class="fw-bold text-success fs-6">${{ number_format($request->amount_paid, 2) }}</span>
+                    <span class="fw-bold text-success fs-6">{{ $currencySymbol ?? '₦' }}{{ number_format($request->amount_paid, 2) }}</span>
                 </div>
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Outstanding Balance</span>
                     <span class="fw-bold {{ $request->outstanding_balance > 0 ? 'text-danger' : 'text-muted' }} fs-6">
-                        ${{ number_format($request->outstanding_balance, 2) }}
+                        {{ $currencySymbol ?? '₦' }}{{ number_format($request->outstanding_balance, 2) }}
                     </span>
                 </div>
+                @if($request->payment_reference)
+                    <div class="col-sm-6">
+                        <span class="text-muted d-block">Transaction / Payment Ref</span>
+                        <span class="fw-bold font-monospace text-primary fs-6">{{ $request->payment_reference }}</span>
+                    </div>
+                @endif
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Assigned Officer</span>
                     <span class="fw-semibold text-dark fs-6">{{ $request->assignedStaff->name ?? ($request->assignedRole->name ?? 'Dooter Support Desk') }}</span>
@@ -263,6 +272,12 @@
                     <div class="d-flex justify-content-between py-2 border-bottom border-light">
                         <span class="text-muted">Payment Gateway:</span>
                         <span class="fw-semibold text-dark text-uppercase">{{ $request->payment_gateway }}</span>
+                    </div>
+                @endif
+                @if($request->payment_reference)
+                    <div class="d-flex justify-content-between py-2 border-bottom border-light">
+                        <span class="text-muted">Transaction ID:</span>
+                        <span class="fw-semibold font-monospace text-dark" style="font-size: 11px;">{{ $request->payment_reference }}</span>
                     </div>
                 @endif
             </div>

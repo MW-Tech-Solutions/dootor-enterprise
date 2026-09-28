@@ -175,29 +175,46 @@
                         <tr>
                             <td>
                                 <span class="font-monospace fw-bold text-primary small">{{ $request->reference_number ?? ('DE-' . $request->id) }}</span>
+                                @if($request->payment_reference)
+                                    <div class="text-muted font-monospace mt-0.5" style="font-size: 10px;" title="Transaction ID / Payment Ref">
+                                        <i class="bi bi-receipt me-1 text-success"></i>Tx: {{ $request->payment_reference }}
+                                    </div>
+                                @endif
                             </td>
                             <td>
                                 <span class="fw-bold text-dark">{{ $request->service_name }}</span><br>
+                                @if($request->sub_service_name)
+                                    <span class="text-secondary small d-block">{{ $request->sub_service_name }}</span>
+                                @endif
                                 <span class="text-muted small">Submitted {{ $request->created_at->format('M d, Y') }}</span>
                             </td>
-                            <td class="fw-semibold text-dark">${{ number_format($request->amount_paid, 2) }}</td>
+                            <td>
+                                <div class="fw-bold text-dark">{{ $currencySymbol }}{{ number_format($request->amount_paid, 2) }}</div>
+                                @if($request->price != $request->amount_paid && $request->price > 0)
+                                    <div class="text-muted" style="font-size: 11px;">Total: {{ $currencySymbol }}{{ number_format($request->price, 2) }}</div>
+                                @endif
+                            </td>
                             <td>
                                 @if($request->payment_status === 'Paid')
-                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1">Paid</span>
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1"><i class="bi bi-check-circle me-1"></i>Paid</span>
+                                @elseif($request->payment_status === 'Partial')
+                                    <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-1">Partial</span>
                                 @else
-                                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1">Unpaid</span>
+                                    <span class="badge bg-warning bg-opacity-10 text-warning rounded-pill px-3 py-1"><i class="bi bi-clock me-1"></i>Unpaid</span>
                                 @endif
                             </td>
                             <td>
                                 @php
-                                    $statusBadge = match($request->status) {
-                                        'Completed' => 'bg-success text-white',
-                                        'Processing' => 'bg-info text-dark',
-                                        'Cancelled' => 'bg-danger text-white',
+                                    $stageDisplay = $request->current_stage_name ?? $request->status;
+                                    $statusBadge = match(true) {
+                                        in_array($request->status, ['Completed', 'Approved', 'Verified']) => 'bg-success text-white',
+                                        in_array($request->status, ['Processing', 'In Progress', 'Under Review', 'Document Verification']) => 'bg-info text-dark',
+                                        in_array($request->status, ['Payment Confirmed']) => 'bg-warning text-dark',
+                                        in_array($request->status, ['Cancelled', 'Rejected']) => 'bg-danger text-white',
                                         default => 'bg-warning text-dark'
                                     };
                                 @endphp
-                                <span class="badge {{ $statusBadge }} rounded-pill px-3 py-1">{{ $request->status }}</span>
+                                <span class="badge {{ $statusBadge }} rounded-pill px-3 py-1">{{ $stageDisplay }}</span>
                             </td>
                             <td>
                                 <a href="{{ route('client.request.details', $request->id) }}" class="btn btn-outline-dark btn-sm rounded-pill px-3">View Details</a>
