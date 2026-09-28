@@ -62,4 +62,9 @@ class Service extends Model
     {
         return $this->hasMany(ServiceWorkflowStage::class)->orderBy('sort_order', 'asc');
     }
+
+    public function requests(): HasMany
+    {
+        return $this->hasMany(ServiceRequest::class);
+    }
 }

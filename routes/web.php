@@ -178,6 +178,7 @@ Route::middleware('auth')->group(function () {
         Route::middleware('permission:reports.view')->group(function () {
             Route::get('/reports', [ReportController::class, 'index'])->name('admin.reports');
             Route::get('/reports/export-csv', [ReportController::class, 'exportCsv'])->name('admin.reports.export');
+            Route::get('/reports/export-pdf', [ReportController::class, 'exportPdf'])->name('admin.reports.export-pdf');
         });
 
         // Settings

@@ -3,86 +3,129 @@
 namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
-use App\Models\ServiceRequest;
+use App\Models\Service;
 use App\Models\User;
+use App\Services\ReportExportService;
+use App\Services\ReportQueryService;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ReportController extends Controller
 {
     /**
-     * Display Reports Dashboard for Admin.
+     * Display Reports & Records Dashboard for Admin / Staff.
      */
     public function index(Request $request)
     {
-        $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
-        $status = $request->query('status');
+        $user = auth()->user();
+        $availableReportTypes = ReportQueryService::getReportTypes($user);
 
-        $query = ServiceRequest::query();
-
-        if ($startDate) {
-            $query->whereDate('created_at', '>=', $startDate);
-        }
-        if ($endDate) {
-            $query->whereDate('created_at', '<=', $endDate);
-        }
-        if ($status) {
-            $query->where('status', $status);
+        $reportType = $request->query('report_type', 'all');
+        if (!array_key_exists($reportType, $availableReportTypes)) {
+            // Default to 'all' if invalid or unauthorized report type requested
+            if (array_key_exists('all', $availableReportTypes)) {
+                $reportType = 'all';
+            } else {
+                $reportType = array_key_first($availableReportTypes) ?? 'all';
+            }
         }
 
-        $requests = $query->latest()->get();
+        if ($reportType && !ReportQueryService::canAccessReportType($user, $reportType)) {
+            abort(403, 'Unauthorized access to the requested report type.');
+        }
 
-        $totalRevenue = $query->sum('amount_paid');
-        $totalOutstanding = $query->sum('outstanding_balance');
-        $totalApplications = $requests->count();
-        $completedApplications = $requests->where('status', 'Completed')->count();
-        $pendingApplications = $requests->whereIn('status', ['Awaiting Payment', 'Documents Under Review', 'Processing', 'Awaiting External Agency'])->count();
+        $filters = [
+            'report_type' => $reportType,
+            'date_preset' => $request->query('date_preset', 'all_time'),
+            'date_from' => $request->query('date_from'),
+            'date_to' => $request->query('date_to'),
+            'status' => $request->query('status'),
+            'service_id' => $request->query('service_id'),
+            'staff_id' => $request->query('staff_id'),
+            'payment_status' => $request->query('payment_status'),
+            'country' => $request->query('country'),
+            'search' => $request->query('search'),
+            'per_page' => (int) $request->query('per_page', 25),
+        ];
 
-        $servicesBreakdown = ServiceRequest::selectRaw('service_name, count(*) as total, sum(amount_paid) as revenue')
-            ->groupBy('service_name')
-            ->get();
+        // Ensure per_page is one of [25, 50, 100, 250]
+        if (!in_array($filters['per_page'], [25, 50, 100, 250])) {
+            $filters['per_page'] = 25;
+        }
+
+        // Build query and get paginated results
+        $query = ReportQueryService::buildQuery($reportType, $filters, $user);
+        $records = $query->paginate($filters['per_page'])->withQueryString();
+
+        // Summary metrics
+        $metrics = ReportQueryService::getSummaryMetrics($reportType, $filters, $user);
+
+        // Supporting dropdown lists for filters
+        $services = Service::orderBy('name')->get(['id', 'name']);
+        $staffMembers = User::whereIn('role', ['admin', 'super_admin', 'manager', 'processing_officer', 'staff'])
+            ->orderBy('first_name')
+            ->get(['id', 'first_name', 'last_name', 'staff_file_number', 'role']);
+
+        $activeReportInfo = $availableReportTypes[$reportType] ?? ['label' => 'Records'];
 
         return view('admin.reports', compact(
-            'requests', 'totalRevenue', 'totalOutstanding', 'totalApplications',
-            'completedApplications', 'pendingApplications', 'servicesBreakdown'
+            'availableReportTypes',
+            'reportType',
+            'activeReportInfo',
+            'filters',
+            'records',
+            'metrics',
+            'services',
+            'staffMembers'
         ));
     }
 
     /**
      * Export Reports to CSV.
      */
-    public function exportCsv(Request $request): StreamedResponse
+    public function exportCsv(Request $request)
     {
-        $fileName = 'dooter_enterprise_report_' . date('Y-m-d') . '.csv';
-        $requests = ServiceRequest::latest()->get();
+        $user = auth()->user();
+        if (!$user->hasPermission('reports.export') && !$user->hasPermission('reports.view') && !$user->hasRole('super-admin') && !$user->hasRole('admin')) {
+            abort(403, 'Unauthorized to export report data.');
+        }
 
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-        ];
+        $availableReportTypes = ReportQueryService::getReportTypes($user);
+        $reportType = $request->query('report_type', 'all');
 
-        $callback = function () use ($requests) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, ['Reference Number', 'Client Name', 'Client Email', 'Service Name', 'Total Price', 'Amount Paid', 'Outstanding Balance', 'Payment Status', 'Application Status', 'Date']);
+        if (!array_key_exists($reportType, $availableReportTypes) || !ReportQueryService::canAccessReportType($user, $reportType)) {
+            abort(403, 'Unauthorized access to the requested report type.');
+        }
 
-            foreach ($requests as $req) {
-                fputcsv($file, [
-                    $req->reference_number ?? ('DE-' . $req->id),
-                    $req->client_name,
-                    $req->client_email,
-                    $req->service_name,
-                    $req->price,
-                    $req->amount_paid,
-                    $req->outstanding_balance,
-                    $req->payment_status,
-                    $req->status,
-                    $req->created_at->format('Y-m-d H:i'),
-                ]);
-            }
-            fclose($file);
-        };
+        $filters = $request->only([
+            'report_type', 'date_preset', 'date_from', 'date_to', 'status',
+            'service_id', 'staff_id', 'payment_status', 'country', 'search'
+        ]);
 
-        return response()->stream($callback, 200, $headers);
+        return ReportExportService::exportCsv($reportType, $filters, $user);
+    }
+
+    /**
+     * Export Reports to PDF.
+     */
+    public function exportPdf(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user->hasPermission('reports.export') && !$user->hasPermission('reports.view') && !$user->hasRole('super-admin') && !$user->hasRole('admin')) {
+            abort(403, 'Unauthorized to export report data.');
+        }
+
+        $availableReportTypes = ReportQueryService::getReportTypes($user);
+        $reportType = $request->query('report_type', 'all');
+
+        if (!array_key_exists($reportType, $availableReportTypes) || !ReportQueryService::canAccessReportType($user, $reportType)) {
+            abort(403, 'Unauthorized access to the requested report type.');
+        }
+
+        $filters = $request->only([
+            'report_type', 'date_preset', 'date_from', 'date_to', 'status',
+            'service_id', 'staff_id', 'payment_status', 'country', 'search'
+        ]);
+
+        return ReportExportService::exportPdf($reportType, $filters, $user);
     }
 }
