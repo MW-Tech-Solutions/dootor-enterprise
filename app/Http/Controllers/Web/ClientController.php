@@ -40,37 +40,36 @@ class ClientController extends Controller
 
     public function services()
     {
+        $primaryNames = [
+            'Passport Services',
+            'NIN Services',
+            'Emergency Travel Certificate',
+            'Authorization Letter / Power of Attorney',
+            'Waiver / Appointment Reschedule',
+            'Same Day Collection',
+        ];
+
         $primaryServices = Service::where('status', 'Active')
             ->whereNull('parent_id')
-            ->where(function ($q) {
-                $q->where('is_primary', true)->orWhere('is_primary', 1);
+            ->where(function ($q) use ($primaryNames) {
+                $q->where('is_primary', true)
+                  ->orWhere('is_primary', 1)
+                  ->orWhereIn('name', $primaryNames);
             })
             ->with(['subServices' => function ($q) {
                 $q->where('status', 'Active');
             }])
             ->get();
 
-        // Fail-safe fallback: If database records have is_primary = 0, treat all top-level services (parent_id IS NULL) as primary services
-        if ($primaryServices->isEmpty()) {
-            $primaryServices = Service::where('status', 'Active')
-                ->whereNull('parent_id')
-                ->with(['subServices' => function ($q) {
-                    $q->where('status', 'Active');
-                }])
-                ->get();
+        $primaryIds = $primaryServices->pluck('id')->toArray();
 
-            $otherServices = collect();
-        } else {
-            $otherServices = Service::where('status', 'Active')
-                ->whereNull('parent_id')
-                ->where(function ($q) {
-                    $q->where('is_primary', false)->orWhere('is_primary', 0);
-                })
-                ->with(['subServices' => function ($q) {
-                    $q->where('status', 'Active');
-                }])
-                ->get();
-        }
+        $otherServices = Service::where('status', 'Active')
+            ->whereNull('parent_id')
+            ->whereNotIn('id', $primaryIds)
+            ->with(['subServices' => function ($q) {
+                $q->where('status', 'Active');
+            }])
+            ->get();
 
         $settings = SystemSetting::first();
         $currencyCode = strtoupper((string) ($settings->default_currency ?? config('services.payment.currency', 'NGN')));

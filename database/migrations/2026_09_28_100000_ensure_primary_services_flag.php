@@ -12,12 +12,24 @@ return new class extends Migration
     public function up(): void
     {
         if (Schema::hasTable('services')) {
+            $primaryNames = [
+                'Passport Services',
+                'NIN Services',
+                'Emergency Travel Certificate',
+                'Authorization Letter / Power of Attorney',
+                'Waiver / Appointment Reschedule',
+                'Same Day Collection',
+            ];
+
+            // 1. Set is_primary = 1 for designated primary services
             \DB::table('services')
-                ->whereNull('parent_id')
-                ->where(function ($q) {
-                    $q->where('is_primary', false)->orWhere('is_primary', 0)->orWhereNull('is_primary');
-                })
+                ->whereIn('name', $primaryNames)
                 ->update(['is_primary' => true]);
+
+            // 2. Set is_primary = 0 for non-primary services
+            \DB::table('services')
+                ->whereNotIn('name', $primaryNames)
+                ->update(['is_primary' => false]);
         }
     }
 

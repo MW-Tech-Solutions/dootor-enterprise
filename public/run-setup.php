@@ -118,12 +118,17 @@ try {
     }
 
     if (\Illuminate\Support\Facades\Schema::hasTable('services')) {
-        $updatedCount = \App\Models\Service::whereNull('parent_id')->where(function($q) {
-            $q->where('is_primary', false)->orWhere('is_primary', 0)->orWhereNull('is_primary');
-        })->update(['is_primary' => true]);
-        if ($updatedCount > 0) {
-            echo "<div class='cmd-box'><span class='success'>[DATA REPAIR]</span> Automatically set <code>is_primary = 1</code> for {$updatedCount} top-level service(s).</div>";
-        }
+        $primaryNames = [
+            'Passport Services',
+            'NIN Services',
+            'Emergency Travel Certificate',
+            'Authorization Letter / Power of Attorney',
+            'Waiver / Appointment Reschedule',
+            'Same Day Collection',
+        ];
+        \DB::table('services')->whereIn('name', $primaryNames)->update(['is_primary' => true]);
+        \DB::table('services')->whereNotIn('name', $primaryNames)->update(['is_primary' => false]);
+        echo "<div class='cmd-box'><span class='success'>[DATA REPAIR]</span> Updated primary services status flags in database successfully.</div>";
     }
 } catch (\Exception $e) {
     echo "<div class='cmd-box'><span class='error'>[SCHEMA WARNING]</span> Schema check: " . htmlspecialchars($e->getMessage()) . "</div>";
