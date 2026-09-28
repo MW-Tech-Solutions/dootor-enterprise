@@ -116,6 +116,15 @@ try {
         });
         echo "<div class='cmd-box'><span class='success'>[SCHEMA FIX]</span> Added missing <code>deleted_at</code> column to <code>users</code> table automatically.</div>";
     }
+
+    if (\Illuminate\Support\Facades\Schema::hasTable('services')) {
+        $updatedCount = \App\Models\Service::whereNull('parent_id')->where(function($q) {
+            $q->where('is_primary', false)->orWhere('is_primary', 0)->orWhereNull('is_primary');
+        })->update(['is_primary' => true]);
+        if ($updatedCount > 0) {
+            echo "<div class='cmd-box'><span class='success'>[DATA REPAIR]</span> Automatically set <code>is_primary = 1</code> for {$updatedCount} top-level service(s).</div>";
+        }
+    }
 } catch (\Exception $e) {
     echo "<div class='cmd-box'><span class='error'>[SCHEMA WARNING]</span> Schema check: " . htmlspecialchars($e->getMessage()) . "</div>";
 }
