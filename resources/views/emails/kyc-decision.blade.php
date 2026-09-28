@@ -4,60 +4,134 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $statusLabel }}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: #1e293b;
+        }
+        .email-wrapper {
+            width: 100%;
+            background-color: #f1f5f9;
+            padding: 40px 16px;
+            box-sizing: border-box;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 12px 32px rgba(0, 46, 26, 0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .email-header {
+            background: linear-gradient(135deg, #002e1a 0%, #004225 100%);
+            padding: 30px 32px;
+            border-bottom: 4px solid #d4af37;
+            text-align: center;
+        }
+        .email-body {
+            padding: 38px 36px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            margin-bottom: 20px;
+        }
+        .badge-approved {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+        .badge-rejected {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+        }
+        .headline {
+            font-size: 22px;
+            font-weight: 800;
+            color: #0f172a;
+            margin: 0 0 16px 0;
+            letter-spacing: -0.2px;
+        }
+        .content-text {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #334155;
+            margin-bottom: 24px;
+        }
+        .alert-box {
+            padding: 18px 22px;
+            border-radius: 12px;
+            margin: 24px 0;
+        }
+        .alert-approved {
+            background-color: #f0fdf4;
+            border-left: 4px solid #16a34a;
+            color: #14532d;
+        }
+        .alert-rejected {
+            background-color: #fef2f2;
+            border-left: 4px solid #dc2626;
+            color: #7f1d1d;
+        }
+        .email-footer {
+            background-color: #f8fafc;
+            padding: 26px 32px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            font-size: 12px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+    </style>
 </head>
-<body style="margin:0;background:#f4f7fb;font-family:Arial,Helvetica,sans-serif;color:#111827;">
-    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f4f7fb;padding:32px 16px;">
-        <tr>
-            <td align="center">
-                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:10px;overflow:hidden;border:1px solid #e5e7eb;">
-                    <tr>
-                        <td style="padding:28px 32px;background:{{ $accent }};color:#ffffff;">
-                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
-                                <tr>
-                                    <td style="vertical-align:middle;">
-                                        @if ($logoUrl)
-                                            <img src="{{ $logoUrl }}" alt="{{ $companyName }}" style="height:42px;max-width:160px;object-fit:contain;background:#ffffff;border-radius:8px;padding:6px;">
-                                        @else
-                                            <div style="font-size:20px;font-weight:700;">{{ $companyName }}</div>
-                                        @endif
-                                    </td>
-                                    <td align="right" style="vertical-align:middle;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;">
-                                        {{ $statusLabel }}
-                                    </td>
-                                </tr>
-                            </table>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding:32px;">
-                            <h1 style="margin:0 0 12px;font-size:24px;line-height:1.3;color:#111827;">Hello {{ $vendorName }},</h1>
-                            <p style="margin:0 0 20px;font-size:16px;line-height:1.7;color:#374151;">{{ $message }}</p>
+<body>
+    <div class="email-wrapper">
+        <div class="email-container">
+            <div class="email-header">
+                @if ($logoUrl)
+                    <img src="{{ $logoUrl }}" alt="{{ $companyName }}" style="max-height: 42px; width: auto; vertical-align: middle;">
+                @endif
+                <span style="color: #ffffff; font-size: 20px; font-weight: 800; letter-spacing: 1px; vertical-align: middle; margin-left: 10px;">{{ $companyName }}</span>
+            </div>
+            <div class="email-body">
+                <div class="badge {{ $isApproved ? 'badge-approved' : 'badge-rejected' }}">
+                    {{ $statusLabel }}
+                </div>
+                <h1 class="headline">Hello {{ $vendorName }},</h1>
+                <div class="content-text">{{ $message }}</div>
 
-                            @if (!$isApproved)
-                                <div style="margin:24px 0;padding:18px 20px;border-left:4px solid {{ $accent }};background:#fef2f2;border-radius:8px;">
-                                    <div style="font-size:13px;font-weight:700;text-transform:uppercase;color:#991b1b;margin-bottom:8px;">Reason for rejection</div>
-                                    <div style="font-size:15px;line-height:1.6;color:#7f1d1d;">{{ $reason }}</div>
-                                </div>
-                            @else
-                                <div style="margin:24px 0;padding:18px 20px;border-left:4px solid {{ $accent }};background:#f0fdf4;border-radius:8px;">
-                                    <div style="font-size:15px;line-height:1.6;color:#14532d;">Your vendor account is now active.</div>
-                                </div>
-                            @endif
+                @if (!$isApproved)
+                    <div class="alert-box alert-rejected">
+                        <div style="font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; color: #991b1b; margin-bottom: 6px;">Reason for Rejection</div>
+                        <div style="font-size: 14px; line-height: 1.6; color: #7f1d1d;">{{ $reason }}</div>
+                    </div>
+                @else
+                    <div class="alert-box alert-approved">
+                        <div style="font-size: 14px; font-weight: 700; color: #14532d;">✓ Your vendor account has been successfully verified &amp; activated!</div>
+                    </div>
+                @endif
 
-                            <p style="margin:0;font-size:15px;line-height:1.7;color:#4b5563;">
-                                Regards,<br>
-                                <strong>{{ $companyName }} Verification Team</strong>
-                            </p>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style="padding:18px 32px;background:#f9fafb;border-top:1px solid #e5e7eb;font-size:12px;line-height:1.6;color:#6b7280;">
-                            This message was sent automatically after an admin reviewed your vendor KYC submission.
-                        </td>
-                    </tr>
-                </table>
-            </td>
-        </tr>
-    </table>
+                <p style="margin: 28px 0 0 0; font-size: 14px; line-height: 1.6; color: #475569;">
+                    Regards,<br>
+                    <strong style="color: #004225;">{{ $companyName }} Compliance &amp; Verification Team</strong>
+                </p>
+            </div>
+            <div class="email-footer">
+                <p style="margin: 0 0 4px 0; font-weight: 600;">&copy; {{ date('Y') }} {{ $companyName }}. All rights reserved.</p>
+                <p style="margin: 0;">Automated account decision notice. Please contact support for inquiries.</p>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

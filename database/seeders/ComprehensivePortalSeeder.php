@@ -175,22 +175,29 @@ class ComprehensivePortalSeeder extends Seeder
                 'code' => 'new_application_user',
                 'title' => 'User Application Submission Confirmation',
                 'subject' => 'Application Received: {service_name} ({reference_number})',
-                'body_html' => '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #004225;">Application Confirmation</h2>
-                    <p>Dear <strong>{full_name}</strong>,</p>
-                    <p>Thank you for choosing <strong>{company_name}</strong>. Your service application has been successfully submitted and logged into our system.</p>
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8fafc; border: 1px solid #cbd5e1;">
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Reference Number:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; color: #004225; font-weight: bold;">{reference_number}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Service Name:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{service_name}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Submission Date:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{application_date}</td></tr>
-                        <tr><td style="padding: 10px; font-weight: bold;">Current Status:</td><td style="padding: 10px;">{status}</td></tr>
-                    </table>
-                    <p>You can track the progress of your application at any time by visiting your client dashboard:</p>
-                    <p style="text-align: center; margin: 25px 0;">
-                        <a href="{dashboard_link}" style="background: #004225; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Track Application</a>
-                    </p>
-                    <hr style="border: 0; border-top: 1px solid #e2e8f0; margin-top: 30px;">
-                    <p style="font-size: 12px; color: #64748b; text-align: center;">This is an automated notification from {company_name}. Please do not reply directly to this email.</p>
+                'body_html' => '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,46,26,0.08);">
+                    <div style="background: linear-gradient(135deg, #002e1a 0%, #004225 100%); padding: 30px; text-align: center; border-bottom: 4px solid #d4af37;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800; letter-spacing: 0.5px;">{company_name}</h1>
+                        <p style="color: #d4af37; margin: 4px 0 0 0; font-size: 13px; font-weight: 600;">Official Application Confirmation</p>
+                    </div>
+                    <div style="padding: 36px 32px;">
+                        <div style="display: inline-block; background: #dcfce7; color: #15803d; border: 1px solid #86efac; padding: 4px 14px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 20px;">✓ Application Submitted</div>
+                        <h2 style="color: #0f172a; font-size: 20px; font-weight: 800; margin: 0 0 16px 0;">Hello {full_name},</h2>
+                        <p style="color: #334155; font-size: 15px; line-height: 1.7; margin-bottom: 24px;">Thank you for trusting <strong>{company_name}</strong>. Your service application has been successfully logged into our processing portal.</p>
+                        <table style="width: 100%; border-collapse: collapse; margin: 24px 0; background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; font-size: 14px;">
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b; width: 40%;">Reference Number:</td><td style="padding: 12px 16px; font-weight: 800; color: #004225;">{reference_number}</td></tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Service Requested:</td><td style="padding: 12px 16px; font-weight: 700; color: #0f172a;">{service_name}</td></tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Date Submitted:</td><td style="padding: 12px 16px; color: #334155;">{application_date}</td></tr>
+                            <tr><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Current Status:</td><td style="padding: 12px 16px;"><span style="background: #e0f2fe; color: #0369a1; padding: 3px 10px; border-radius: 20px; font-weight: 700; font-size: 12px;">{status}</span></td></tr>
+                        </table>
+                        <p style="color: #334155; font-size: 14px; line-height: 1.6; margin-bottom: 28px;">You can track real-time progress and upload supporting documents directly from your personal dashboard:</p>
+                        <div style="text-align: center; margin: 28px 0;">
+                            <a href="{dashboard_link}" style="background: linear-gradient(135deg, #004225 0%, #002e1a 100%); color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 50px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 6px 18px rgba(0,66,37,0.25);">Track Application &rarr;</a>
+                        </div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 22px 32px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b; line-height: 1.6;">
+                        &copy; {company_name}. All rights reserved. Automated security notification.
+                    </div>
                 </div>',
                 'variables_description' => '{full_name}, {service_name}, {reference_number}, {application_date}, {status}, {company_name}, {dashboard_link}',
             ],
@@ -198,16 +205,28 @@ class ComprehensivePortalSeeder extends Seeder
                 'code' => 'new_application_admin',
                 'title' => 'Admin Job Alert - New Application',
                 'subject' => 'New Job Alert: {service_name} Application ({reference_number})',
-                'body_html' => '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #004225;">New Service Application Notification</h2>
-                    <p>A new application has been submitted on <strong>{company_name}</strong>.</p>
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8fafc; border: 1px solid #cbd5e1;">
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Applicant:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{full_name}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Service:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{service_name}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Reference Number:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold; color: #004225;">{reference_number}</td></tr>
-                        <tr><td style="padding: 10px; font-weight: bold;">Submission Date:</td><td style="padding: 10px;">{application_date}</td></tr>
-                    </table>
-                    <p>Please log in to the administrative dashboard to review documents and process this request.</p>
+                'body_html' => '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,46,26,0.08);">
+                    <div style="background: linear-gradient(135deg, #002e1a 0%, #004225 100%); padding: 30px; text-align: center; border-bottom: 4px solid #d4af37;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">{company_name}</h1>
+                        <p style="color: #d4af37; margin: 4px 0 0 0; font-size: 13px; font-weight: 600;">Administrative Work Queue Alert</p>
+                    </div>
+                    <div style="padding: 36px 32px;">
+                        <div style="display: inline-block; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; padding: 4px 14px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 20px;">🔔 New Action Item</div>
+                        <h2 style="color: #0f172a; font-size: 20px; font-weight: 800; margin: 0 0 16px 0;">New Application Submitted</h2>
+                        <p style="color: #334155; font-size: 15px; line-height: 1.7; margin-bottom: 24px;">A new client application has been registered and requires vetting or assignment.</p>
+                        <table style="width: 100%; border-collapse: collapse; margin: 24px 0; background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; font-size: 14px;">
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b; width: 40%;">Client Name:</td><td style="padding: 12px 16px; font-weight: 700; color: #0f172a;">{full_name}</td></tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Service:</td><td style="padding: 12px 16px; font-weight: 700; color: #0f172a;">{service_name}</td></tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Reference No:</td><td style="padding: 12px 16px; font-weight: 800; color: #004225;">{reference_number}</td></tr>
+                            <tr><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Submission Time:</td><td style="padding: 12px 16px; color: #334155;">{application_date}</td></tr>
+                        </table>
+                        <div style="text-align: center; margin: 28px 0;">
+                            <a href="{dashboard_link}" style="background: linear-gradient(135deg, #004225 0%, #002e1a 100%); color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 50px; font-weight: 700; font-size: 14px; display: inline-block;">Open Admin Portal &rarr;</a>
+                        </div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 22px 32px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b;">
+                        Internal System Notification for Authorized Staff.
+                    </div>
                 </div>',
                 'variables_description' => '{full_name}, {service_name}, {reference_number}, {application_date}, {company_name}',
             ],
@@ -215,19 +234,28 @@ class ComprehensivePortalSeeder extends Seeder
                 'code' => 'stage_updated_user',
                 'title' => 'Application Stage Transition Notice',
                 'subject' => 'Update on your {service_name} Application ({reference_number})',
-                'body_html' => '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #004225;">Application Progress Update</h2>
-                    <p>Dear <strong>{full_name}</strong>,</p>
-                    <p>Your application <strong>{reference_number}</strong> for <strong>{service_name}</strong> has progressed to a new stage.</p>
-                    <div style="background: #f1f5f9; padding: 15px; border-left: 4px solid #004225; margin: 20px 0; border-radius: 4px;">
-                        <h4 style="margin: 0 0 5px 0; color: #004225;">Current Stage: {current_stage}</h4>
-                        <p style="margin: 0; color: #475569;">Status: <strong>{status}</strong></p>
+                'body_html' => '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,46,26,0.08);">
+                    <div style="background: linear-gradient(135deg, #002e1a 0%, #004225 100%); padding: 30px; text-align: center; border-bottom: 4px solid #d4af37;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">{company_name}</h1>
+                        <p style="color: #d4af37; margin: 4px 0 0 0; font-size: 13px; font-weight: 600;">Status Tracker Update</p>
                     </div>
-                    {notes}
-                    <p>Log in to your dashboard to view complete details and stage history.</p>
-                    <p style="text-align: center; margin: 25px 0;">
-                        <a href="{dashboard_link}" style="background: #004225; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">View Progress</a>
-                    </p>
+                    <div style="padding: 36px 32px;">
+                        <div style="display: inline-block; background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; padding: 4px 14px; border-radius: 50px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 20px;">⚡ Stage Progress Alert</div>
+                        <h2 style="color: #0f172a; font-size: 20px; font-weight: 800; margin: 0 0 16px 0;">Hello {full_name},</h2>
+                        <p style="color: #334155; font-size: 15px; line-height: 1.7; margin-bottom: 24px;">Your application <strong>{reference_number}</strong> for <strong>{service_name}</strong> has successfully moved to a new processing milestone.</p>
+                        <div style="background: #f8fafc; border-left: 4px solid #004225; padding: 20px; border-radius: 10px; margin: 24px 0; border: 1px solid #e2e8f0; border-left-width: 4px;">
+                            <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px; margin-bottom: 4px;">Current Milestone Stage</div>
+                            <div style="font-size: 18px; font-weight: 800; color: #004225; margin-bottom: 6px;">{current_stage}</div>
+                            <div style="font-size: 13px; color: #475569;">Status: <strong>{status}</strong></div>
+                        </div>
+                        {notes}
+                        <div style="text-align: center; margin: 28px 0;">
+                            <a href="{dashboard_link}" style="background: linear-gradient(135deg, #004225 0%, #002e1a 100%); color: #ffffff; text-decoration: none; padding: 14px 36px; border-radius: 50px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 6px 18px rgba(0,66,37,0.25);">View Timeline & Progress &rarr;</a>
+                        </div>
+                    </div>
+                    <div style="background: #f8fafc; padding: 22px 32px; border-top: 1px solid #e2e8f0; text-align: center; font-size: 12px; color: #64748b;">
+                        &copy; {company_name}. All rights reserved.
+                    </div>
                 </div>',
                 'variables_description' => '{full_name}, {service_name}, {reference_number}, {current_stage}, {status}, {notes}, {company_name}, {dashboard_link}',
             ],
@@ -235,16 +263,22 @@ class ComprehensivePortalSeeder extends Seeder
                 'code' => 'new_client_registration_admin',
                 'title' => 'New Client Account Created (Admin Notification)',
                 'subject' => 'New Client Registration – {company_name}',
-                'body_html' => '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #004225;">New Client Registration</h2>
-                    <p>A new client account has been registered on <strong>{company_name}</strong>.</p>
-                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8fafc; border: 1px solid #cbd5e1;">
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Client Name:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{full_name}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Email:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{email}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Phone:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{phone}</td></tr>
-                        <tr><td style="padding: 10px; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Applying From:</td><td style="padding: 10px; border-bottom: 1px solid #cbd5e1;">{country_applying_from}</td></tr>
-                        <tr><td style="padding: 10px; font-weight: bold;">Service Country:</td><td style="padding: 10px;">{country_service_requested}</td></tr>
-                    </table>
+                'body_html' => '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,46,26,0.08);">
+                    <div style="background: linear-gradient(135deg, #002e1a 0%, #004225 100%); padding: 30px; text-align: center; border-bottom: 4px solid #d4af37;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">{company_name}</h1>
+                        <p style="color: #d4af37; margin: 4px 0 0 0; font-size: 13px; font-weight: 600;">Client Account Registration Alert</p>
+                    </div>
+                    <div style="padding: 36px 32px;">
+                        <h2 style="color: #0f172a; font-size: 20px; font-weight: 800; margin: 0 0 16px 0;">New Client Account Registered</h2>
+                        <p style="color: #334155; font-size: 15px; line-height: 1.7; margin-bottom: 24px;">A new client account has been registered on <strong>{company_name}</strong>.</p>
+                        <table style="width: 100%; border-collapse: collapse; margin: 24px 0; background: #f8fafc; border-radius: 12px; overflow: hidden; border: 1px solid #e2e8f0; font-size: 14px;">
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b; width: 40%;">Client Name:</td><td style="padding: 12px 16px; font-weight: 700; color: #0f172a;">{full_name}</td></tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Email:</td><td style="padding: 12px 16px; color: #004225;">{email}</td></tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Phone:</td><td style="padding: 12px 16px;">{phone}</td></tr>
+                            <tr style="border-bottom: 1px solid #e2e8f0;"><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Applying From:</td><td style="padding: 12px 16px;">{country_applying_from}</td></tr>
+                            <tr><td style="padding: 12px 16px; font-weight: 700; color: #64748b;">Service Country:</td><td style="padding: 12px 16px;">{country_service_requested}</td></tr>
+                        </table>
+                    </div>
                 </div>',
                 'variables_description' => '{full_name}, {email}, {phone}, {country_applying_from}, {country_service_requested}, {company_name}',
             ],
@@ -252,11 +286,16 @@ class ComprehensivePortalSeeder extends Seeder
                 'code' => 'application_assigned_staff',
                 'title' => 'Application Assignment Notice (Staff)',
                 'subject' => 'Application Assigned: {reference_number} – {service_name}',
-                'body_html' => '<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px;">
-                    <h2 style="color: #004225;">New Application Assigned</h2>
-                    <p>Application <strong>{reference_number}</strong> ({service_name}) has been assigned to you for processing.</p>
-                    <p>Applicant: <strong>{full_name}</strong></p>
-                    <p>Log in to your Staff Work Queue to review documents and take action.</p>
+                'body_html' => '<div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 10px 30px rgba(0,46,26,0.08);">
+                    <div style="background: linear-gradient(135deg, #002e1a 0%, #004225 100%); padding: 30px; text-align: center; border-bottom: 4px solid #d4af37;">
+                        <h1 style="color: #ffffff; margin: 0; font-size: 22px; font-weight: 800;">{company_name}</h1>
+                        <p style="color: #d4af37; margin: 4px 0 0 0; font-size: 13px; font-weight: 600;">Work Queue Assignment Notice</p>
+                    </div>
+                    <div style="padding: 36px 32px;">
+                        <h2 style="color: #0f172a; font-size: 20px; font-weight: 800; margin: 0 0 16px 0;">New Application Assigned</h2>
+                        <p style="color: #334155; font-size: 15px; line-height: 1.7; margin-bottom: 24px;">Application <strong>{reference_number}</strong> ({service_name}) has been assigned to you for active processing.</p>
+                        <p style="color: #334155; font-size: 15px;">Applicant: <strong>{full_name}</strong></p>
+                    </div>
                 </div>',
                 'variables_description' => '{full_name}, {service_name}, {reference_number}, {company_name}',
             ],

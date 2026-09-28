@@ -138,9 +138,7 @@
                 <!-- Email Content / Body -->
                 <div class="mb-3">
                     <label for="email_body" class="form-label small fw-bold text-dark">4. Email Body Message</label>
-                    <textarea name="email_body" id="email_body" class="form-control rounded-3" rows="6" placeholder="Type your email message here..." required oninput="updatePreview()">Dear Member,
-
-Please be informed that we will be performing scheduled platform maintenance to optimize system processing and server infrastructure.
+                    <textarea name="email_body" id="email_body" class="form-control rounded-3" rows="6" placeholder="Type your email message here..." required oninput="updatePreview()">Please be informed that we have scheduled platform maintenance to optimize system processing and server infrastructure.
 
 During this window, service processing may experience brief delays. All your application data and uploaded documents remain completely secure.
 
@@ -178,42 +176,45 @@ We apologize for any inconvenience and appreciate your patience as we work to se
             </div>
 
             <!-- Email Container Preview Box -->
-            <div class="border rounded-4 overflow-hidden shadow-sm bg-light" style="font-family: Arial, sans-serif; font-size: 13px;">
-                <!-- Email Header -->
-                <div style="background-color: #004225; padding: 18px 20px; text-align: center; border-bottom: 3px solid #d4af37;">
+            <div class="border rounded-4 overflow-hidden shadow-sm bg-light" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; font-size: 13px;">
+                <!-- Email Header Banner -->
+                <div style="background: linear-gradient(135deg, #002e1a 0%, #004225 100%); padding: 24px 20px; text-align: center; border-bottom: 4px solid #d4af37;">
                     @if(!empty($settings->logo_url))
-                        <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" style="max-height: 32px; vertical-align: middle; margin-right: 6px;">
+                        <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" style="max-height: 38px; vertical-align: middle; margin-right: 8px;">
                     @endif
-                    <span style="color: #ffffff; font-weight: 700; font-size: 16px; vertical-align: middle;">{{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}</span>
+                    <span style="color: #ffffff; font-weight: 800; font-size: 18px; letter-spacing: 0.8px; vertical-align: middle;">{{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}</span>
                 </div>
 
-                <!-- Email Body -->
-                <div class="p-3 bg-white">
-                    <div id="previewBadge" class="category-badge badge-maintenance mb-2" style="font-size: 10px; padding: 4px 10px; display: inline-block; border-radius: 50px; font-weight: 700; text-transform: uppercase;">
+                <!-- Email Body Canvas -->
+                <div class="p-4 bg-white">
+                    <div id="previewBadge" class="category-badge badge-maintenance mb-3" style="font-size: 10px; padding: 5px 14px; display: inline-block; border-radius: 50px; font-weight: 700; text-transform: uppercase;">
                         🛠️ SYSTEM MAINTENANCE NOTICE
                     </div>
 
-                    <h4 id="previewHeadline" class="fw-bold text-dark mb-2 fs-6" style="line-height: 1.3;">Upcoming Platform Maintenance & Upgrade</h4>
+                    <h4 id="previewHeadline" class="fw-bold text-dark mb-3 fs-6" style="line-height: 1.35; color: #0f172a; letter-spacing: -0.2px;">Upcoming Platform Maintenance & Upgrade</h4>
 
-                    <div class="text-dark fw-semibold small mb-2">Hello Valued Member,</div>
+                    <div id="previewGreeting" class="fw-bold text-dark small mb-2" style="color: #0f172a; font-size: 14px;">Hello Valued Member,</div>
 
-                    <div id="previewBody" class="text-secondary small mb-3" style="line-height: 1.5; white-space: pre-line;">
-                        Dear Member,
-
+                    <div id="previewBody" class="text-secondary small mb-4" style="line-height: 1.65; color: #334155; white-space: pre-line; font-size: 14px;">
                         Please be informed that we will be performing scheduled platform maintenance to optimize system processing and server infrastructure.
+
+                        During this window, service processing may experience brief delays. All your application data and uploaded documents remain completely secure.
+
+                        We apologize for any inconvenience and appreciate your patience as we work to serve you better.
                     </div>
 
-                    <div id="previewBtnWrapper" class="text-center my-3">
-                        <a id="previewBtn" href="#" class="btn btn-sm text-white rounded-pill px-4 fw-bold shadow-sm" style="background-color: #004225; font-size: 12px;" target="_blank">
+                    <div id="previewBtnWrapper" class="text-center my-4">
+                        <a id="previewBtn" href="#" class="btn btn-sm text-white rounded-pill px-4 py-2.5 fw-bold shadow-sm" style="background: linear-gradient(135deg, #004225 0%, #002e1a 100%); font-size: 13px; letter-spacing: 0.3px;" target="_blank">
                             Go to Dashboard &rarr;
                         </a>
                     </div>
                 </div>
 
                 <!-- Email Footer -->
-                <div class="p-2.5 bg-light text-center border-top text-muted" style="font-size: 10px;">
-                    <div>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved. | Developed by <a href="https://kisprojectslab.com" target="_blank" class="text-secondary text-decoration-none border-bottom">KendatTech</a></div>
-                    <div>Need assistance? <span class="text-success">support@dootor-enterprises.com</span></div>
+                <div class="p-3 bg-light text-center border-top text-muted" style="font-size: 11px; line-height: 1.5; background-color: #f8fafc;">
+                    <div style="font-weight: 600; color: #475569; margin-bottom: 3px;">&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</div>
+                    <div style="color: #64748b; margin-bottom: 3px;">Secured Portal for Verified Document Handling &amp; Official Services.</div>
+                    <div>Need assistance? <a href="mailto:support@dootor-enterprises.com" style="color: #004225; font-weight: 600; text-decoration: none;">support@dootor-enterprises.com</a></div>
                 </div>
             </div>
         </div>
@@ -240,33 +241,43 @@ We apologize for any inconvenience and appreciate your patience as we work to se
         // Badge update
         var badge = document.getElementById('previewBadge');
         if (category === 'maintenance') {
-            badge.className = 'category-badge badge-maintenance mb-2';
-            badge.style.backgroundColor = '#fff9db';
-            badge.style.color = '#b45309';
-            badge.style.border = '1px solid #fde047';
+            badge.className = 'category-badge badge-maintenance mb-3';
+            badge.style.backgroundColor = '#fef3c7';
+            badge.style.color = '#92400e';
+            badge.style.border = '1px solid #fde68a';
             badge.innerText = '🛠️ SYSTEM MAINTENANCE NOTICE';
         } else if (category === 'announcement') {
-            badge.className = 'category-badge badge-announcement mb-2';
-            badge.style.backgroundColor = '#dbeafe';
-            badge.style.color = '#1d4ed8';
-            badge.style.border = '1px solid #93c5fd';
+            badge.className = 'category-badge badge-announcement mb-3';
+            badge.style.backgroundColor = '#e0f2fe';
+            badge.style.color = '#0369a1';
+            badge.style.border = '1px solid #bae6fd';
             badge.innerText = '📢 PLATFORM ANNOUNCEMENT';
         } else if (category === 'service_update') {
-            badge.className = 'category-badge badge-service_update mb-2';
+            badge.className = 'category-badge badge-service_update mb-3';
             badge.style.backgroundColor = '#dcfce7';
             badge.style.color = '#15803d';
             badge.style.border = '1px solid #86efac';
             badge.innerText = '⚡ SERVICE UPDATE & ALERT';
         } else {
-            badge.className = 'category-badge badge-custom mb-2';
+            badge.className = 'category-badge badge-custom mb-3';
             badge.style.backgroundColor = '#f3e8ff';
-            badge.style.color = '#7e22ce';
-            badge.style.border = '1px solid #d8b4fe';
+            badge.style.color = '#6b21a8';
+            badge.style.border = '1px solid #e9d5ff';
             badge.innerText = '✉️ OFFICIAL DIRECT NOTICE';
         }
 
         document.getElementById('previewHeadline').innerText = headline;
         document.getElementById('previewBody').innerText = body;
+
+        // Check if body starts with a greeting to avoid duplicate greetings
+        var greetingEl = document.getElementById('previewGreeting');
+        var cleanBody = body.replace(/<[^>]*>/g, '').trim();
+        var hasGreeting = /^(Hello|Dear|Hi|Greetings|Good\s+(morning|afternoon|evening))/i.test(cleanBody);
+        if (hasGreeting) {
+            greetingEl.style.display = 'none';
+        } else {
+            greetingEl.style.display = 'block';
+        }
 
         var btnWrapper = document.getElementById('previewBtnWrapper');
         var btn = document.getElementById('previewBtn');
@@ -284,28 +295,28 @@ We apologize for any inconvenience and appreciate your patience as we work to se
             document.getElementById('cat_maintenance').checked = true;
             document.getElementById('email_subject').value = 'Scheduled System Maintenance Notice';
             document.getElementById('email_headline').value = 'Upcoming System Maintenance & Upgrade';
-            document.getElementById('email_body').value = "Dear Valued Member,\n\nPlease be informed that we have scheduled platform maintenance to upgrade our system infrastructure and improve document processing speeds.\n\nDuring this maintenance window, service processing may experience brief pauses. All your account details, transactions, and uploaded files remain completely safe.\n\nThank you for your understanding!";
+            document.getElementById('email_body').value = "Please be informed that we have scheduled platform maintenance to upgrade our system infrastructure and improve document processing speeds.\n\nDuring this maintenance window, service processing may experience brief pauses. All your account details, transactions, and uploaded files remain completely safe.\n\nThank you for your understanding!";
             document.getElementById('button_text').value = 'Check Application Status';
             document.getElementById('button_url').value = "{{ url('/login') }}";
         } else if (presetType === 'announcement') {
             document.getElementById('cat_announcement').checked = true;
             document.getElementById('email_subject').value = 'Exciting New Platform Announcement';
             document.getElementById('email_headline').value = 'New Features & Expedited Processing Available';
-            document.getElementById('email_body').value = "Hello,\n\nWe are excited to announce new updates to our official document processing portal!\n\nYou can now fast-track passport approvals, NIN verifications, visa applications, and court affidavits directly from your secure client dashboard with real-time status tracking.\n\nLog in today to explore our expanded services catalog.";
+            document.getElementById('email_body').value = "We are excited to announce new updates to our official document processing portal!\n\nYou can now fast-track passport approvals, NIN verifications, visa applications, and court affidavits directly from your secure client dashboard with real-time status tracking.\n\nLog in today to explore our expanded services catalog.";
             document.getElementById('button_text').value = 'Explore Services Catalog';
             document.getElementById('button_url').value = "{{ url('/') }}#services";
         } else if (presetType === 'service_update') {
             document.getElementById('cat_service').checked = true;
             document.getElementById('email_subject').value = 'Important Service Catalog & Processing Update';
             document.getElementById('email_headline').value = 'Updated Processing Timelines & Vetting Procedures';
-            document.getElementById('email_body').value = "Dear Customer,\n\nWe have updated our service processing guidelines and document checklist requirements.\n\nPlease log into your dashboard to view updated stage requirements and status tracker logs for your ongoing applications.\n\nIf you have any questions, our support team is available 24/7.";
+            document.getElementById('email_body').value = "We have updated our service processing guidelines and document checklist requirements.\n\nPlease log into your dashboard to view updated stage requirements and status tracker logs for your ongoing applications.\n\nIf you have any questions, our support team is available 24/7.";
             document.getElementById('button_text').value = 'View My Requests';
             document.getElementById('button_url').value = "{{ url('/client/requests') }}";
         } else if (presetType === 'custom') {
             document.getElementById('cat_custom').checked = true;
             document.getElementById('email_subject').value = 'Direct Notice from Admin';
             document.getElementById('email_headline').value = 'Important Official Communication';
-            document.getElementById('email_body').value = "Dear Member,\n\nWe are writing to provide you with an important update regarding your account or service request.\n\nPlease review this notice and contact support if you require any assistance.";
+            document.getElementById('email_body').value = "We are writing to provide you with an important update regarding your account or service request.\n\nPlease review this notice and contact support if you require any assistance.";
             document.getElementById('button_text').value = 'Login to Account';
             document.getElementById('button_url').value = "{{ url('/login') }}";
         }
