@@ -205,12 +205,22 @@ class ServiceRequest extends Model
         return $this->hasMany(RequestDocument::class, 'service_request_id');
     }
 
+    public function documents(): HasMany
+    {
+        return $this->hasMany(RequestDocument::class, 'service_request_id');
+    }
+
     public function stageHistories(): HasMany
     {
         return $this->hasMany(ApplicationStageHistory::class, 'service_request_id')->orderBy('created_at', 'asc');
     }
 
     public function applicationNotes(): HasMany
+    {
+        return $this->hasMany(ApplicationNote::class, 'service_request_id')->orderBy('created_at', 'desc');
+    }
+
+    public function notes(): HasMany
     {
         return $this->hasMany(ApplicationNote::class, 'service_request_id')->orderBy('created_at', 'desc');
     }

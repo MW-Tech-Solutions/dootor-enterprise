@@ -26,6 +26,7 @@ return new class extends Migration
             $table->string('avatar_url')->nullable();
             $table->foreignId('registered_by_vendor_id')->nullable()->constrained('users')->nullOnDelete();
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

@@ -108,6 +108,18 @@ if (function_exists('ob_end_clean')) {
     @ob_end_clean();
 }
 
+// Auto-repair missing database schema columns on production
+try {
+    if (\Illuminate\Support\Facades\Schema::hasTable('users') && !\Illuminate\Support\Facades\Schema::hasColumn('users', 'deleted_at')) {
+        \Illuminate\Support\Facades\Schema::table('users', function (\Illuminate\Database\Schema\Blueprint $table) {
+            $table->softDeletes();
+        });
+        echo "<div class='cmd-box'><span class='success'>[SCHEMA FIX]</span> Added missing <code>deleted_at</code> column to <code>users</code> table automatically.</div>";
+    }
+} catch (\Exception $e) {
+    echo "<div class='cmd-box'><span class='error'>[SCHEMA WARNING]</span> Schema check: " . htmlspecialchars($e->getMessage()) . "</div>";
+}
+
 // Start executing Laravel setup & cache refresh tasks
 runArtisanCommand('config:clear');
 runArtisanCommand('cache:clear');
