@@ -301,12 +301,12 @@
         </div>
     </div>
 
-    <!-- Section 2: Refund & Cancellation Policy Management -->
+    <!-- Section 3: Data & Privacy Protection Statement Management -->
     <div class="col-12">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <h2 class="h5 fw-bold text-dark mb-0">
-                    <i class="bi bi-cash-stack me-2 text-success"></i> Refund &amp; Cancellation Policy Editor
+                    <i class="bi bi-lock me-2 text-success"></i> Data &amp; Privacy Protection Statement Editor
                 </h2>
                 <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small">
                     <i class="bi bi-pencil-square me-1"></i> Visual WYSIWYG Editor
@@ -314,18 +314,18 @@
             </div>
             
             <p class="text-secondary small mb-4">
-                Manage the dynamic Refund Policy displayed inside the signup modal. Use the visual editor below to format headings, paragraphs, bullet points, and bold text without writing code.
+                Manage the dynamic Data &amp; Privacy Protection Statement displayed inside the signup modal and footer legal pages. Use the visual editor below to format headings, paragraphs, bullet points, and bold text without writing code.
             </p>
             
             <form action="{{ route('admin.settings.update') }}" method="POST">
                 @csrf
                 <div class="mb-4">
-                    <textarea name="refund_policy" id="refund_policy_editor" class="form-control rounded-3">{{ old('refund_policy', $settings->refund_policy) }}</textarea>
-                    <small class="text-muted d-block mt-1"><i class="bi bi-info-circle me-1"></i> Content formatted here will be rendered cleanly in the Client Registration Refund Policy modal.</small>
+                    <textarea name="privacy_policy" id="privacy_policy_editor" class="form-control rounded-3">{{ old('privacy_policy', $settings->privacy_policy) }}</textarea>
+                    <small class="text-muted d-block mt-1"><i class="bi bi-info-circle me-1"></i> Content formatted here will be rendered cleanly in the Client Registration Privacy modal and public Privacy Policy page.</small>
                 </div>
 
                 <button type="submit" class="btn btn-dark rounded-pill px-4 py-2 small fw-semibold">
-                    <i class="bi bi-check-circle me-1"></i> Save Refund Policy
+                    <i class="bi bi-check-circle me-1"></i> Save Data &amp; Privacy Statement
                 </button>
             </form>
         </div>
@@ -367,6 +367,11 @@ document.addEventListener('DOMContentLoaded', function() {
         ClassicEditor.create(document.querySelector('#refund_policy_editor'), {
             toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo']
         }).catch(error => { console.error('CKEditor Refund Error:', error); });
+    }
+    if (document.querySelector('#privacy_policy_editor')) {
+        ClassicEditor.create(document.querySelector('#privacy_policy_editor'), {
+            toolbar: ['heading', '|', 'bold', 'italic', 'link', 'bulletedList', 'numberedList', 'blockQuote', 'undo', 'redo']
+        }).catch(error => { console.error('CKEditor Privacy Error:', error); });
     }
 });
 </script>

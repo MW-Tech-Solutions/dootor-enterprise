@@ -105,6 +105,7 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'terms_check' => ['accepted'],
             'refund_check' => ['accepted'],
+            'privacy_check' => ['accepted'],
         ]);
 
         $data['country'] = $data['country_applying_from'];

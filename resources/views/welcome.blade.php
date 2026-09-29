@@ -523,9 +523,10 @@
                 <span>&copy; {{ date('Y') }} {{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}. All rights reserved.</span>
                 <span class="ms-md-2 text-white-50 opacity-75">| Developed by <a href="https://kisprojectslab.com" target="_blank" rel="noopener noreferrer" class="text-white text-decoration-none fw-medium border-bottom border-light">KendatTech</a></span>
             </div>
-            <div class="d-flex gap-3">
-                <a href="#" class="text-white-50 text-decoration-none hover-white">Terms of Service</a>
-                <a href="#" class="text-white-50 text-decoration-none hover-white">Privacy Policy</a>
+            <div class="d-flex flex-wrap gap-3">
+                <a href="{{ route('terms.conditions') }}" class="text-white-50 text-decoration-none hover-white">Terms &amp; Conditions</a>
+                <a href="{{ route('refund.policy') }}" class="text-white-50 text-decoration-none hover-white">Refund Policy</a>
+                <a href="{{ route('privacy.policy') }}" class="text-white-50 text-decoration-none hover-white">Data &amp; Privacy Statement</a>
             </div>
         </div>
     </div>

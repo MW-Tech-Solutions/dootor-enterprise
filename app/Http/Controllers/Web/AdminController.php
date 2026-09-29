@@ -265,6 +265,7 @@ class AdminController extends Controller
             'credo_base_url' => ['nullable', 'string'],
             'terms_conditions' => ['nullable', 'string'],
             'refund_policy' => ['nullable', 'string'],
+            'privacy_policy' => ['nullable', 'string'],
         ]);
 
         if ($request->hasFile('logo_file')) {

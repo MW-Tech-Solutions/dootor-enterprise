@@ -46,6 +46,7 @@ class SystemSetting extends Model
         'template_service_update',
         'terms_conditions',
         'refund_policy',
+        'privacy_policy',
     ];
 
     protected function casts(): array

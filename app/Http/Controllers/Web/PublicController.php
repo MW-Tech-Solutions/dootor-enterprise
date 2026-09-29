@@ -63,5 +63,23 @@ class PublicController extends Controller
                 ->with('contact_error', 'Sorry, we could not send your message right now. Please try again later or contact us via WhatsApp.');
         }
     }
+
+    public function termsAndConditions()
+    {
+        $settings = \App\Models\SystemSetting::first();
+        return view('policies.terms', compact('settings'));
+    }
+
+    public function refundPolicy()
+    {
+        $settings = \App\Models\SystemSetting::first();
+        return view('policies.refund', compact('settings'));
+    }
+
+    public function privacyPolicy()
+    {
+        $settings = \App\Models\SystemSetting::first();
+        return view('policies.privacy', compact('settings'));
+    }
 }
 

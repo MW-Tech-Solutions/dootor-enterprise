@@ -23,6 +23,11 @@ Route::get('/', function () {
 // Public Contact Form Submission
 Route::post('/contact', [PublicController::class, 'sendContact'])->name('contact.send');
 
+// Public Legal & Policy Pages
+Route::get('/terms-and-conditions', [PublicController::class, 'termsAndConditions'])->name('terms.conditions');
+Route::get('/refund-policy', [PublicController::class, 'refundPolicy'])->name('refund.policy');
+Route::get('/privacy-policy', [PublicController::class, 'privacyPolicy'])->name('privacy.policy');
+
 // Public Vendor Storefront Link
 Route::get('/v/{vendor}', [PublicController::class, 'vendorStorefront'])->name('vendor.storefront');
 

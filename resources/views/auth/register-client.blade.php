@@ -254,13 +254,27 @@
                     <hr class="my-2 border-secondary border-opacity-10">
 
                     <!-- Checkbox 2: Refund Policy -->
-                    <div class="form-check">
+                    <div class="form-check mb-2.5">
                         <input class="form-check-input @error('refund_check') is-invalid @enderror" type="checkbox" name="refund_check" id="refundCheck" value="1" required {{ old('refund_check') ? 'checked' : '' }}>
                         <label class="form-check-label small text-dark fw-medium" for="refundCheck">
                             I have read and agree to the <a href="javascript:void(0)" class="text-brand-success fw-bold text-decoration-underline" data-bs-toggle="modal" data-bs-target="#refundModal">Refund Policy</a>
                         </label>
                         <small class="d-block text-muted" style="font-size: 11px;">Review our policy regarding service cancellations, processing windows, and refund eligibility.</small>
                         @error('refund_check')
+                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <hr class="my-2 border-secondary border-opacity-10">
+
+                    <!-- Checkbox 3: Data & Privacy Protection Statement -->
+                    <div class="form-check">
+                        <input class="form-check-input @error('privacy_check') is-invalid @enderror" type="checkbox" name="privacy_check" id="privacyCheck" value="1" required {{ old('privacy_check') ? 'checked' : '' }}>
+                        <label class="form-check-label small text-dark fw-medium" for="privacyCheck">
+                            I have read and agree to the <a href="javascript:void(0)" class="text-brand-success fw-bold text-decoration-underline" data-bs-toggle="modal" data-bs-target="#privacyModal">Data &amp; Privacy Protection Statement</a>
+                        </label>
+                        <small class="d-block text-muted" style="font-size: 11px;">Review how your identity records, files, and personal data are encrypted and protected.</small>
+                        @error('privacy_check')
                             <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
                         @enderror
                     </div>
@@ -348,6 +362,42 @@
             <div class="modal-footer bg-light border-top py-2.5">
                 <button type="button" class="btn btn-brand-primary btn-sm rounded-pill px-4" data-bs-dismiss="modal" onclick="document.getElementById('refundCheck').checked = true;">
                     <i class="bi bi-check-circle me-1"></i> I Accept Refund Policy
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Data & Privacy Protection Statement Modal -->
+<div class="modal fade" id="privacyModal" tabindex="-1" aria-labelledby="privacyModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header bg-light border-bottom py-3">
+                <h5 class="modal-title fw-bold text-dark mb-0 fs-6" id="privacyModalLabel">
+                    <i class="bi bi-lock me-2 text-success"></i> Data &amp; Privacy Protection Statement
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4 text-secondary small" style="line-height: 1.6;">
+                @php
+                    $privacyContent = $sysSettings->privacy_policy ?? '';
+                @endphp
+                @if(!empty(trim($privacyContent)))
+                    {!! $privacyContent !!}
+                @else
+                    <h5>1. Data Collection & Purpose</h5>
+                    <p>DOOTOR ENTERPRISES collects applicant personal data, contact details, identity documents, and application questionnaire inputs solely for processing and verifying requested consular and administrative document services.</p>
+                    <h5>2. End-to-End Security & Access Control</h5>
+                    <p>Your uploaded documents and identity records are transmitted over SSL/TLS encrypted channels and stored in secure database servers. Only assigned processing officers and platform administrators have authorization to view processing documents.</p>
+                    <h5>3. Third-Party Sharing Restrictions</h5>
+                    <p>We strictly do not sell, trade, or rent personal applicant information to marketing agencies or unauthorized third parties. Document details are only shared with official government processing channels or courier dispatch services as necessary to fulfill your requested service.</p>
+                    <h5>4. Data Retention & Privacy Rights</h5>
+                    <p>Applicant records are retained securely for verification audit trails and order history tracking. You may request data updates or profile modifications by submitting a support ticket through your client portal.</p>
+                @endif
+            </div>
+            <div class="modal-footer bg-light border-top py-2.5">
+                <button type="button" class="btn btn-brand-primary btn-sm rounded-pill px-4" data-bs-dismiss="modal" onclick="document.getElementById('privacyCheck').checked = true;">
+                    <i class="bi bi-check-circle me-1"></i> I Accept Data &amp; Privacy Statement
                 </button>
             </div>
         </div>
