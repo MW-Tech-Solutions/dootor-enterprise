@@ -301,6 +301,36 @@
         </div>
     </div>
 
+    <!-- Section 2: Refund & Cancellation Policy Management -->
+    <div class="col-12">
+        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h2 class="h5 fw-bold text-dark mb-0">
+                    <i class="bi bi-cash-stack me-2 text-success"></i> Refund &amp; Cancellation Policy Editor
+                </h2>
+                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 small">
+                    <i class="bi bi-pencil-square me-1"></i> Visual WYSIWYG Editor
+                </span>
+            </div>
+            
+            <p class="text-secondary small mb-4">
+                Manage the dynamic Refund Policy displayed inside the signup modal and public Refund Policy page. Use the visual editor below to format headings, paragraphs, bullet points, and bold text without writing code.
+            </p>
+            
+            <form action="{{ route('admin.settings.update') }}" method="POST">
+                @csrf
+                <div class="mb-4">
+                    <textarea name="refund_policy" id="refund_policy_editor" class="form-control rounded-3">{{ old('refund_policy', $settings->refund_policy) }}</textarea>
+                    <small class="text-muted d-block mt-1"><i class="bi bi-info-circle me-1"></i> Content formatted here will be rendered cleanly in the Client Registration Refund Policy modal.</small>
+                </div>
+
+                <button type="submit" class="btn btn-dark rounded-pill px-4 py-2 small fw-semibold">
+                    <i class="bi bi-check-circle me-1"></i> Save Refund Policy
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Section 3: Data & Privacy Protection Statement Management -->
     <div class="col-12">
         <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">

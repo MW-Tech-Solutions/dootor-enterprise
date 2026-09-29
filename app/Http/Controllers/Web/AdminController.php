@@ -282,12 +282,16 @@ class AdminController extends Controller
 
         unset($data['logo_file'], $data['hero_bg_file'], $data['remove_hero_bg']);
 
-        // Auto-run pending migrations if hero columns are missing on server
-        if (!\Illuminate\Support\Facades\Schema::hasColumn('system_settings', 'hero_badge_text')) {
-            try {
-                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning('Auto-migration failed: ' . $e->getMessage());
+        // Auto-repair missing policy columns on production table if migration has not run yet
+        foreach (['privacy_policy', 'terms_conditions', 'refund_policy'] as $policyCol) {
+            if (!\Illuminate\Support\Facades\Schema::hasColumn('system_settings', $policyCol)) {
+                try {
+                    \Illuminate\Support\Facades\Schema::table('system_settings', function (\Illuminate\Database\Schema\Blueprint $table) use ($policyCol) {
+                        $table->longText($policyCol)->nullable();
+                    });
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("Auto-schema check for {$policyCol} failed: " . $e->getMessage());
+                }
             }
         }
 

@@ -66,19 +66,19 @@ class PublicController extends Controller
 
     public function termsAndConditions()
     {
-        $settings = \App\Models\SystemSetting::first();
+        $settings = \App\Models\SystemSetting::firstOrCreate([]);
         return view('policies.terms', compact('settings'));
     }
 
     public function refundPolicy()
     {
-        $settings = \App\Models\SystemSetting::first();
+        $settings = \App\Models\SystemSetting::firstOrCreate([]);
         return view('policies.refund', compact('settings'));
     }
 
     public function privacyPolicy()
     {
-        $settings = \App\Models\SystemSetting::first();
+        $settings = \App\Models\SystemSetting::firstOrCreate([]);
         return view('policies.privacy', compact('settings'));
     }
 }
