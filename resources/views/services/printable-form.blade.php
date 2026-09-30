@@ -277,37 +277,61 @@
     @if($fields && $fields->count() > 0)
         <div class="row g-3">
             @foreach($fields as $f)
-                <div class="col-{{ in_array($f->field_type, ['textarea', 'address', 'instructions']) ? '12' : '6' }}">
-                    <div class="form-label-print">{{ $f->field_label }} {{ $f->is_required ? '*' : '' }}</div>
-                    @if($f->field_type === 'checkbox' || $f->field_type === 'yes_no')
-                        <div class="field-fill-line">
-                            <span class="checkbox-box"></span> YES &nbsp;&nbsp;&nbsp;&nbsp;
-                            <span class="checkbox-box"></span> NO
+                <div class="col-{{ in_array($f->field_type, ['textarea', 'address', 'instructions', 'declaration']) ? '12' : '6' }}">
+                    @if($f->field_type === 'instructions')
+                        <div class="p-2 mb-1 bg-light border rounded" style="font-size: 11px;">
+                            <strong style="color: #004225;">{{ $f->field_label }}</strong>
+                            <p class="mb-0 text-muted" style="font-size: 10px;">{{ $f->help_text ?: $f->placeholder }}</p>
                         </div>
-                    @elseif($f->field_type === 'dropdown' && is_array($f->options))
-                        <div class="field-fill-line">
-                            Options: {{ implode(' / ', array_slice($f->options, 0, 4)) }}
-                        </div>
-                    @elseif($f->field_type === 'date')
-                        <div class="field-fill-line border-0 pt-1">
-                            <div class="date-fill-box">
-                                <span class="date-unit">DD</span>
-                                <span class="date-separator">/</span>
-                                <span class="date-unit">MM</span>
-                                <span class="date-separator">/</span>
-                                <span class="date-unit-year">YYYY</span>
-                            </div>
-                        </div>
-                    @elseif(in_array($f->field_type, ['textarea', 'address']))
-                        <div class="field-fill-line" style="min-height: 48px;">
-                            ___________________________________________________________________________________________________<br>
-                            ___________________________________________________________________________________________________
+                    @elseif($f->field_type === 'declaration')
+                        <div class="p-2 mb-1 border rounded bg-light" style="font-size: 11px;">
+                            <span class="checkbox-box"></span> <strong>{{ $f->field_label }}</strong>
+                            <p class="mb-0 text-muted" style="font-size: 10px;">{{ $f->help_text ?: $f->placeholder }}</p>
                         </div>
                     @else
-                        <div class="field-fill-line">____________________________________</div>
-                    @endif
-                    @if($f->help_text)
-                        <div style="font-size: 9.5px; color: #64748b;">{{ $f->help_text }}</div>
+                        <div class="form-label-print">{{ $f->field_label }} {{ $f->is_required ? '*' : '' }}</div>
+                        @if($f->field_type === 'checkbox' || $f->field_type === 'yes_no')
+                            <div class="field-fill-line">
+                                <span class="checkbox-box"></span> YES &nbsp;&nbsp;&nbsp;&nbsp;
+                                <span class="checkbox-box"></span> NO
+                            </div>
+                        @elseif($f->field_type === 'country')
+                            <div class="field-fill-line">
+                                [ &nbsp; ] Nigeria &nbsp;&nbsp; [ &nbsp; ] Ghana &nbsp;&nbsp; [ &nbsp; ] Kenya &nbsp;&nbsp; [ &nbsp; ] Other: __________________
+                            </div>
+                        @elseif($f->field_type === 'passport')
+                            <div class="field-fill-line" style="font-size: 11px; font-weight: 500;">
+                                <i class="bi bi-camera me-1"></i> Passport Photograph Attachment Required (White Background)
+                            </div>
+                        @elseif($f->field_type === 'file')
+                            <div class="field-fill-line" style="font-size: 11px; font-weight: 500;">
+                                Supporting File Upload: ____________________________________
+                            </div>
+                        @elseif($f->field_type === 'dropdown' && is_array($f->options))
+                            <div class="field-fill-line">
+                                Options: {{ implode(' / ', array_slice($f->options, 0, 4)) }}
+                            </div>
+                        @elseif($f->field_type === 'date')
+                            <div class="field-fill-line border-0 pt-1">
+                                <div class="date-fill-box">
+                                    <span class="date-unit">DD</span>
+                                    <span class="date-separator">/</span>
+                                    <span class="date-unit">MM</span>
+                                    <span class="date-separator">/</span>
+                                    <span class="date-unit-year">YYYY</span>
+                                </div>
+                            </div>
+                        @elseif(in_array($f->field_type, ['textarea', 'address']))
+                            <div class="field-fill-line" style="min-height: 48px;">
+                                ___________________________________________________________________________________________________<br>
+                                ___________________________________________________________________________________________________
+                            </div>
+                        @else
+                            <div class="field-fill-line">____________________________________</div>
+                        @endif
+                        @if($f->help_text)
+                            <div style="font-size: 9.5px; color: #64748b;">{{ $f->help_text }}</div>
+                        @endif
                     @endif
                 </div>
             @endforeach

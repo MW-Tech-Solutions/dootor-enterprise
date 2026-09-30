@@ -83,42 +83,7 @@
                                     <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">1. Service Application Questionnaire</h6>
                                     <div class="row g-3">
                                         @foreach($service->fields as $field)
-                                            <div class="col-md-{{ in_array($field->field_type, ['textarea', 'address', 'instructions']) ? '12' : '6' }}">
-                                                <label class="form-label small fw-semibold text-dark">
-                                                    {{ $field->field_label }}
-                                                    @if($field->is_required) <span class="text-danger">*</span> @endif
-                                                </label>
-
-                                                @if($field->field_type === 'textarea' || $field->field_type === 'address')
-                                                    <textarea name="form_data[{{ $field->field_name }}]" class="form-control rounded-3" rows="3" placeholder="{{ $field->placeholder }}" {{ $field->is_required ? 'required' : '' }}></textarea>
-                                                @elseif($field->field_type === 'dropdown' && is_array($field->options))
-                                                    <select name="form_data[{{ $field->field_name }}]" class="form-select rounded-3" {{ $field->is_required ? 'required' : '' }}>
-                                                        <option value="">-- Select Option --</option>
-                                                        @foreach($field->options as $opt)
-                                                            <option value="{{ $opt }}">{{ $opt }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                @elseif($field->field_type === 'country')
-                                                    <select name="form_data[{{ $field->field_name }}]" class="form-select rounded-3" {{ $field->is_required ? 'required' : '' }}>
-                                                        @foreach(\App\Constants\AfricanCountries::all() as $c)
-                                                            <option value="{{ $c }}" {{ $c === 'Nigeria' ? 'selected' : '' }}>{{ $c }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                @elseif($field->field_type === 'date')
-                                                    <input type="date" name="form_data[{{ $field->field_name }}]" class="form-control rounded-3" {{ $field->is_required ? 'required' : '' }}>
-                                                @elseif($field->field_type === 'yes_no')
-                                                    <select name="form_data[{{ $field->field_name }}]" class="form-select rounded-3" {{ $field->is_required ? 'required' : '' }}>
-                                                        <option value="Yes">Yes</option>
-                                                        <option value="No">No</option>
-                                                    </select>
-                                                @else
-                                                    <input type="{{ $field->field_type === 'number' ? 'number' : ($field->field_type === 'email' ? 'email' : 'text') }}" name="form_data[{{ $field->field_name }}]" class="form-control rounded-3" placeholder="{{ $field->placeholder }}" {{ $field->is_required ? 'required' : '' }}>
-                                                @endif
-
-                                                @if($field->help_text)
-                                                    <div class="form-text small" style="font-size: 11px;">{{ $field->help_text }}</div>
-                                                @endif
-                                            </div>
+                                            @include('partials.dynamic-form-field', ['field' => $field])
                                         @endforeach
                                     </div>
                                 </div>

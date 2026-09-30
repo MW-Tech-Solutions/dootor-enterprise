@@ -128,7 +128,7 @@
 
     <!-- Form Container -->
     <div class="card border-0 shadow-sm p-4 p-sm-5 rounded-4 bg-white">
-        <form id="applicationForm" action="{{ route('client.application.submit', $application->id) }}" method="POST">
+        <form id="applicationForm" action="{{ route('client.application.submit', $application->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
             <!-- STEP 1: Personal & Location Details -->
@@ -194,37 +194,7 @@
                 @if($service->fields && $service->fields->count() > 0)
                     <div class="row g-3 mb-4">
                         @foreach($service->fields as $field)
-                            <div class="col-12 {{ in_array($field->field_type, ['textarea', 'address', 'instructions']) ? 'col-12' : 'col-md-6' }}">
-                                <label class="form-label small fw-semibold">
-                                    {{ $field->field_label }}
-                                    @if($field->is_required) <span class="text-danger">*</span> @endif
-                                </label>
-
-                                @php
-                                    $fieldVal = $application->form_data[$field->field_name] ?? '';
-                                @endphp
-
-                                @if($field->field_type === 'textarea')
-                                    <textarea name="form_data[{{ $field->field_name }}]" class="form-control autosave-field" rows="3" placeholder="{{ $field->placeholder }}">{{ $fieldVal }}</textarea>
-                                @elseif($field->field_type === 'dropdown')
-                                    <select name="form_data[{{ $field->field_name }}]" class="form-select autosave-field">
-                                        <option value="">Select {{ $field->field_label }}</option>
-                                        @if(is_array($field->options))
-                                            @foreach($field->options as $opt)
-                                                <option value="{{ $opt }}" {{ $fieldVal == $opt ? 'selected' : '' }}>{{ $opt }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
-                                @elseif($field->field_type === 'date')
-                                    <input type="date" name="form_data[{{ $field->field_name }}]" class="form-control autosave-field" value="{{ $fieldVal }}">
-                                @else
-                                    <input type="text" name="form_data[{{ $field->field_name }}]" class="form-control autosave-field" value="{{ $fieldVal }}" placeholder="{{ $field->placeholder }}">
-                                @endif
-
-                                @if($field->help_text)
-                                    <span class="d-block text-muted" style="font-size: 11px;">{{ $field->help_text }}</span>
-                                @endif
-                            </div>
+                            @include('partials.dynamic-form-field', ['field' => $field, 'application' => $application])
                         @endforeach
                     </div>
                 @else
@@ -600,7 +570,7 @@
             }
         });
 
-        // Auto-upload immediately when file is chosen in a checklist card input
+        // Auto-upload immediately when file is chosen in a checklist card input or dynamic form builder input
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('checklist-file-input')) {
                 const fileInput = e.target;
@@ -609,6 +579,19 @@
                 if (file && docName) {
                     const btn = document.querySelector(`.select-req-doc-btn[data-input-id="${fileInput.id}"]`);
                     uploadDocumentFile(docName, file, btn);
+                }
+            } else if (e.target.classList.contains('dynamic-file-input')) {
+                const fileInput = e.target;
+                const docName = fileInput.dataset.docName;
+                const file = fileInput.files[0];
+                if (file && docName) {
+                    uploadDocumentFile(docName, file);
+                }
+            } else if (e.target.classList.contains('dynamic-passport-input')) {
+                const fileInput = e.target;
+                const file = fileInput.files[0];
+                if (file) {
+                    uploadDocumentFile('Passport Photograph Upload', file);
                 }
             }
         });
