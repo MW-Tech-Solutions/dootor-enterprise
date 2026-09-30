@@ -241,6 +241,14 @@ class AfricanLocationService
     }
 
     /**
+     * Alias for getDivisions to ensure compatibility across all view callers.
+     */
+    public static function getDivisionsForCountry(?string $country): array
+    {
+        return self::getDivisions($country);
+    }
+
+    /**
      * Validate whether a division/state belongs to a specific African country using dynamic API response.
      */
     public static function isValidPair(?string $country, ?string $division): bool
