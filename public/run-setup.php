@@ -108,7 +108,7 @@ if (function_exists('ob_end_clean')) {
     @ob_end_clean();
 }
 
-// Auto-repair missing database schema columns on production
+// Auto-repair missing database schema columns & service form fields on production
 try {
     if (\Illuminate\Support\Facades\Schema::hasTable('users') && !\Illuminate\Support\Facades\Schema::hasColumn('users', 'deleted_at')) {
         \Illuminate\Support\Facades\Schema::table('users', function (\Illuminate\Database\Schema\Blueprint $table) {
@@ -129,6 +129,36 @@ try {
         \DB::table('services')->whereIn('name', $primaryNames)->update(['is_primary' => true]);
         \DB::table('services')->whereNotIn('name', $primaryNames)->update(['is_primary' => false]);
         echo "<div class='cmd-box'><span class='success'>[DATA REPAIR]</span> Updated primary services status flags in database successfully.</div>";
+    }
+
+    // Auto-update service_fields table type column if any labels match special types (country, passport, file)
+    if (\Illuminate\Support\Facades\Schema::hasTable('service_fields')) {
+        $fields = \App\Models\ServiceField::all();
+        $updatedCount = 0;
+        foreach ($fields as $f) {
+            $lbl = strtolower($f->field_label);
+            $newType = $f->field_type;
+
+            if (str_contains($lbl, 'passport photo') || str_contains($lbl, 'passport photograph')) {
+                $newType = 'passport';
+            } elseif (str_contains($lbl, 'country')) {
+                $newType = 'country';
+            } elseif (str_contains($lbl, 'datapage') || str_contains($lbl, 'certificate') || str_contains($lbl, 'upload') || str_contains($lbl, 'document')) {
+                $newType = 'file';
+            } elseif (str_contains($lbl, 'state')) {
+                $newType = 'state';
+            } elseif (str_contains($lbl, 'lga') || str_contains($lbl, 'local government')) {
+                $newType = 'lga';
+            }
+
+            if ($newType !== $f->field_type) {
+                $f->update(['field_type' => $newType]);
+                $updatedCount++;
+            }
+        }
+        if ($updatedCount > 0) {
+            echo "<div class='cmd-box'><span class='success'>[FORM FIELD REPAIR]</span> Auto-updated {$updatedCount} service form fields to match proper input types (country, passport photo, file upload, state, lga).</div>";
+        }
     }
 } catch (\Exception $e) {
     echo "<div class='cmd-box'><span class='error'>[SCHEMA WARNING]</span> Schema check: " . htmlspecialchars($e->getMessage()) . "</div>";
@@ -157,7 +187,7 @@ runArtisanCommand('view:cache');
 
 echo "</div>
     <div class='footer'>
-        Setup complete. For safety, it is highly recommended to **delete** or **rename** this script (<code>public/run-setup.php</code>) now that setup is done.
+        Setup & Field Repair complete. For safety, it is highly recommended to **delete** or **rename** this script (<code>public/run-setup.php</code>) now that setup is done.
     </div>
 </div>
 </body>
