@@ -137,16 +137,16 @@
                 </div>
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Total Application Fee</span>
-                    <span class="fw-bold text-dark fs-6">{{ $currencySymbol ?? '₦' }}{{ number_format($request->price, 2) }}</span>
+                    <span class="fw-bold text-dark fs-6">{{ $currencySymbol ?? '$' }}{{ number_format($request->price, 2) }}</span>
                 </div>
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Amount Paid</span>
-                    <span class="fw-bold text-success fs-6">{{ $currencySymbol ?? '₦' }}{{ number_format($request->amount_paid, 2) }}</span>
+                    <span class="fw-bold text-success fs-6">{{ $currencySymbol ?? '$' }}{{ number_format($request->amount_paid, 2) }}</span>
                 </div>
                 <div class="col-sm-6">
                     <span class="text-muted d-block">Outstanding Balance</span>
                     <span class="fw-bold {{ $request->outstanding_balance > 0 ? 'text-danger' : 'text-muted' }} fs-6">
-                        {{ $currencySymbol ?? '₦' }}{{ number_format($request->outstanding_balance, 2) }}
+                        {{ $currencySymbol ?? '$' }}{{ number_format($request->outstanding_balance, 2) }}
                     </span>
                 </div>
                 @if($request->payment_reference)
@@ -288,8 +288,8 @@
             @php
                 $activeGw = strtolower($settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paystack'));
                 $gwLabel = $activeGw === 'credo' ? 'Credo' : 'Paystack';
-                $currencySymbol = ($settings->default_currency ?? config('services.payment.currency', 'NGN')) === 'NGN' ? '₦' : '$';
-                $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'NGN');
+                $currencySymbol = ($settings->default_currency ?? config('services.payment.currency', 'USD')) === 'NGN' ? '₦' : '$';
+                $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'USD');
             @endphp
             <div class="card border-0 shadow-sm p-4 rounded-4 text-white mb-4" style="background: linear-gradient(135deg, #004225, #006637);">
                 <h5 class="fw-bold text-white mb-2"><i class="bi bi-credit-card me-2"></i> {{ $gwLabel }} Checkout</h5>

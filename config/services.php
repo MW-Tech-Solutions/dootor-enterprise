@@ -53,7 +53,7 @@ return [
 
     'payment' => [
         'gateway' => env('PAYMENT_GATEWAY', 'paystack'),
-        'currency' => env('PORTAL_BASE_CURRENCY', 'NGN'),
+        'currency' => env('PORTAL_BASE_CURRENCY', 'USD'),
     ],
 
 ];

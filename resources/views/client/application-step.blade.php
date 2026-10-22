@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
 
-@section('title', 'Application ' . $application->reference_number . ' - Step ' . $step)
+@section('title', $service->name . ' Pre-Enrollment Form - Application ' . $application->reference_number . ' - Step ' . $step)
 
 @section('styles')
 <style>
@@ -83,7 +83,7 @@
                 <span class="badge bg-dark font-monospace px-2.5 py-1 fs-6">{{ $application->reference_number }}</span>
                 <span class="badge bg-warning text-dark px-2 py-1 font-monospace small">{{ $application->status }}</span>
             </div>
-            <h1 class="h4 fw-bold text-dark mt-2 mb-0">{{ $service->name }}</h1>
+            <h1 class="h4 fw-bold text-dark mt-2 mb-0">{{ $service->name }} Pre-Enrollment Form</h1>
             @if($application->sub_service_name)
                 <p class="text-secondary small mb-0"><i class="bi bi-diagram-2 me-1"></i> Sub-service: <strong>{{ $application->sub_service_name }}</strong></p>
             @endif
@@ -100,29 +100,25 @@
         </div>
     </div>
 
-    <!-- Stepper Navigation Header -->
+    <!-- Stepper Navigation Header (3 Steps) -->
     <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center gap-2">
                 <div class="step-badge {{ $step == 1 ? 'active' : ($step > 1 ? 'completed' : 'pending') }}">1</div>
-                <span class="d-none d-sm-inline fw-semibold small {{ $step == 1 ? 'text-dark' : 'text-muted' }}">Applicant Info</span>
+                <span class="d-none d-sm-inline fw-semibold small {{ $step == 1 ? 'text-dark' : 'text-muted' }}">Biodata</span>
             </div>
             <div class="d-flex align-items-center gap-2">
                 <div class="step-badge {{ $step == 2 ? 'active' : ($step > 2 ? 'completed' : 'pending') }}">2</div>
-                <span class="d-none d-sm-inline fw-semibold small {{ $step == 2 ? 'text-dark' : 'text-muted' }}">Service Details</span>
+                <span class="d-none d-sm-inline fw-semibold small {{ $step == 2 ? 'text-dark' : 'text-muted' }}">Service Inputs &amp; Documents</span>
             </div>
             <div class="d-flex align-items-center gap-2">
-                <div class="step-badge {{ $step == 3 ? 'active' : ($step > 3 ? 'completed' : 'pending') }}">3</div>
-                <span class="d-none d-sm-inline fw-semibold small {{ $step == 3 ? 'text-dark' : 'text-muted' }}">Supporting Docs</span>
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <div class="step-badge {{ $step == 4 ? 'active' : 'pending' }}">4</div>
-                <span class="d-none d-sm-inline fw-semibold small {{ $step == 4 ? 'text-dark' : 'text-muted' }}">Review & Submit</span>
+                <div class="step-badge {{ $step == 3 ? 'active' : 'pending' }}">3</div>
+                <span class="d-none d-sm-inline fw-semibold small {{ $step == 3 ? 'text-dark' : 'text-muted' }}">Review &amp; Confirm</span>
             </div>
         </div>
 
         <div class="step-progress-bar">
-            <div class="step-progress-fill" style="width: {{ $step * 25 }}%;"></div>
+            <div class="step-progress-fill" style="width: {{ round(($step / 3) * 100) }}%;"></div>
         </div>
     </div>
 
@@ -131,12 +127,14 @@
         <form id="applicationForm" action="{{ route('client.application.submit', $application->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 
-            <!-- STEP 1: Personal & Location Details -->
+            <!-- STEP 1: Biodata -->
             @if($step == 1)
-                <h2 class="h5 fw-bold text-dark mb-3 border-bottom pb-2">Step 1: Personal & Location Details</h2>
+                <h2 class="h5 fw-bold text-dark mb-1">Step 1: Biodata Pre-Enrollment Form</h2>
+                <p class="text-secondary small mb-3 border-bottom pb-2">Please enter your personal contact and location information.</p>
+
                 <div class="row g-3 mb-4">
                     <div class="col-sm-4">
-                        <label class="form-label small fw-semibold">First Name</label>
+                        <label class="form-label small fw-semibold">First Name <span class="text-danger">*</span></label>
                         <input type="text" name="form_data[first_name]" class="form-control autosave-field" value="{{ old('form_data.first_name', $application->form_data['first_name'] ?? Auth::user()->first_name) }}" required>
                     </div>
                     <div class="col-sm-4">
@@ -144,16 +142,16 @@
                         <input type="text" name="form_data[middle_name]" class="form-control autosave-field" value="{{ old('form_data.middle_name', $application->form_data['middle_name'] ?? Auth::user()->middle_name) }}">
                     </div>
                     <div class="col-sm-4">
-                        <label class="form-label small fw-semibold">Last Name</label>
+                        <label class="form-label small fw-semibold">Last Name <span class="text-danger">*</span></label>
                         <input type="text" name="form_data[last_name]" class="form-control autosave-field" value="{{ old('form_data.last_name', $application->form_data['last_name'] ?? Auth::user()->last_name) }}" required>
                     </div>
 
                     <div class="col-sm-6">
-                        <label class="form-label small fw-semibold">Email Address</label>
+                        <label class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
                         <input type="email" name="form_data[email]" class="form-control autosave-field" value="{{ old('form_data.email', $application->form_data['email'] ?? Auth::user()->email) }}" required>
                     </div>
                     <div class="col-sm-6">
-                        <label class="form-label small fw-semibold">Phone Number</label>
+                        <label class="form-label small fw-semibold">Phone Number <span class="text-danger">*</span></label>
                         <input type="text" name="form_data[phone]" class="form-control autosave-field" value="{{ old('form_data.phone', $application->form_data['phone'] ?? Auth::user()->phone) }}" required>
                     </div>
 
@@ -188,23 +186,8 @@
                     </div>
                 </div>
 
-            <!-- STEP 2: Service Specific Forms & Custom Fields -->
+            <!-- STEP 2: Service Form Inputs & Documents (Combined) -->
             @elseif($step == 2)
-                <h2 class="h5 fw-bold text-dark mb-3 border-bottom pb-2">Step 2: {{ $service->name }} Application Inputs</h2>
-                @if($service->fields && $service->fields->count() > 0)
-                    <div class="row g-3 mb-4">
-                        @foreach($service->fields as $field)
-                            @include('partials.dynamic-form-field', ['field' => $field, 'application' => $application])
-                        @endforeach
-                    </div>
-                @else
-                    <div class="p-4 bg-light rounded-3 mb-4 border">
-                        <p class="text-secondary small mb-0">No additional custom input fields required for {{ $service->name }}. Please proceed to upload supporting documents.</p>
-                    </div>
-                @endif
-
-            <!-- STEP 3: Supporting Document Uploads -->
-            @elseif($step == 3)
                 @php
                     $rawRequiredDocs = $service->required_documents;
                     if (empty($rawRequiredDocs) && isset($application->service) && !empty($application->service->required_documents)) {
@@ -251,120 +234,149 @@
                     };
                 @endphp
 
-                <h2 class="h5 fw-bold text-dark mb-1">Step 3: Upload Supporting Documents</h2>
-                <p class="text-secondary small mb-3">Upload your required official documents for <strong>{{ $service->name }}</strong>. Documents marked as compulsory must be attached before final submission.</p>
+                <h2 class="h5 fw-bold text-dark mb-1">Step 2: {{ $service->name }} Pre-Enrollment Form - Service Inputs &amp; Documents</h2>
+                <p class="text-secondary small mb-4 border-bottom pb-2">Complete the customized service questionnaire and upload all supporting documents required for {{ $service->name }}.</p>
 
-                @if(count($serviceDocChecklist) > 0)
-                    <!-- Admin Configured Required Document Checklist Box -->
-                    <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
-                        <div class="card-header bg-light py-3 border-bottom">
-                            <h6 class="fw-bold text-dark mb-0 small">
-                                <i class="bi bi-card-checklist me-1 text-success"></i> Required Supporting Documents Checklist for {{ $service->name }}
-                            </h6>
+                <!-- Part A: Form Builder Custom Fields -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-ui-checks-grid text-success"></i>
+                        <span>Service Questionnaire &amp; Details</span>
+                    </h6>
+                    @if($service->fields && $service->fields->count() > 0)
+                        <div class="row g-3 p-3 bg-light rounded-3 border mb-4">
+                            @foreach($service->fields as $field)
+                                @include('partials.dynamic-form-field', ['field' => $field, 'application' => $application])
+                            @endforeach
                         </div>
-                        <div class="card-body p-3">
-                            <div class="row g-3">
-                                @foreach($serviceDocChecklist as $reqDoc)
-                                    @php
-                                        $uploaded = $isDocUploaded($reqDoc['name']);
-                                    @endphp
-                                    <div class="col-md-6 d-flex">
-                                        <div class="p-3 border rounded-3 d-flex align-items-center justify-content-between w-100" style="background-color: {{ $uploaded ? 'rgba(16, 185, 129, 0.05)' : ($reqDoc['is_compulsory'] ? 'rgba(239, 68, 68, 0.03)' : '#ffffff') }}; border-color: {{ $uploaded ? '#10b981' : ($reqDoc['is_compulsory'] ? '#fca5a5' : '#e2e8f0') }} !important;">
-                                            <div class="me-2 flex-grow-1">
-                                                <div class="d-flex flex-wrap align-items-center gap-1.5 mb-1">
-                                                    <span class="fw-bold text-dark small me-1">{{ $reqDoc['name'] }}</span>
-                                                    @if($reqDoc['is_compulsory'])
-                                                        <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill extra-small flex-shrink-0" style="font-size: 10px;">Compulsory</span>
-                                                    @else
-                                                        <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill extra-small flex-shrink-0" style="font-size: 10px;">Optional</span>
-                                                    @endif
+                    @else
+                        <div class="p-3 bg-light rounded-3 border mb-4">
+                            <p class="text-secondary small mb-0"><i class="bi bi-info-circle me-1"></i> No custom questionnaire fields required for {{ $service->name }}. Please proceed to attach your supporting documents below.</p>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Part B: Supporting Document Uploads -->
+                <div class="mb-4">
+                    <h6 class="fw-bold text-dark mb-3 d-flex align-items-center gap-2">
+                        <i class="bi bi-file-earmark-arrow-up text-success"></i>
+                        <span>Required Supporting Documents</span>
+                    </h6>
+
+                    @if(count($serviceDocChecklist) > 0)
+                        <!-- Document Checklist Box -->
+                        <div class="card border-0 shadow-sm rounded-3 mb-4 bg-white">
+                            <div class="card-header bg-light py-2.5 border-bottom">
+                                <h6 class="fw-bold text-dark mb-0 small">
+                                    <i class="bi bi-card-checklist me-1 text-success"></i> Document Checklist for {{ $service->name }}
+                                </h6>
+                            </div>
+                            <div class="card-body p-3">
+                                <div class="row g-3">
+                                    @foreach($serviceDocChecklist as $reqDoc)
+                                        @php
+                                            $uploaded = $isDocUploaded($reqDoc['name']);
+                                        @endphp
+                                        <div class="col-md-6 d-flex">
+                                            <div class="p-3 border rounded-3 d-flex align-items-center justify-content-between w-100" style="background-color: {{ $uploaded ? 'rgba(16, 185, 129, 0.05)' : ($reqDoc['is_compulsory'] ? 'rgba(239, 68, 68, 0.03)' : '#ffffff') }}; border-color: {{ $uploaded ? '#10b981' : ($reqDoc['is_compulsory'] ? '#fca5a5' : '#e2e8f0') }} !important;">
+                                                <div class="me-2 flex-grow-1">
+                                                    <div class="d-flex flex-wrap align-items-center gap-1.5 mb-1">
+                                                        <span class="fw-bold text-dark small me-1">{{ $reqDoc['name'] }}</span>
+                                                        @if($reqDoc['is_compulsory'])
+                                                            <span class="badge bg-danger bg-opacity-10 text-danger rounded-pill extra-small flex-shrink-0" style="font-size: 10px;">Compulsory</span>
+                                                        @else
+                                                            <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill extra-small flex-shrink-0" style="font-size: 10px;">Optional</span>
+                                                        @endif
+                                                    </div>
+                                                    <div class="small">
+                                                        @if($uploaded)
+                                                            <span class="text-success fw-semibold extra-small" style="font-size: 11px;"><i class="bi bi-check-circle-fill me-1"></i> File Attached</span>
+                                                        @else
+                                                            <span class="text-muted extra-small" style="font-size: 11px;"><i class="bi bi-hourglass me-1"></i> Awaiting Upload</span>
+                                                        @endif
+                                                    </div>
                                                 </div>
-                                                <div class="small">
-                                                    @if($uploaded)
-                                                        <span class="text-success fw-semibold extra-small" style="font-size: 11px;"><i class="bi bi-check-circle-fill me-1"></i> File Attached</span>
-                                                    @else
-                                                        <span class="text-muted extra-small" style="font-size: 11px;"><i class="bi bi-hourglass me-1"></i> Awaiting Upload</span>
-                                                    @endif
+                                                <div class="d-flex align-items-center flex-shrink-0 ms-2">
+                                                    <input type="file" class="d-none checklist-file-input" id="checkFileInput_{{ $loop->index }}" data-doc-name="{{ $reqDoc['name'] }}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                                    <button type="button" class="btn {{ $uploaded ? 'btn-outline-success' : 'btn-success' }} btn-sm rounded-pill py-1.5 px-3 select-req-doc-btn text-nowrap" data-input-id="checkFileInput_{{ $loop->index }}" data-doc-name="{{ $reqDoc['name'] }}" style="font-size: 11.5px; white-space: nowrap; background-color: {{ $uploaded ? 'transparent' : '#004225' }}; color: {{ $uploaded ? '#004225' : '#ffffff' }}; border-color: #004225;">
+                                                        <i class="bi bi-upload me-1"></i> {{ $uploaded ? 'Re-upload' : 'Upload' }}
+                                                    </button>
                                                 </div>
-                                            </div>
-                                            <div class="d-flex align-items-center flex-shrink-0 ms-2">
-                                                <input type="file" class="d-none checklist-file-input" id="checkFileInput_{{ $loop->index }}" data-doc-name="{{ $reqDoc['name'] }}" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
-                                                <button type="button" class="btn {{ $uploaded ? 'btn-outline-success' : 'btn-success' }} btn-sm rounded-pill py-1.5 px-3 select-req-doc-btn text-nowrap" data-input-id="checkFileInput_{{ $loop->index }}" data-doc-name="{{ $reqDoc['name'] }}" style="font-size: 11.5px; white-space: nowrap; background-color: {{ $uploaded ? 'transparent' : '#004225' }}; color: {{ $uploaded ? '#004225' : '#ffffff' }}; border-color: #004225;">
-                                                    <i class="bi bi-upload me-1"></i> {{ $uploaded ? 'Re-upload' : 'Upload' }}
-                                                </button>
                                             </div>
                                         </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-                @endif
-
-                <!-- Document Upload Area -->
-                <div class="doc-upload-card p-4 mb-4">
-                    <div class="text-center mb-3">
-                        <i class="bi bi-cloud-arrow-up-fill fs-1 text-success mb-2" style="color: #004225 !important;"></i>
-                        <h6 class="fw-bold text-dark mb-1">Attach Document File</h6>
-                        <p class="text-muted small mb-0">Allowed formats: PDF, JPG, PNG, DOCX (Max 10MB per file)</p>
-                    </div>
-
-                    <div class="row g-2 justify-content-center max-w-md mx-auto" style="max-width: 600px;">
-                        <div class="col-sm-6">
-                            @if(count($serviceDocChecklist) > 0)
-                                <select id="docNameSelect" class="form-select form-select-sm" onchange="toggleCustomDocInput(this)">
-                                    <option value="">-- Select Required Document --</option>
-                                    @foreach($serviceDocChecklist as $reqDoc)
-                                        <option value="{{ $reqDoc['name'] }}">{{ $reqDoc['name'] }} {{ $reqDoc['is_compulsory'] ? '(Compulsory)' : '(Optional)' }}</option>
                                     @endforeach
-                                    <option value="__custom__">+ Other Custom Document Title</option>
-                                </select>
-                                <input type="text" id="docNameInput" class="form-control form-control-sm mt-2 d-none" placeholder="e.g. Additional Passport Page">
-                            @else
-                                <input type="text" id="docNameInput" class="form-control form-control-sm" placeholder="e.g. Passport Photograph">
-                            @endif
+                                </div>
+                            </div>
                         </div>
-                        <div class="col-sm-4">
-                            <input type="file" id="docFileInput" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                    @endif
+
+                    <!-- Document Upload Area -->
+                    <div class="doc-upload-card p-4 mb-4">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-cloud-arrow-up-fill fs-1 text-success mb-2" style="color: #004225 !important;"></i>
+                            <h6 class="fw-bold text-dark mb-1">Attach Supporting Document File</h6>
+                            <p class="text-muted small mb-0">Allowed formats: PDF, JPG, PNG, DOCX (Max 10MB per file)</p>
                         </div>
-                        <div class="col-sm-2">
-                            <button type="button" id="uploadDocBtn" class="btn btn-brand-primary btn-sm w-100">Upload</button>
+
+                        <div class="row g-2 justify-content-center max-w-md mx-auto" style="max-width: 600px;">
+                            <div class="col-sm-6">
+                                @if(count($serviceDocChecklist) > 0)
+                                    <select id="docNameSelect" class="form-select form-select-sm" onchange="toggleCustomDocInput(this)">
+                                        <option value="">-- Select Required Document --</option>
+                                        @foreach($serviceDocChecklist as $reqDoc)
+                                            <option value="{{ $reqDoc['name'] }}">{{ $reqDoc['name'] }} {{ $reqDoc['is_compulsory'] ? '(Compulsory)' : '(Optional)' }}</option>
+                                        @endforeach
+                                        <option value="__custom__">+ Other Custom Document Title</option>
+                                    </select>
+                                    <input type="text" id="docNameInput" class="form-control form-control-sm mt-2 d-none" placeholder="e.g. Additional Passport Page">
+                                @else
+                                    <input type="text" id="docNameInput" class="form-control form-control-sm" placeholder="e.g. Passport Photograph">
+                                @endif
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="file" id="docFileInput" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="button" id="uploadDocBtn" class="btn btn-brand-primary btn-sm w-100">Upload</button>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- List of Uploaded Documents -->
+                    <h6 class="fw-bold text-dark mb-2">Uploaded Supporting Documents (<span id="docCount">{{ $application->requestDocuments->count() }}</span>)</h6>
+                    <div id="uploadedDocsList" class="d-flex flex-column gap-2 mb-4">
+                        @forelse($application->requestDocuments as $doc)
+                            <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between" id="docRow{{ $doc->id }}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="bg-white p-2 rounded-circle border">
+                                        <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="fw-bold mb-0 text-dark small">{{ $doc->document_name }}</h6>
+                                        <span class="text-muted" style="font-size: 11px;">{{ $doc->file_name ?? 'Uploaded File' }} • Status: <strong class="text-success">{{ $doc->status }}</strong></span>
+                                    </div>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <a href="{{ app_file_url($doc->file_path) }}" target="_blank" class="btn btn-outline-secondary btn-sm py-1 px-2.5" style="font-size: 12px;"><i class="bi bi-eye"></i> View</a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm py-1 px-2 delete-doc-btn" data-id="{{ $doc->id }}"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </div>
+                        @empty
+                            <div id="emptyDocsMsg" class="text-center p-4 bg-light rounded-3 border">
+                                <p class="text-muted small mb-0">No supporting documents uploaded yet. Use the uploader above to attach your files.</p>
+                            </div>
+                        @endforelse
                     </div>
                 </div>
 
-                <!-- List of Uploaded Documents -->
-                <h6 class="fw-bold text-dark mb-2">Uploaded Supporting Documents (<span id="docCount">{{ $application->requestDocuments->count() }}</span>)</h6>
-                <div id="uploadedDocsList" class="d-flex flex-column gap-2 mb-4">
-                    @forelse($application->requestDocuments as $doc)
-                        <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between" id="docRow{{ $doc->id }}">
-                            <div class="d-flex align-items-center gap-3">
-                                <div class="bg-white p-2 rounded-circle border">
-                                    <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
-                                </div>
-                                <div>
-                                    <h6 class="fw-bold mb-0 text-dark small">{{ $doc->document_name }}</h6>
-                                    <span class="text-muted" style="font-size: 11px;">{{ $doc->file_name ?? 'Uploaded File' }} • Status: <strong class="text-success">{{ $doc->status }}</strong></span>
-                                </div>
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <a href="{{ app_file_url($doc->file_path) }}" target="_blank" class="btn btn-outline-secondary btn-sm py-1 px-2.5" style="font-size: 12px;"><i class="bi bi-eye"></i> View</a>
-                                <button type="button" class="btn btn-outline-danger btn-sm py-1 px-2 delete-doc-btn" data-id="{{ $doc->id }}"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </div>
-                    @empty
-                        <div id="emptyDocsMsg" class="text-center p-4 bg-light rounded-3 border">
-                            <p class="text-muted small mb-0">No supporting documents uploaded yet. Use the uploader above to attach your files.</p>
-                        </div>
-                    @endforelse
-                </div>
+            <!-- STEP 3: Review & Confirm (No Price or Total Fee Displayed) -->
+            @elseif($step == 3)
+                <h2 class="h5 fw-bold text-dark mb-1">Step 3: {{ $service->name }} Pre-Enrollment Form - Review &amp; Confirm</h2>
+                <p class="text-secondary small mb-4 border-bottom pb-2">Review all information entered and documents attached before proceeding to payment.</p>
 
-            <!-- STEP 4: Review & Final Submission -->
-            @elseif($step == 4)
-                <h2 class="h5 fw-bold text-dark mb-3 border-bottom pb-2">Step 4: Application Review & Final Submission</h2>
-
+                <!-- Biodata & Service Summary (Price / Total Fee completely removed) -->
                 <div class="bg-light p-4 rounded-3 border mb-4">
-                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Application Summary</h6>
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-card-text me-1 text-success"></i> Application Summary</h6>
                     <div class="row g-3 small">
                         <div class="col-sm-6">
                             <span class="text-muted d-block">Reference Number:</span>
@@ -379,7 +391,7 @@
                             <strong class="text-dark">{{ $application->form_data['first_name'] ?? '' }} {{ $application->form_data['middle_name'] ?? '' }} {{ $application->form_data['last_name'] ?? '' }}</strong>
                         </div>
                         <div class="col-sm-6">
-                            <span class="text-muted d-block">Applicant Email & Phone:</span>
+                            <span class="text-muted d-block">Applicant Email &amp; Phone:</span>
                             <strong class="text-dark">{{ $application->form_data['email'] ?? '' }} • {{ $application->form_data['phone'] ?? '' }}</strong>
                         </div>
                         <div class="col-sm-6">
@@ -390,21 +402,57 @@
                             <span class="text-muted d-block">Country for Service:</span>
                             <strong class="text-dark">{{ $application->country_service_requested }}</strong>
                         </div>
-                        <div class="col-sm-6">
-                            <span class="text-muted d-block">Total Fees:</span>
-                            <strong class="text-success fs-6">₦{{ number_format($application->price) }}</strong>
-                        </div>
-                        <div class="col-sm-6">
-                            <span class="text-muted d-block">Uploaded Documents:</span>
+                        <div class="col-sm-12">
+                            <span class="text-muted d-block">Attached Supporting Documents:</span>
                             <strong class="text-dark">{{ $application->requestDocuments->count() }} Files Attached</strong>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Custom Questionnaire Responses Summary -->
+                @if(is_array($application->form_data))
+                    @php
+                        $customResponses = array_filter($application->form_data, function($val, $key) {
+                            return !in_array($key, ['first_name', 'middle_name', 'last_name', 'email', 'phone', 'state', 'city', 'country_applying_from', 'country_service_requested']);
+                        }, ARRAY_FILTER_USE_BOTH);
+                    @endphp
+                    @if(count($customResponses) > 0)
+                        <div class="bg-light p-4 rounded-3 border mb-4">
+                            <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-list-check me-1 text-success"></i> Custom Service Form Responses</h6>
+                            <div class="row g-2 small">
+                                @foreach($customResponses as $fieldKey => $fieldVal)
+                                    <div class="col-sm-6">
+                                        <span class="text-muted d-block text-capitalize">{{ str_replace('_', ' ', $fieldKey) }}:</span>
+                                        <strong class="text-dark">{{ is_array($fieldVal) ? implode(', ', $fieldVal) : (string)$fieldVal }}</strong>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endif
+                @endif
+
+                <!-- Uploaded Documents Overview -->
+                <div class="bg-light p-4 rounded-3 border mb-4">
+                    <h6 class="fw-bold text-dark border-bottom pb-2 mb-3"><i class="bi bi-folder-check me-1 text-success"></i> Attached Supporting Documents ({{ $application->requestDocuments->count() }})</h6>
+                    <div class="d-flex flex-column gap-2">
+                        @forelse($application->requestDocuments as $doc)
+                            <div class="d-flex align-items-center justify-content-between p-2 rounded bg-white border small">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="bi bi-file-earmark-check-fill text-success fs-6"></i>
+                                    <span class="fw-semibold text-dark">{{ $doc->document_name }}</span>
+                                </div>
+                                <span class="badge bg-success-subtle text-success border border-success-subtle">Ready</span>
+                            </div>
+                        @empty
+                            <p class="text-muted small mb-0">No documents attached.</p>
+                        @endforelse
                     </div>
                 </div>
 
                 <div class="form-check mb-4">
                     <input class="form-check-input" type="checkbox" id="termsCheck" required checked>
                     <label class="form-check-label small text-secondary" for="termsCheck">
-                        I declare that all information provided and supporting documents uploaded are authentic and correct. I authorize DOOTOR ENTERPRISES to process my application.
+                        I declare that all information provided and supporting documents uploaded are authentic and correct. I authorize DOOTOR ENTERPRISES to process my pre-enrollment.
                     </label>
                 </div>
             @endif
@@ -419,20 +467,109 @@
                     <div></div>
                 @endif
 
-                @if($step < 4)
-                    <a href="{{ route('client.application.step', ['serviceRequest' => $application->id, 'step' => $step + 1]) }}" class="btn btn-brand-primary px-4 py-2 rounded-3">
-                        <span>Save & Next Step</span>
+                @if($step < 3)
+                    <button type="button" id="btnOpenConfirmStepModal" class="btn btn-brand-primary px-4 py-2 rounded-3">
+                        <span>Save &amp; Next Step</span>
                         <i class="bi bi-arrow-right ms-1"></i>
-                    </a>
+                    </button>
                 @else
-                    <button type="submit" class="btn btn-success px-5 py-2.5 rounded-3 fw-bold shadow-sm" style="background-color: #004225; border: none;">
-                        <i class="bi bi-check-circle-fill me-1.5"></i> Submit Official Application
+                    <!-- Step 3: Continue to Payment Button -->
+                    <button type="button" id="btnOpenConfirmPaymentModal" class="btn btn-success px-5 py-2.5 rounded-3 fw-bold shadow-sm" style="background-color: #004225; border: none;">
+                        <span>Continue to Payment</span>
+                        <i class="bi bi-credit-card-2-front ms-2"></i>
                     </button>
                 @endif
             </div>
         </form>
     </div>
 </div>
+
+<!-- Modal: Confirm Details Before Proceeding to Next Form Step (Step 1 & Step 2) -->
+@if($step < 3)
+<div class="modal fade" id="confirmStepDetailsModal" tabindex="-1" aria-labelledby="confirmStepDetailsLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-2 text-success">
+                        <i class="bi bi-shield-check fs-5"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark fs-6" id="confirmStepDetailsLabel">Confirm Form Details</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-secondary small mb-3">
+                    Before proceeding to the next step, please confirm that you have reviewed the details provided in this <strong>Step {{ $step }} Pre-Enrollment Form</strong>.
+                </p>
+                <div class="p-3 rounded-3 bg-light border mb-3">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="agreeStepCheckbox" checked>
+                        <label class="form-check-label small fw-semibold text-dark" for="agreeStepCheckbox">
+                            I agree and confirm that all details and documents provided in this step are accurate and true.
+                        </label>
+                    </div>
+                </div>
+                <div class="alert alert-info py-2 px-3 mb-0 small border-0 d-flex align-items-center gap-2">
+                    <i class="bi bi-info-circle-fill fs-6 flex-shrink-0"></i>
+                    <span>Your entries will be automatically saved before advancing to the next stage.</span>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" data-bs-dismiss="modal">
+                    Review Details
+                </button>
+                <button type="button" id="confirmNextStepBtn" class="btn btn-success rounded-pill px-4 btn-sm fw-bold" style="background-color: #004225; border: none;">
+                    <span>I Agree &amp; Proceed</span>
+                    <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@else
+<!-- Modal: Confirm Details & Continue to Payment (Step 3) -->
+<div class="modal fade" id="confirmPaymentModal" tabindex="-1" aria-labelledby="confirmPaymentLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-0 pb-0">
+                <div class="d-flex align-items-center gap-2">
+                    <div class="rounded-circle bg-success bg-opacity-10 p-2 text-success">
+                        <i class="bi bi-credit-card-2-front-fill fs-5"></i>
+                    </div>
+                    <h5 class="modal-title fw-bold text-dark fs-6" id="confirmPaymentLabel">Confirm Application &amp; Continue to Payment</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="text-secondary small mb-3">
+                    You are confirming your pre-enrollment application for <strong>{{ $service->name }}</strong> (Reference: <span class="font-monospace fw-bold text-dark">{{ $application->reference_number }}</span>).
+                </p>
+                <div class="p-3 rounded-3 bg-light border mb-3">
+                    <div class="form-check mb-0">
+                        <input class="form-check-input" type="checkbox" id="agreePaymentCheckbox" checked>
+                        <label class="form-check-label small fw-semibold text-dark" for="agreePaymentCheckbox">
+                            I declare that all entered biodata, custom inputs, and supporting documents are accurate and ready for payment.
+                        </label>
+                    </div>
+                </div>
+                <div class="alert alert-success py-2 px-3 mb-0 small border-0 d-flex align-items-center gap-2 bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-shield-check fs-6 flex-shrink-0"></i>
+                    <span>You will now be redirected directly to the secured payment gateway to complete your transaction.</span>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" data-bs-dismiss="modal">
+                    Cancel / Review
+                </button>
+                <button type="button" id="confirmPaymentSubmitBtn" class="btn btn-success rounded-pill px-4 btn-sm fw-bold" style="background-color: #004225; border: none;">
+                    <i class="bi bi-lock-fill me-1"></i> Continue to Payment Gateway
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @section('scripts')
@@ -455,7 +592,7 @@
             autosaveText.innerText = text;
         }
 
-        // Background Auto-Save Functionality (Requirement #7)
+        // Background Auto-Save Functionality (3 Steps Progress: 33%, 66%, 100%)
         function triggerAutoSave() {
             setStatus('saving', 'Saving...');
 
@@ -468,10 +605,13 @@
                 }
             });
 
+            const currentStepNum = parseInt("{{ $step }}", 10) || 1;
+            const progressPct = Math.round((currentStepNum / 3) * 100);
+
             const payload = {
                 _token: csrfToken,
-                current_step: "{{ $step }}",
-                progress_percent: "{{ $step * 25 }}",
+                current_step: currentStepNum,
+                progress_percent: progressPct,
                 country_applying_from: document.getElementById('country_applying_from') ? document.getElementById('country_applying_from').value : "{{ $application->country_applying_from }}",
                 country_service_requested: document.getElementById('country_service_requested') ? document.getElementById('country_service_requested').value : "{{ $application->country_service_requested }}",
                 form_data: formDataObj
@@ -570,7 +710,7 @@
             }
         });
 
-        // Auto-upload immediately when file is chosen in a checklist card input or dynamic form builder input
+        // Auto-upload immediately when file is chosen
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('checklist-file-input')) {
                 const fileInput = e.target;
@@ -667,6 +807,69 @@
                 }
             }
         });
+
+        // Step Advance & Confirmation Modal Handlers (Step 1 and Step 2)
+        const btnOpenStepModal = document.getElementById('btnOpenConfirmStepModal');
+        if (btnOpenStepModal) {
+            btnOpenStepModal.addEventListener('click', function(e) {
+                e.preventDefault();
+                const form = document.getElementById('applicationForm');
+                if (form && !form.checkValidity()) {
+                    form.reportValidity();
+                    return;
+                }
+                const modal = new bootstrap.Modal(document.getElementById('confirmStepDetailsModal'));
+                modal.show();
+            });
+        }
+
+        const confirmNextStepBtn = document.getElementById('confirmNextStepBtn');
+        if (confirmNextStepBtn) {
+            confirmNextStepBtn.addEventListener('click', function() {
+                const agreeCheck = document.getElementById('agreeStepCheckbox');
+                if (agreeCheck && !agreeCheck.checked) {
+                    alert('Please confirm that you agree with the provided details before proceeding.');
+                    return;
+                }
+                confirmNextStepBtn.disabled = true;
+                confirmNextStepBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Saving & Proceeding...`;
+
+                triggerAutoSave();
+
+                setTimeout(() => {
+                    window.location.href = "{{ route('client.application.step', ['serviceRequest' => $application->id, 'step' => $step + 1]) }}";
+                }, 400);
+            });
+        }
+
+        // Step 3: Continue to Payment Modal Handlers
+        const btnOpenPaymentModal = document.getElementById('btnOpenConfirmPaymentModal');
+        if (btnOpenPaymentModal) {
+            btnOpenPaymentModal.addEventListener('click', function(e) {
+                e.preventDefault();
+                const termsCheck = document.getElementById('termsCheck');
+                if (termsCheck && !termsCheck.checked) {
+                    alert('Please check the declaration checkbox before continuing to payment.');
+                    return;
+                }
+                const modal = new bootstrap.Modal(document.getElementById('confirmPaymentModal'));
+                modal.show();
+            });
+        }
+
+        const confirmPaymentSubmitBtn = document.getElementById('confirmPaymentSubmitBtn');
+        if (confirmPaymentSubmitBtn) {
+            confirmPaymentSubmitBtn.addEventListener('click', function() {
+                const agreeCheck = document.getElementById('agreePaymentCheckbox');
+                if (agreeCheck && !agreeCheck.checked) {
+                    alert('Please confirm that you agree with all details before continuing to payment.');
+                    return;
+                }
+                confirmPaymentSubmitBtn.disabled = true;
+                confirmPaymentSubmitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-1" role="status"></span> Connecting to Payment Gateway...`;
+                document.getElementById('applicationForm').submit();
+            });
+        }
     });
 </script>
 @endsection

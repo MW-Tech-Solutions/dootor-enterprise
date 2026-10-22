@@ -169,58 +169,6 @@
                     </div>
                 </div>
 
-                <!-- Location Distinction: Country Applying From vs Country for Requested Service -->
-                @php
-                    $allCountries = \App\Services\LocationService::allCountries();
-                    $oldApplyingFrom = old('country_applying_from', old('country', 'Canada'));
-                    $oldRequestedCountry = old('country_service_requested', 'Nigeria');
-                @endphp
-
-                <div class="row g-2 mb-3">
-                    <div class="col-sm-6">
-                        <label for="country_applying_from" class="form-label small fw-medium">Country Applying From</label>
-                        <select name="country_applying_from" id="country_applying_from" class="form-select african-country-select bg-light rounded-3 @error('country_applying_from') is-invalid @enderror" data-selected="{{ $oldApplyingFrom }}" data-division-target="state" data-label-target="state_label" style="border-color: #dee2e6;" required>
-                            @foreach($allCountries as $c)
-                                <option value="{{ $c['name'] }}" {{ $oldApplyingFrom == $c['name'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
-                            @endforeach
-                        </select>
-                        @error('country_applying_from')
-                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="col-sm-6">
-                        <label for="country_service_requested" class="form-label small fw-medium">Country for Requested Service</label>
-                        <select name="country_service_requested" id="country_service_requested" class="form-select bg-light rounded-3 @error('country_service_requested') is-invalid @enderror" style="border-color: #dee2e6;" required>
-                            @foreach($allCountries as $c)
-                                <option value="{{ $c['name'] }}" {{ $oldRequestedCountry == $c['name'] ? 'selected' : '' }}>{{ $c['name'] }}</option>
-                            @endforeach
-                        </select>
-                        @error('country_service_requested')
-                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
-
-                <!-- Dynamic Administrative Division & City -->
-                <div class="row g-2 mb-3">
-                    <div class="col-sm-6">
-                        <label for="state" id="state_label" class="form-label small fw-medium african-division-label">State / Province / Region</label>
-                        <select name="state" id="state" class="form-select african-division-select bg-light rounded-3 @error('state') is-invalid @enderror" data-selected="{{ old('state') }}" style="border-color: #dee2e6;">
-                            <option value="">Loading Divisions...</option>
-                        </select>
-                        @error('state')
-                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-                    <div class="col-sm-6">
-                        <label for="city" class="form-label small fw-medium">City / Town</label>
-                        <input type="text" name="city" id="city" class="form-control bg-light rounded-3 @error('city') is-invalid @enderror" value="{{ old('city') }}" placeholder="e.g. Toronto, London, Lagos" style="border-color: #dee2e6;">
-                        @error('city')
-                            <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
-                        @enderror
-                    </div>
-                </div>
 
                 <!-- Password Fields -->
                 <div class="row g-2 mb-4">
@@ -404,5 +352,4 @@
     </div>
 </div>
 
-<script src="{{ asset('js/location-loader.js') }}"></script>
 @endsection

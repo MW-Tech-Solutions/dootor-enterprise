@@ -19,10 +19,17 @@
             @foreach($vendorServices as $vendorService)
                 <div class="col-md-6 col-lg-4">
                     <div class="card border border-light h-100 p-3 rounded-3 bg-light d-flex flex-column">
-                        <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2.5 py-1 text-uppercase small">
-                                {{ $vendorService->service->name }}
-                            </span>
+                        <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-1">
+                            @if(!$vendorService->service->parent_id)
+                                <span class="badge bg-warning text-dark rounded-pill px-2.5 py-1 small">
+                                    <i class="bi bi-star-fill me-1"></i> Primary Service
+                                </span>
+                            @else
+                                <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-2.5 py-1 small">
+                                    <i class="bi bi-arrow-return-right me-1"></i> Mother: {{ $vendorService->service->parent->name ?? 'Primary' }}
+                                </span>
+                            @endif
+
                             @if($vendorService->status === 'Active')
                                 <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Active</span>
                             @else

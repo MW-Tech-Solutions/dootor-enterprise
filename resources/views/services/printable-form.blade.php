@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OFFICIAL SERVICE APPLICATION FORM - {{ $service->name }} ({{ $referenceNumber }})</title>
+    <title>OFFICIAL PRE-ENROLLMENT FORM - {{ $service->name }} ({{ $referenceNumber }})</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         @page {
@@ -174,7 +174,7 @@
             <!-- Center: Header Title & Service Meta -->
             <td style="width: 56%; text-align: center; vertical-align: middle; padding: 0 10px;">
                 <h4 style="margin: 0; font-weight: 800; color: #004225; font-size: 17px; text-transform: uppercase; letter-spacing: 0.5px;">{{ $companyName }}</h4>
-                <div style="font-size: 13px; font-weight: 700; color: #d4af37; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px;">OFFICIAL SERVICE APPLICATION FORM</div>
+                <div style="font-size: 13px; font-weight: 700; color: #d4af37; margin-top: 3px; text-transform: uppercase; letter-spacing: 0.5px;">OFFICIAL PRE-ENROLLMENT FORM</div>
                 <div style="font-size: 12.5px; font-weight: 600; color: #334155; margin-top: 2px;">{{ $service->name }}</div>
                 <div style="font-size: 10.5px; color: #64748b; margin-top: 4px;">
                     Issued: {{ $generatedDate }} &nbsp;|&nbsp; <strong style="color: #004225; letter-spacing: 0.5px;">REF: {{ $referenceNumber }}</strong>
@@ -378,7 +378,7 @@
     <!-- Section 4: Declaration & Signature -->
     <div class="section-title">SECTION 4: APPLICANT DECLARATION & CONSENT</div>
     <p style="font-size: 10.5px; color: #334155; text-align: justify; line-height: 1.4; margin-bottom: 15px;">
-        I hereby declare that all information provided in this application form is true, correct, and complete to the best of my knowledge. 
+        I hereby declare that all information provided in this pre-enrollment form is true, correct, and complete to the best of my knowledge. 
         I authorize <strong>{{ $companyName }}</strong> and its designated verification officers to process, verify, and authenticate my submitted documents with the relevant official authorities for the fulfillment of the requested service.
     </p>
 

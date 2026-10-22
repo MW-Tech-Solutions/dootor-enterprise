@@ -16,6 +16,106 @@
             flex: 1;
         }
     }
+
+    /* Social Media Handles Hover Styles */
+    .footer-social-btn {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: #ffffff !important;
+        text-decoration: none;
+        transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        font-size: 16px;
+    }
+    .footer-social-btn i {
+        color: #ffffff !important;
+        transition: all 0.25s ease;
+    }
+    .footer-social-btn:hover {
+        transform: translateY(-3px) scale(1.08);
+        color: #ffffff !important;
+    }
+    .footer-social-btn:hover i {
+        color: #ffffff !important;
+    }
+    .footer-social-btn.social-fb:hover {
+        background-color: #1877F2 !important;
+        border-color: #1877F2 !important;
+        box-shadow: 0 6px 16px rgba(24, 119, 242, 0.45);
+    }
+    .footer-social-btn.social-x:hover {
+        background-color: #000000 !important;
+        border-color: #ffffff !important;
+        box-shadow: 0 6px 16px rgba(255, 255, 255, 0.25);
+    }
+    .footer-social-btn.social-ig:hover {
+        background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%) !important;
+        border-color: #d6249f !important;
+        box-shadow: 0 6px 16px rgba(214, 36, 159, 0.45);
+    }
+    .footer-social-btn.social-in:hover {
+        background-color: #0A66C2 !important;
+        border-color: #0A66C2 !important;
+        box-shadow: 0 6px 16px rgba(10, 102, 194, 0.45);
+    }
+    .footer-social-btn.social-wa:hover {
+        background-color: #25D366 !important;
+        border-color: #25D366 !important;
+        box-shadow: 0 6px 16px rgba(37, 211, 102, 0.45);
+    }
+    .footer-social-btn.social-yt:hover {
+        background-color: #FF0000 !important;
+        border-color: #FF0000 !important;
+        box-shadow: 0 6px 16px rgba(255, 0, 0, 0.45);
+    }
+    .footer-social-btn.social-tt:hover {
+        background-color: #000000 !important;
+        border-color: #00f2fe !important;
+        box-shadow: 0 6px 16px rgba(0, 242, 254, 0.45);
+    }
+
+    /* Homepage Service Cards Refined Styling */
+    .service-catalog-card {
+        border: 1px solid #eef2f6 !important;
+        border-radius: 20px !important;
+        transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+        background: #ffffff !important;
+        box-shadow: 0 4px 18px -2px rgba(0, 0, 0, 0.04) !important;
+    }
+    .service-catalog-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 30px -10px rgba(0, 66, 37, 0.12) !important;
+        border-color: rgba(0, 66, 37, 0.25) !important;
+    }
+    .subservice-chip-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 12px 14px;
+    }
+    .subservice-chip {
+        background: #ffffff;
+        color: #1e293b;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        padding: 4px 8px;
+        font-size: 11.5px;
+        font-weight: 500;
+        box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s ease;
+    }
+    .subservice-chip:hover {
+        border-color: #004225;
+        color: #004225;
+    }
 </style>
 @endsection
 
@@ -38,7 +138,20 @@
         ['title' => 'Birth Certificate/Attestation by the National Population Commission (NPC)', 'icon' => 'bi-file-earmark-medical', 'description' => 'Acquire official birth registration records or attestation documents from the NPC.'],
     ];
 
-    $dbServices = \App\Models\Service::where('status', 'Active')->get();
+    $dbPrimaryServices = isset($primaryServices) && $primaryServices->count() > 0
+        ? $primaryServices
+        : \App\Models\Service::where('status', 'Active')
+            ->whereNull('parent_id')
+            ->with(['subServices' => function($q) { 
+                $q->where('status', 'Active')
+                  ->orderByRaw('CASE WHEN priority IS NULL OR priority = 0 THEN 999999 ELSE priority END ASC')
+                  ->orderBy('name', 'asc'); 
+            }])
+            ->orderByRaw('CASE WHEN priority IS NULL OR priority = 0 THEN 999999 ELSE priority END ASC')
+            ->orderBy('name', 'asc')
+            ->get();
+
+    $allActiveServices = \App\Models\Service::where('status', 'Active')->get();
 
     if (!function_exists('getServiceCategory')) {
         function getServiceCategory($name) {
@@ -54,12 +167,20 @@
     }
 @endphp
 
-<!-- Disclaimer Top Banner -->
-<div id="disclaimerBanner" class="py-2 text-center text-white position-relative" style="background-color: #003b1c; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; border-bottom: 2px solid #d4af37; z-index: 1060;">
-    <div class="container pe-5">
-        <i class="bi bi-exclamation-triangle-fill text-warning me-2"></i>WE ARE NOT GOVERNMENT OFFICIALS, AFFILIATES, OR AN ANNEX OF THE NIGERIAN HIGH COMMISSION.
+<!-- Disclaimer Top Banner Marquee (High-Visibility Warning & Danger Styling) -->
+<div id="disclaimerBanner" class="position-relative overflow-hidden py-2" style="background-color: #1a0505; border-bottom: 2px solid #ef4444; z-index: 1060;">
+    <div class="d-flex align-items-center w-100">
+        <div class="px-3 py-1 bg-danger text-white fw-bold d-flex align-items-center gap-1.5 flex-shrink-0 rounded-end-pill shadow-sm" style="font-size: 11.5px; letter-spacing: 0.8px; z-index: 2;">
+            <i class="bi bi-exclamation-octagon-fill text-warning"></i>
+            <span>WARNING</span>
+        </div>
+        <div class="flex-grow-1 overflow-hidden mx-2">
+            <marquee behavior="scroll" direction="left" scrollamount="6" onmouseover="this.stop();" onmouseout="this.start();" class="mb-0 fw-bold py-1" style="color: #ff4d4f; font-size: 13.5px; letter-spacing: 1px; text-transform: uppercase;">
+                <span class="text-warning"><i class="bi bi-exclamation-triangle-fill me-1"></i> NOTICE:</span> &nbsp; WE ARE NOT GOVERNMENT OFFICIALS, AFFILIATES, OR AN ANNEX OF ANY EMBASSY HIGH COMMISSION OR CONSULATES &nbsp;&bull;&nbsp; DOOTOR ENTERPRISES IS AN INDEPENDENT ADMINISTRATIVE CONSULTANCY &nbsp;&bull;&nbsp; <span class="text-warning"><i class="bi bi-shield-exclamation me-1"></i></span> WE ARE NOT GOVERNMENT OFFICIALS, AFFILIATES, OR AN ANNEX OF ANY EMBASSY HIGH COMMISSION OR CONSULATES
+            </marquee>
+        </div>
+        <button type="button" class="btn-close btn-close-white flex-shrink-0 me-3 ms-1" aria-label="Close" onclick="dismissDisclaimer()" style="font-size: 10px; z-index: 2;" title="Dismiss notification"></button>
     </div>
-    <button type="button" class="btn-close btn-close-white position-absolute top-50 translate-middle-y end-0 me-3" aria-label="Close" onclick="dismissDisclaimer()" style="font-size: 10px;"></button>
 </div>
 
 <!-- Navigation Header -->
@@ -323,22 +444,59 @@
         </div>
 
         <div class="row g-4">
-            @if($dbServices->count() > 0)
-                @foreach($dbServices as $service)
-                    <div class="col-md-6 col-lg-3 service-card-container" data-category="{{ getServiceCategory($service->name) }}" data-name="{{ strtolower($service->name) }}">
-                        <div class="card border-0 shadow-sm h-100 p-3 rounded-4 bg-white d-flex flex-column position-relative overflow-hidden">
+            @if($dbPrimaryServices->count() > 0)
+                @foreach($dbPrimaryServices as $service)
+                    @php
+                        $subServiceNames = $service->subServices->pluck('name')->implode(' ');
+                        $searchableName = strtolower($service->name . ' ' . $subServiceNames);
+                    @endphp
+                    <div class="col-md-6 col-lg-4 service-card-container" data-category="{{ getServiceCategory($service->name) }}" data-name="{{ $searchableName }}">
+                        <div class="card service-catalog-card h-100 p-4 d-flex flex-column position-relative overflow-hidden">
                             <!-- Gold Checkmark Badge -->
-                            <div class="position-absolute top-0 end-0 mt-3 me-3" title="Verified Service">
+                            <div class="position-absolute top-0 end-0 mt-3 me-3" title="Verified Consular Service">
                                 <i class="bi bi-patch-check-fill fs-5" style="color: #d4af37;"></i>
                             </div>
-                            <div class="rounded-3 text-white p-3 mb-3 d-flex align-items-center justify-content-center align-self-start shadow-sm" style="width: 50px; height: 50px; background-color: #004225;">
-                                <i class="bi bi-file-earmark-check fs-4"></i>
+                            
+                            <div class="d-flex align-items-center gap-3 mb-3">
+                                <div class="rounded-3 text-white d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 44px; height: 44px; background: linear-gradient(135deg, #004225 0%, #0a5c36 100%);">
+                                    <i class="bi bi-file-earmark-text fs-5"></i>
+                                </div>
+                                <div>
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1 extra-small fw-bold" style="font-size: 10.5px; border: 1px solid rgba(0,66,37,0.15);">Primary Service</span>
+                                    <h3 class="h5 fw-bold mb-0 text-dark mt-1" style="letter-spacing: -0.3px;">{{ $service->name }}</h3>
+                                </div>
                             </div>
-                            <h3 class="h6 fw-bold mb-2 text-dark">{{ $service->name }}</h3>
-                            <p class="small flex-grow-1" style="color: #334155;">{{ $service->description }}</p>
-                            <hr class="my-2 border-light">
-                            <div class="d-flex justify-content-end align-items-center">
-                                <a href="{{ route('login') }}" class="btn btn-outline-dark btn-sm rounded-pill px-3 w-100 text-center">Order Now</a>
+
+                            <p class="small text-secondary mb-3" style="line-height: 1.6; font-size: 13px;">{{ $service->description }}</p>
+
+                            <!-- Sub-Services View Section -->
+                            @if($service->subServices && $service->subServices->count() > 0)
+                                <div class="subservice-chip-box mb-3 flex-grow-1">
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="extra-small fw-bold text-uppercase d-flex align-items-center gap-1.5" style="font-size: 11px; letter-spacing: 0.5px; color: #004225;">
+                                            <i class="bi bi-diagram-3-fill text-success"></i> Sub-Services ({{ $service->subServices->count() }})
+                                        </span>
+                                    </div>
+                                    <div class="d-flex flex-wrap gap-1.5">
+                                        @foreach($service->subServices as $sub)
+                                            <span class="subservice-chip">
+                                                <i class="bi bi-check2 text-success fw-bold"></i> {{ $sub->name }}
+                                            </span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @else
+                                <div class="flex-grow-1"></div>
+                            @endif
+
+                            <div class="pt-3 border-top d-flex align-items-center justify-content-between gap-2 mt-auto">
+                                <div>
+                                    <span class="text-muted extra-small d-block" style="font-size: 11px; font-weight: 500;">Official Pre-Enrollment Fee</span>
+                                    <strong class="text-dark fs-5 fw-bold" style="letter-spacing: -0.5px;">{{ $currencySymbol ?? '$' }}{{ number_format($service->price, 2) }}</strong>
+                                </div>
+                                <a href="{{ route('login') }}" class="btn btn-dark btn-sm rounded-pill px-3.5 py-2 font-monospace small d-inline-flex align-items-center gap-1.5 fw-semibold shadow-sm text-decoration-none" style="background-color: #004225; border-color: #004225;">
+                                    <span>Apply Now</span> <i class="bi bi-arrow-right"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
@@ -347,7 +505,6 @@
                 @foreach($staticServices as $service)
                     <div class="col-md-6 col-lg-3 service-card-container" data-category="{{ getServiceCategory($service['title']) }}" data-name="{{ strtolower($service['title']) }}">
                         <div class="card border-0 shadow-sm h-100 p-3 rounded-4 bg-white d-flex flex-column position-relative overflow-hidden">
-                            <!-- Gold Checkmark Badge -->
                             <div class="position-absolute top-0 end-0 mt-3 me-3" title="Verified Service">
                                 <i class="bi bi-patch-check-fill fs-5" style="color: #d4af37;"></i>
                             </div>
@@ -380,48 +537,27 @@
             </div>
             
             <div class="col-lg-7">
+                @php
+                    $displayFaqs = isset($faqs) && $faqs->count() > 0 
+                        ? $faqs 
+                        : \App\Models\Faq::where('status', 'Active')->orderBy('sort_order', 'asc')->get();
+                @endphp
                 <div id="customFaqAccordion">
-
-                    <div class="faq-item border-bottom py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
-                            How long does document processing take?
-                            <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
-                        </button>
-                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
-                            Processing times vary depending on the service. Routine certificates like Court Affidavits are usually ready in 24 hours, while passport approvals and visa vetted applications can take between 3 to 10 working days.
+                    @forelse($displayFaqs as $index => $faqItem)
+                        <div class="faq-item {{ !$loop->last ? 'border-bottom' : '' }} py-2">
+                            <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
+                                <span>{{ $faqItem->question }}</span>
+                                <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
+                            </button>
+                            <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
+                                {!! nl2br(e($faqItem->answer)) !!}
+                            </div>
                         </div>
-                    </div>
-
-                    <div class="faq-item border-bottom py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
-                            Are the service providers verified?
-                            <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
-                        </button>
-                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
-                            Yes. All vendors on this platform must complete a strict KYC profile, upload official government IDs, submit banking details, and pass a vetting approval process by system administrators before they can list services.
+                    @empty
+                        <div class="faq-item py-2">
+                            <p class="text-secondary small mb-0">No frequently asked questions available at this time.</p>
                         </div>
-                    </div>
-
-                    <div class="faq-item border-bottom py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
-                            What payment gateways are supported?
-                            <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
-                        </button>
-                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
-                            We support secure billing via Paystack and Credo for rapid local and international payments. All transactions are protected via industry-standard encryption protocols.
-                        </div>
-                    </div>
-
-                    <div class="faq-item py-2">
-                        <button class="faq-question w-100 text-start bg-transparent border-0 fw-semibold fs-6 d-flex justify-content-between align-items-center py-2 px-0 text-dark" type="button">
-                            Is my personal information secure?
-                            <i class="bi bi-chevron-down faq-icon ms-2" style="transition: transform 0.25s ease; flex-shrink:0;"></i>
-                        </button>
-                        <div class="faq-answer small px-1" style="display:none; padding-top: 8px; padding-bottom: 8px; color: #334155; line-height: 1.6;">
-                            Absolutely. We use end-to-end data encryption, secure server infrastructure, and strict access controls. Your data is never shared with third parties without your consent.
-                        </div>
-                    </div>
-
+                    @endforelse
                 </div>
             </div>
         </div>
@@ -455,18 +591,83 @@
                     The leading portal for quick, verified, and secured document applications. Connecting business services with professional agents.
                 </p>
                 <div class="d-flex flex-column gap-2 text-white-50 small">
+                    @php
+                        $footerPhone = $settings->contact_phone ?? '+1 (416) 458-9707';
+                        $footerEmail = $settings->contact_email ?? 'support@dootor-enterprises.com';
+                        $footerAddress = $settings->contact_address ?? 'Toronto, Ontario, Canada';
+                        $rawWa = $settings->whatsapp_number ?? '+14164589707';
+                        $footerWaLink = str_starts_with($rawWa, 'http') ? $rawWa : 'https://wa.me/' . preg_replace('/[^0-9]/', '', $rawWa);
+                    @endphp
                     <span class="d-flex align-items-center gap-2">
                         <i class="bi bi-whatsapp text-success"></i>
-                        <a href="https://wa.me/14164589707" class="text-white-50 text-decoration-none" style="transition: color 0.2s;" target="_blank">Direct/WhatsApp: +1 416-458-9707</a>
+                        <a href="{{ $footerWaLink }}" class="text-white-50 text-decoration-none" style="transition: color 0.2s;" target="_blank">Direct / WhatsApp: {{ $rawWa }}</a>
+                    </span>
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-telephone text-info"></i>
+                        <a href="tel:{{ $footerPhone }}" class="text-white-50 text-decoration-none">{{ $footerPhone }}</a>
                     </span>
                     <span class="d-flex align-items-center gap-2">
                         <i class="bi bi-envelope text-white"></i>
-                        <a href="mailto:support@dootor-enterprises.com" class="text-white-50 text-decoration-none">support@dootor-enterprises.com</a>
+                        <a href="mailto:{{ $footerEmail }}" class="text-white-50 text-decoration-none">{{ $footerEmail }}</a>
                     </span>
+                    @if(!empty($footerAddress))
+                    <span class="d-flex align-items-center gap-2">
+                        <i class="bi bi-geo-alt text-danger"></i>
+                        <span>{{ $footerAddress }}</span>
+                    </span>
+                    @endif
                     <span class="d-flex align-items-center gap-2">
                         <i class="bi bi-google text-warning"></i>
-                        <span>Google Page: NIN & OTHER NIGERIAN TRAVEL DOCUMENTS CONSULTANCY</span>
+                        <span>Google Page: NIN &amp; OTHER NIGERIAN TRAVEL DOCUMENTS CONSULTANCY</span>
                     </span>
+                </div>
+
+                <!-- Dynamic Social Media Handles (Bootstrap Icons) -->
+                <div class="mt-4 pt-2">
+                    <h6 class="text-white small fw-bold text-uppercase mb-2.5" style="letter-spacing: 0.8px; font-size: 11px;">Follow Us Online</h6>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        @if(!empty($settings->facebook_url))
+                            <a href="{{ $settings->facebook_url }}" target="_blank" rel="noopener noreferrer" class="footer-social-btn social-fb" title="Facebook">
+                                <i class="bi bi-facebook fs-6"></i>
+                            </a>
+                        @endif
+                        @if(!empty($settings->twitter_url))
+                            <a href="{{ $settings->twitter_url }}" target="_blank" rel="noopener noreferrer" class="footer-social-btn social-tw" title="Twitter / X">
+                                <i class="bi bi-twitter-x fs-6"></i>
+                            </a>
+                        @endif
+                        @if(!empty($settings->instagram_url))
+                            <a href="{{ $settings->instagram_url }}" target="_blank" rel="noopener noreferrer" class="footer-social-btn social-ig" title="Instagram">
+                                <i class="bi bi-instagram fs-6"></i>
+                            </a>
+                        @endif
+                        @if(!empty($settings->linkedin_url))
+                            <a href="{{ $settings->linkedin_url }}" target="_blank" rel="noopener noreferrer" class="footer-social-btn social-li" title="LinkedIn">
+                                <i class="bi bi-linkedin fs-6"></i>
+                            </a>
+                        @endif
+                        @if(!empty($settings->whatsapp_number))
+                            <a href="{{ $footerWaLink }}" target="_blank" rel="noopener noreferrer" class="footer-social-btn social-wa" title="WhatsApp">
+                                <i class="bi bi-whatsapp fs-6"></i>
+                            </a>
+                        @endif
+                        @if(!empty($settings->youtube_url))
+                            <a href="{{ $settings->youtube_url }}" target="_blank" rel="noopener noreferrer" class="footer-social-btn social-yt" title="YouTube">
+                                <i class="bi bi-youtube fs-6"></i>
+                            </a>
+                        @endif
+                        @if(!empty($settings->tiktok_url))
+                            <a href="{{ $settings->tiktok_url }}" target="_blank" rel="noopener noreferrer" class="footer-social-btn social-tt" title="TikTok">
+                                <i class="bi bi-tiktok fs-6"></i>
+                            </a>
+                        @endif
+                        @if(empty($settings->facebook_url) && empty($settings->twitter_url) && empty($settings->instagram_url) && empty($settings->linkedin_url) && empty($settings->youtube_url) && empty($settings->tiktok_url))
+                            <a href="#" class="footer-social-btn social-fb" title="Facebook"><i class="bi bi-facebook fs-6"></i></a>
+                            <a href="#" class="footer-social-btn social-tw" title="Twitter / X"><i class="bi bi-twitter-x fs-6"></i></a>
+                            <a href="#" class="footer-social-btn social-ig" title="Instagram"><i class="bi bi-instagram fs-6"></i></a>
+                            <a href="#" class="footer-social-btn social-li" title="LinkedIn"><i class="bi bi-linkedin fs-6"></i></a>
+                        @endif
+                    </div>
                 </div>
             </div>
             
@@ -489,20 +690,23 @@
                         @csrf
                         <div class="row g-3">
                             <div class="col-sm-6">
-                                <input type="text" name="first_name" class="form-control bg-dark text-white border-secondary small" placeholder="First Name" value="{{ old('first_name') }}" required style="color:#fff; --bs-form-control-color:#fff;" autocomplete="given-name">
+                                <input type="text" name="first_name" class="form-control bg-dark text-white border-secondary small" placeholder="First Name *" value="{{ old('first_name') }}" required style="color:#fff; --bs-form-control-color:#fff;" autocomplete="given-name">
                                 <style>#contact .form-control::placeholder { color: rgba(255,255,255,0.55) !important; }</style>
                             </div>
                             <div class="col-sm-6">
-                                <input type="text" name="last_name" class="form-control bg-dark text-white border-secondary small" placeholder="Last Name" value="{{ old('last_name') }}" required style="color:#fff;">
+                                <input type="text" name="last_name" class="form-control bg-dark text-white border-secondary small" placeholder="Last Name *" value="{{ old('last_name') }}" required style="color:#fff;">
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="email" name="email" class="form-control bg-dark text-white border-secondary small" placeholder="Email Address *" value="{{ old('email') }}" required style="color:#fff;">
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="tel" name="phone" class="form-control bg-dark text-white border-secondary small" placeholder="Phone Number" value="{{ old('phone') }}" style="color:#fff;">
                             </div>
                             <div class="col-12">
-                                <input type="email" name="email" class="form-control bg-dark text-white border-secondary small" placeholder="Email Address" value="{{ old('email') }}" required style="color:#fff;">
+                                <input type="text" name="subject" class="form-control bg-dark text-white border-secondary small" placeholder="Subject *" value="{{ old('subject') }}" required style="color:#fff;">
                             </div>
                             <div class="col-12">
-                                <input type="text" name="subject" class="form-control bg-dark text-white border-secondary small" placeholder="Subject" value="{{ old('subject') }}" required style="color:#fff;">
-                            </div>
-                            <div class="col-12">
-                                <textarea name="message" class="form-control bg-dark text-white border-secondary small" rows="4" placeholder="How can we help you?" required style="color:#fff;">{{ old('message') }}</textarea>
+                                <textarea name="message" class="form-control bg-dark text-white border-secondary small" rows="4" placeholder="How can we help you? *" required style="color:#fff;">{{ old('message') }}</textarea>
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-light rounded-pill px-4 small w-100 fw-semibold">

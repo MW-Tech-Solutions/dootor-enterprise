@@ -16,6 +16,7 @@ class ContactEnquiry extends Mailable
     public string $senderFirstName;
     public string $senderLastName;
     public string $senderEmail;
+    public ?string $senderPhone;
     public string $enquirySubject;
     public string $enquiryMessage;
 
@@ -24,13 +25,15 @@ class ContactEnquiry extends Mailable
         string $lastName,
         string $email,
         string $subject,
-        string $message
+        string $message,
+        ?string $phone = null
     ) {
         $this->senderFirstName = $firstName;
         $this->senderLastName  = $lastName;
         $this->senderEmail     = $email;
         $this->enquirySubject  = $subject;
         $this->enquiryMessage  = $message;
+        $this->senderPhone     = $phone;
     }
 
     public function envelope(): Envelope

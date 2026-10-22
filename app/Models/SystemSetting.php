@@ -47,6 +47,22 @@ class SystemSetting extends Model
         'terms_conditions',
         'refund_policy',
         'privacy_policy',
+        'facebook_url',
+        'twitter_url',
+        'instagram_url',
+        'linkedin_url',
+        'whatsapp_number',
+        'youtube_url',
+        'tiktok_url',
+        'contact_email',
+        'contact_phone',
+        'contact_address',
+        'draft_expiry_value',
+        'draft_expiry_unit',
+        'paid_incomplete_expiry_value',
+        'paid_incomplete_expiry_unit',
+        'auto_purge_enabled',
+        'purge_action',
     ];
 
     protected function casts(): array
@@ -54,20 +70,23 @@ class SystemSetting extends Model
         return [
             'maintenance_mode' => 'boolean',
             'payments_enabled' => 'boolean',
+            'auto_purge_enabled' => 'boolean',
+            'draft_expiry_value' => 'integer',
+            'paid_incomplete_expiry_value' => 'integer',
             'smtp_port' => 'integer',
         ];
     }
 
     public function getCurrencySymbolAttribute(): string
     {
-        $code = strtoupper((string) ($this->default_currency ?? config('services.payment.currency', 'NGN')));
+        $code = strtoupper((string) ($this->default_currency ?? config('services.payment.currency', 'USD')));
         return match($code) {
-            'NGN' => '₦',
             'USD' => '$',
+            'NGN' => '₦',
             'GBP' => '£',
             'EUR' => '€',
             'CAD' => 'CA$',
-            default => $code . ' ',
+            default => '$',
         };
     }
 }

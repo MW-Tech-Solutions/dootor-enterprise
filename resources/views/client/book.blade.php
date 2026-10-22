@@ -45,13 +45,13 @@
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active fw-bold py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" id="online-tab" data-bs-toggle="tab" data-bs-target="#onlineTabContent" type="button" role="tab" aria-controls="onlineTabContent" aria-selected="true">
                             <i class="bi bi-laptop fs-5"></i>
-                            <span>Method A: Complete Application Online</span>
+                            <span>Method A: Complete Pre-Enrollment Online</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link fw-bold py-2.5 rounded-3 d-flex align-items-center justify-content-center gap-2" id="manual-tab" data-bs-toggle="tab" data-bs-target="#manualTabContent" type="button" role="tab" aria-controls="manualTabContent" aria-selected="false">
                             <i class="bi bi-file-earmark-arrow-down fs-5"></i>
-                            <span>Method B: Download Form & Upload Scanned</span>
+                            <span>Method B: Download Pre-Enrollment Form &amp; Upload Scanned</span>
                         </button>
                     </li>
                 </ul>
@@ -126,7 +126,7 @@
                             </div>
 
                             <button type="submit" class="btn text-white w-100 py-3 rounded-3 fw-bold fs-6 shadow-sm" style="background-color: #004225; border: none;">
-                                <i class="bi bi-send me-2"></i> Submit Online Application & Generate Reference
+                                <i class="bi bi-send me-2"></i> Submit Online Pre-Enrollment Form &amp; Generate Reference
                             </button>
                         </form>
                     </div>
@@ -134,7 +134,7 @@
                     <!-- METHOD B: MANUAL FORM DOWNLOAD & UPLOAD -->
                     <div class="tab-pane fade" id="manualTabContent" role="tabpanel" aria-labelledby="manual-tab">
                         <div class="alert alert-warning border-0 bg-warning bg-opacity-10 text-dark rounded-3 mb-4 small" role="alert">
-                            <i class="bi bi-file-earmark-pdf me-2"></i> Follow the 3-step offline manual application process below:
+                            <i class="bi bi-file-earmark-pdf me-2"></i> Follow the 3-step offline manual pre-enrollment process below:
                         </div>
 
                         <div class="row g-3 mb-4">
@@ -142,11 +142,11 @@
                             <div class="col-md-12">
                                 <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between">
                                     <div>
-                                        <h6 class="fw-bold text-dark mb-1"><span class="badge bg-success me-2" style="background-color: #004225 !important;">Step 1</span> Download Official Printable Form</h6>
-                                        <p class="text-secondary small mb-0">Download the pre-formatted A4 application form for {{ $service->name }}.</p>
+                                        <h6 class="fw-bold text-dark mb-1"><span class="badge bg-success me-2" style="background-color: #004225 !important;">Step 1</span> Download Official Printable Pre-Enrollment Form</h6>
+                                        <p class="text-secondary small mb-0">Download the pre-formatted A4 pre-enrollment form for {{ $service->name }}.</p>
                                     </div>
                                     <a href="{{ route('client.service.download-form', $service) }}" target="_blank" class="btn btn-outline-success btn-sm font-semibold">
-                                        <i class="bi bi-download me-1"></i> Download / Print Form
+                                        <i class="bi bi-download me-1"></i> Download / Print Pre-Enrollment Form
                                     </a>
                                 </div>
                             </div>
@@ -157,14 +157,14 @@
 
                             <!-- Step 2: Upload Completed Form -->
                             <div class="mb-4 p-3 border rounded-3 bg-white">
-                                <h6 class="fw-bold text-dark mb-2"><span class="badge bg-warning text-dark me-2">Step 2</span> Upload Completed & Signed Form *</h6>
-                                <p class="text-secondary small mb-2">Upload your scanned/photographed completed and signed form (PDF, JPG, PNG max 20MB).</p>
+                                <h6 class="fw-bold text-dark mb-2"><span class="badge bg-warning text-dark me-2">Step 2</span> Upload Completed &amp; Signed Pre-Enrollment Form *</h6>
+                                <p class="text-secondary small mb-2">Upload your scanned/photographed completed and signed pre-enrollment form (PDF, JPG, PNG max 20MB).</p>
                                 <input type="file" name="manual_form" class="form-control rounded-3" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" required>
                             </div>
 
                             <!-- Step 3: Supporting Documents & Passport Photo -->
                             <div class="mb-4 p-3 border rounded-3 bg-white">
-                                <h6 class="fw-bold text-dark mb-2"><span class="badge bg-info text-dark me-2">Step 3</span> Attach Passport Photo & Supporting Documents</h6>
+                                <h6 class="fw-bold text-dark mb-2"><span class="badge bg-info text-dark me-2">Step 3</span> Attach Passport Photo &amp; Supporting Documents</h6>
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label small fw-semibold text-dark">Passport Photograph</label>
@@ -193,7 +193,7 @@
                             </div>
 
                             <button type="submit" class="btn text-white w-100 py-3 rounded-3 fw-bold fs-6 shadow-sm" style="background-color: #004225; border: none;">
-                                <i class="bi bi-cloud-upload me-2"></i> Submit Completed Manual Application Form
+                                <i class="bi bi-cloud-upload me-2"></i> Submit Completed Manual Pre-Enrollment Form
                             </button>
                         </form>
                     </div>

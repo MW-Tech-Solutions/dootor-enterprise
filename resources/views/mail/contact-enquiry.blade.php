@@ -35,6 +35,11 @@
         <div class="label">Email Address</div>
         <div class="value"><a href="mailto:{{ $senderEmail }}" style="color:#004225; text-decoration: underline;">{{ $senderEmail }}</a></div>
 
+        @if(!empty($senderPhone))
+        <div class="label">Phone Number</div>
+        <div class="value"><a href="tel:{{ $senderPhone }}" style="color:#004225; text-decoration: none;">{{ $senderPhone }}</a></div>
+        @endif
+
         <div class="label">Subject</div>
         <div class="value">{{ $enquirySubject }}</div>
 

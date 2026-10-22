@@ -16,9 +16,7 @@ Route::get('/api/location/african-countries', [LocationApiController::class, 'af
 Route::get('/api/location/divisions', [LocationApiController::class, 'divisions']);
 
 // Public Welcome Homepage
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [PublicController::class, 'welcome'])->name('home');
 
 // Public Contact Form Submission
 Route::post('/contact', [PublicController::class, 'sendContact'])->name('contact.send');
@@ -139,6 +137,8 @@ Route::middleware('auth')->group(function () {
             Route::post('/services', [AdminController::class, 'storeService'])->name('admin.services.store');
             Route::patch('/services/{service}', [AdminController::class, 'updateService'])->name('admin.service.update');
             Route::delete('/services/{service}', [AdminController::class, 'deleteService'])->name('admin.service.delete');
+            Route::post('/services/{service}/make-sub-service', [AdminController::class, 'makeSubService'])->name('admin.service.make-sub-service');
+            Route::post('/services/{service}/make-primary', [AdminController::class, 'makePrimaryService'])->name('admin.service.make-primary');
             
             Route::get('/services/{service}/form-builder', [AdminController::class, 'formBuilder'])->name('admin.service.form-builder');
             Route::post('/services/{service}/form-builder', [AdminController::class, 'saveFormFields'])->name('admin.service.form-builder.save');
@@ -191,6 +191,18 @@ Route::middleware('auth')->group(function () {
             Route::get('/settings', [AdminController::class, 'settings'])->name('admin.settings');
             Route::post('/settings', [AdminController::class, 'updateSettings'])->name('admin.settings.update');
         });
+
+        // FAQs Dynamic Management
+        Route::get('/faqs', [AdminController::class, 'faqs'])->name('admin.faqs');
+        Route::post('/faqs', [AdminController::class, 'storeFaq'])->name('admin.faqs.store');
+        Route::patch('/faqs/{faq}', [AdminController::class, 'updateFaq'])->name('admin.faqs.update');
+        Route::delete('/faqs/{faq}', [AdminController::class, 'deleteFaq'])->name('admin.faqs.delete');
+
+        // Application Expiration & Lifecycle Management
+        Route::get('/expirations', [AdminController::class, 'expirations'])->name('admin.expirations');
+        Route::post('/expirations/settings', [AdminController::class, 'updateExpirationSettings'])->name('admin.expirations.settings');
+        Route::post('/expirations/purge', [AdminController::class, 'runExpirationPurge'])->name('admin.expirations.purge');
+        Route::delete('/expirations/{serviceRequest}', [AdminController::class, 'deleteIncompleteApplication'])->name('admin.expirations.delete');
 
         // Profile Management
         Route::get('/profile', [AdminController::class, 'profile'])->name('admin.profile');

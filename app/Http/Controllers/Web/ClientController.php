@@ -51,24 +51,17 @@ class ClientController extends Controller
 
         $primaryServices = Service::where('status', 'Active')
             ->whereNull('parent_id')
-            ->where(function ($q) use ($primaryNames) {
-                $q->where('is_primary', true)
-                  ->orWhere('is_primary', 1)
-                  ->orWhereIn('name', $primaryNames);
-            })
             ->with(['subServices' => function ($q) {
-                $q->where('status', 'Active');
+                $q->where('status', 'Active')->orderBy('name', 'asc');
             }])
+            ->orderBy('is_primary', 'desc')
+            ->orderBy('name', 'asc')
             ->get();
 
-        $primaryIds = $primaryServices->pluck('id')->toArray();
-
-        $otherServices = Service::where('status', 'Active')
-            ->whereNull('parent_id')
-            ->whereNotIn('id', $primaryIds)
-            ->with(['subServices' => function ($q) {
-                $q->where('status', 'Active');
-            }])
+        $subServices = Service::where('status', 'Active')
+            ->whereNotNull('parent_id')
+            ->with('parent')
+            ->orderBy('name', 'asc')
             ->get();
 
         $settings = SystemSetting::first();
@@ -82,7 +75,7 @@ class ClientController extends Controller
             default => $currencyCode . ' ',
         };
 
-        return view('client.services', compact('primaryServices', 'otherServices', 'settings', 'currencyCode', 'currencySymbol'));
+        return view('client.services', compact('primaryServices', 'subServices', 'settings', 'currencyCode', 'currencySymbol'));
     }
 
     public function requests()
@@ -161,7 +154,7 @@ class ClientController extends Controller
             'country_service_requested' => $client->country_service_requested ?? 'Nigeria',
             'status' => 'Draft',
             'current_step' => 1,
-            'progress_percent' => 25,
+            'progress_percent' => 33,
             'payment_status' => 'Unpaid',
             'form_data' => [
                 'first_name' => $client->first_name,
@@ -185,18 +178,18 @@ class ClientController extends Controller
         return redirect()->route('client.application.step', ['serviceRequest' => $draft->id, 'step' => 1]);
     }
 
-    // Step View Handler
+    // Step View Handler (3 Steps Total: 1=Biodata, 2=Fields & Docs, 3=Review & Confirm)
     public function applicationStep(ServiceRequest $serviceRequest, int $step)
     {
         if ($serviceRequest->client_id !== Auth::id()) {
             abort(403);
         }
 
-        $step = max(1, min(4, $step));
+        $step = max(1, min(3, $step));
 
         $serviceRequest->update([
             'current_step' => $step,
-            'progress_percent' => $step * 25,
+            'progress_percent' => round(($step / 3) * 100),
             'last_saved_at' => now(),
         ]);
 
@@ -216,7 +209,7 @@ class ClientController extends Controller
         ]);
     }
 
-    // Background Auto-Save Endpoint (Requirement #7)
+    // Background Auto-Save Endpoint
     public function autoSave(Request $request, ServiceRequest $serviceRequest)
     {
         if ($serviceRequest->client_id !== Auth::id()) {
@@ -228,7 +221,7 @@ class ClientController extends Controller
         $mergedData = array_merge($existingData, $inputData);
 
         $step = (int) $request->input('current_step', $serviceRequest->current_step);
-        $progress = (int) $request->input('progress_percent', $step * 25);
+        $progress = (int) $request->input('progress_percent', round(($step / 3) * 100));
 
         $serviceRequest->update([
             'form_data' => $mergedData,
@@ -326,8 +319,8 @@ class ClientController extends Controller
         return response()->json(['status' => 'success']);
     }
 
-    // Final Application Submission Handler (Requirement #14, #15, #27)
-    public function submitApplication(Request $request, ServiceRequest $serviceRequest)
+    // Final Application Submission & Gateway Redirection (Step 3: Continue to Payment)
+    public function submitApplication(Request $request, ServiceRequest $serviceRequest, \App\Http\Controllers\Web\PaymentController $paymentController)
     {
         if ($serviceRequest->client_id !== Auth::id()) {
             abort(403);
@@ -337,12 +330,12 @@ class ClientController extends Controller
         $initialStage = $service->workflowStages()->orderBy('sort_order', 'asc')->first();
 
         $serviceRequest->update([
-            'status' => 'Awaiting Assignment',
+            'status' => 'Application Submitted',
             'current_stage_id' => $initialStage?->id,
-            'current_stage_name' => $initialStage?->stage_name ?? 'Awaiting Assignment',
+            'current_stage_name' => $initialStage?->stage_name ?? 'Application Submitted',
             'submitted_at' => now(),
             'last_saved_at' => now(),
-            'current_step' => 4,
+            'current_step' => 3,
             'progress_percent' => 100,
         ]);
 
@@ -351,9 +344,9 @@ class ClientController extends Controller
             'service_request_id' => $serviceRequest->id,
             'stage_id' => $initialStage?->id,
             'stage_name' => $initialStage?->stage_name ?? 'Application Submitted',
-            'status' => 'Awaiting Assignment',
+            'status' => 'Application Submitted',
             'changed_by_user_id' => Auth::id(),
-            'notes' => 'Application submitted by applicant. Awaiting admin staff assignment.',
+            'notes' => 'Application confirmed by applicant. Proceeding to payment gateway.',
             'is_user_visible' => true,
         ]);
 
@@ -363,13 +356,13 @@ class ClientController extends Controller
             'client_name' => $serviceRequest->client_name,
         ]);
 
-        // Send Email Notifications (Requirement #14 & #15)
+        // Send Email Notifications
         $client = Auth::user();
         \App\Services\EmailNotificationService::send('new_application_user', $client->email, [
             'full_name' => $client->name,
             'service_name' => $serviceRequest->service_name,
             'reference_number' => $serviceRequest->reference_number,
-            'status' => 'Awaiting Assignment',
+            'status' => 'Application Submitted',
         ], $serviceRequest, $client);
 
         $adminEmail = config('mail.from.address', 'admin@dootor-enterprises.com');
@@ -382,7 +375,13 @@ class ClientController extends Controller
             'application_date' => now()->format('M d, Y h:i A'),
         ], $serviceRequest);
 
-        return redirect()->route('client.request.details', $serviceRequest)->with('success', 'Application ' . $serviceRequest->reference_number . ' submitted successfully!');
+        // Attempt direct redirection to payment gateway (Paystack / Credo)
+        try {
+            return $paymentController->initiatePayment($request, $serviceRequest);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Payment gateway direct redirect failed: ' . $e->getMessage());
+            return redirect()->route('client.request.details', $serviceRequest)->with('success', 'Application ' . $serviceRequest->reference_number . ' confirmed! Please complete payment below.');
+        }
     }
 
     // Method B: Printable Form Download

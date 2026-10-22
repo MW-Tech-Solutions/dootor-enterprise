@@ -98,8 +98,8 @@ class AuthController extends Controller
             'last_name' => ['required', 'string', 'min:2', 'max:255'],
             'email' => ['required', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['nullable', 'string', 'max:50'],
-            'country_applying_from' => ['required', 'string', 'max:255'],
-            'country_service_requested' => ['required', 'string', 'max:255'],
+            'country_applying_from' => ['nullable', 'string', 'max:255'],
+            'country_service_requested' => ['nullable', 'string', 'max:255'],
             'state' => ['nullable', 'string', 'max:255'],
             'city' => ['nullable', 'string', 'max:255'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
@@ -108,7 +108,7 @@ class AuthController extends Controller
             'privacy_check' => ['accepted'],
         ]);
 
-        $data['country'] = $data['country_applying_from'];
+        $data['country'] = $data['country_applying_from'] ?? null;
         $data['role'] = 'client';
         $data['status'] = 'Approved';
         $data['password'] = Hash::make($data['password']);
@@ -118,8 +118,8 @@ class AuthController extends Controller
         // 1. Audit Log
         \App\Services\AuditLogger::log('client_registered', 'User', (string) $user->id, $user->name, null, [
             'email' => $user->email,
-            'country_applying_from' => $user->country_applying_from,
-            'country_service_requested' => $user->country_service_requested,
+            'country_applying_from' => $user->country_applying_from ?? null,
+            'country_service_requested' => $user->country_service_requested ?? null,
         ]);
 
         // 2. Admin Notification Email
@@ -128,8 +128,8 @@ class AuthController extends Controller
             'full_name' => $user->name,
             'email' => $user->email,
             'phone' => $user->phone ?? 'N/A',
-            'country_applying_from' => $user->country_applying_from,
-            'country_service_requested' => $user->country_service_requested,
+            'country_applying_from' => $user->country_applying_from ?? 'N/A',
+            'country_service_requested' => $user->country_service_requested ?? 'N/A',
             'client_id' => $user->id,
         ], null, $user);
 

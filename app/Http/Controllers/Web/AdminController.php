@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\DocumentType;
+use App\Models\Faq;
 use App\Models\RequestDocument;
 use App\Models\Service;
 use App\Models\ServiceRequest;
 use App\Models\SystemSetting;
 use App\Models\User;
+use App\Services\ApplicationExpirationService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
@@ -166,9 +169,29 @@ class AdminController extends Controller
 
     public function services()
     {
-        $services = Service::latest()->get();
+        $primaryServices = Service::whereNull('parent_id')
+            ->with(['subServices', 'fields', 'workflowStages'])
+            ->latest()
+            ->get();
+
+        $subServices = Service::whereNotNull('parent_id')
+            ->with(['parent', 'fields', 'workflowStages'])
+            ->latest()
+            ->get();
+
+        $allPrimaryServices = Service::whereNull('parent_id')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        $services = Service::with(['parent', 'subServices', 'fields', 'workflowStages'])
+            ->latest()
+            ->get();
+
         return view('admin.services', [
             'services' => $services,
+            'primaryServices' => $primaryServices,
+            'subServices' => $subServices,
+            'allPrimaryServices' => $allPrimaryServices,
         ]);
     }
 
@@ -176,19 +199,29 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'parent_id' => ['nullable', 'exists:services,id'],
             'category' => ['nullable', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
             'service_fee' => ['nullable', 'numeric', 'min:0'],
             'processing_fee' => ['nullable', 'numeric', 'min:0'],
             'processing_days' => ['nullable', 'integer', 'min:1'],
             'description' => ['required', 'string'],
+            'short_description' => ['nullable', 'string', 'max:500'],
             'status' => ['sometimes', Rule::in(['Active', 'Inactive'])],
             'is_primary' => ['nullable', 'boolean'],
+            'priority' => ['nullable', 'integer', 'min:0'],
             'required_documents' => ['nullable', 'array'],
             'custom_fields' => ['nullable', 'array'],
         ]);
 
-        $data['is_primary'] = $request->boolean('is_primary');
+        if (!empty($data['parent_id'])) {
+            $data['is_primary'] = false;
+        } else {
+            $data['parent_id'] = null;
+            $data['is_primary'] = $request->has('is_primary') ? $request->boolean('is_primary') : true;
+        }
+
+        $data['priority'] = (int) ($data['priority'] ?? 0);
 
         Service::create($data);
 
@@ -199,23 +232,61 @@ class AdminController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'parent_id' => ['nullable', 'exists:services,id', Rule::notIn([$service->id])],
             'category' => ['nullable', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
             'service_fee' => ['nullable', 'numeric', 'min:0'],
             'processing_fee' => ['nullable', 'numeric', 'min:0'],
             'processing_days' => ['nullable', 'integer', 'min:1'],
             'description' => ['required', 'string'],
+            'short_description' => ['nullable', 'string', 'max:500'],
             'status' => ['sometimes', Rule::in(['Active', 'Inactive'])],
             'is_primary' => ['nullable', 'boolean'],
+            'priority' => ['nullable', 'integer', 'min:0'],
             'required_documents' => ['nullable', 'array'],
             'custom_fields' => ['nullable', 'array'],
         ]);
 
-        $data['is_primary'] = $request->boolean('is_primary');
+        if (!empty($data['parent_id'])) {
+            $data['is_primary'] = false;
+        } else {
+            $data['parent_id'] = null;
+            $data['is_primary'] = $request->has('is_primary') ? $request->boolean('is_primary') : true;
+        }
+
+        if (array_key_exists('priority', $data)) {
+            $data['priority'] = (int) ($data['priority'] ?? 0);
+        }
 
         $service->update($data);
 
         return redirect()->back()->with('success', 'Service updated successfully.');
+    }
+
+    public function makeSubService(Request $request, Service $service)
+    {
+        $data = $request->validate([
+            'parent_id' => ['required', 'exists:services,id', Rule::notIn([$service->id])],
+        ]);
+
+        $motherService = Service::findOrFail($data['parent_id']);
+
+        $service->update([
+            'parent_id' => $motherService->id,
+            'is_primary' => false,
+        ]);
+
+        return redirect()->back()->with('success', "Service '{$service->name}' is now a sub-service under mother primary service '{$motherService->name}'.");
+    }
+
+    public function makePrimaryService(Service $service)
+    {
+        $service->update([
+            'parent_id' => null,
+            'is_primary' => true,
+        ]);
+
+        return redirect()->back()->with('success', "Service '{$service->name}' has been successfully converted into an independent Primary Service.");
     }
 
     public function deleteService(Service $service)
@@ -266,6 +337,22 @@ class AdminController extends Controller
             'terms_conditions' => ['nullable', 'string'],
             'refund_policy' => ['nullable', 'string'],
             'privacy_policy' => ['nullable', 'string'],
+            'facebook_url' => ['nullable', 'string', 'max:255'],
+            'twitter_url' => ['nullable', 'string', 'max:255'],
+            'instagram_url' => ['nullable', 'string', 'max:255'],
+            'linkedin_url' => ['nullable', 'string', 'max:255'],
+            'whatsapp_number' => ['nullable', 'string', 'max:50'],
+            'youtube_url' => ['nullable', 'string', 'max:255'],
+            'tiktok_url' => ['nullable', 'string', 'max:255'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
+            'contact_phone' => ['nullable', 'string', 'max:50'],
+            'contact_address' => ['nullable', 'string', 'max:1000'],
+            'draft_expiry_value' => ['nullable', 'integer', 'min:1', 'max:365'],
+            'draft_expiry_unit' => ['nullable', Rule::in(['days', 'months'])],
+            'paid_incomplete_expiry_value' => ['nullable', 'integer', 'min:1', 'max:365'],
+            'paid_incomplete_expiry_unit' => ['nullable', Rule::in(['days', 'months'])],
+            'auto_purge_enabled' => ['nullable', 'boolean'],
+            'purge_action' => ['nullable', Rule::in(['delete', 'mark_expired'])],
         ]);
 
         if ($request->hasFile('logo_file')) {
@@ -281,6 +368,12 @@ class AdminController extends Controller
         }
 
         unset($data['logo_file'], $data['hero_bg_file'], $data['remove_hero_bg']);
+
+        // Only update fields that were actually submitted by the specific tab form
+        $submittedKeys = array_keys($request->all());
+        if (isset($data['logo_url'])) $submittedKeys[] = 'logo_url';
+        if (isset($data['hero_bg_image'])) $submittedKeys[] = 'hero_bg_image';
+        $data = array_intersect_key($data, array_flip($submittedKeys));
 
         // Auto-repair missing policy columns on production table if migration has not run yet
         foreach (['privacy_policy', 'terms_conditions', 'refund_policy'] as $policyCol) {
@@ -313,6 +406,52 @@ class AdminController extends Controller
         $settings->update($data);
 
         return redirect()->back()->with('success', 'System settings updated successfully. Service prices updated to match new billing currency!');
+    }
+
+    public function faqs()
+    {
+        $faqs = Faq::orderBy('sort_order', 'asc')->latest()->get();
+        return view('admin.faqs', compact('faqs'));
+    }
+
+    public function storeFaq(Request $request)
+    {
+        $data = $request->validate([
+            'question' => ['required', 'string', 'max:255'],
+            'answer' => ['required', 'string'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'sort_order' => ['nullable', 'integer'],
+            'status' => ['required', Rule::in(['Active', 'Inactive'])],
+        ]);
+
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        Faq::create($data);
+
+        return redirect()->back()->with('success', 'FAQ entry created successfully.');
+    }
+
+    public function updateFaq(Request $request, Faq $faq)
+    {
+        $data = $request->validate([
+            'question' => ['required', 'string', 'max:255'],
+            'answer' => ['required', 'string'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'sort_order' => ['nullable', 'integer'],
+            'status' => ['required', Rule::in(['Active', 'Inactive'])],
+        ]);
+
+        $data['sort_order'] = $data['sort_order'] ?? 0;
+
+        $faq->update($data);
+
+        return redirect()->back()->with('success', 'FAQ entry updated successfully.');
+    }
+
+    public function deleteFaq(Faq $faq)
+    {
+        $faq->delete();
+        return redirect()->back()->with('success', 'FAQ entry deleted successfully.');
     }
 
     public function subscriptions(Request $request)
@@ -1475,5 +1614,144 @@ class AdminController extends Controller
 
         return redirect()->back()->with('success', $msg);
     }
+
+    /**
+     * Display Application Expirations and Halfway Incomplete Applications Management.
+     */
+    public function expirations(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->isAdmin() && !$user->hasPermission('applications.view'))) {
+            return redirect()->route('admin.dashboard')->with('error', 'Access Denied: You do not have permission to view application expirations.');
+        }
+
+        $activeTab = $request->input('tab', 'drafts'); // 'drafts' or 'paid'
+        $search = trim($request->input('search', ''));
+        $statusFilter = $request->input('status_filter', 'all'); // 'all', 'expired', 'expiring_soon', 'active'
+
+        $stats = ApplicationExpirationService::getDashboardStats();
+        $settings = $stats['settings'];
+
+        if ($activeTab === 'paid') {
+            $query = ApplicationExpirationService::getPaidIncompleteQuery();
+            $cutoff = ApplicationExpirationService::getPaidIncompleteCutoff();
+            $warningCutoff = $settings['paid_incomplete_expiry_unit'] === 'months'
+                ? \Carbon\Carbon::now()->subMonths($settings['paid_incomplete_expiry_value'])->addDays(7)
+                : \Carbon\Carbon::now()->subDays($settings['paid_incomplete_expiry_value'])->addDays(7);
+        } else {
+            $query = ApplicationExpirationService::getUnfinishedDraftsQuery();
+            $cutoff = ApplicationExpirationService::getDraftCutoff();
+            $warningCutoff = $settings['draft_expiry_unit'] === 'months'
+                ? \Carbon\Carbon::now()->subMonths($settings['draft_expiry_value'])->addDays(5)
+                : \Carbon\Carbon::now()->subDays($settings['draft_expiry_value'])->addDays(5);
+        }
+
+        if (!empty($search)) {
+            $query->where(function ($q) use ($search) {
+                $q->where('reference_number', 'like', "%{$search}%")
+                  ->orWhere('client_name', 'like', "%{$search}%")
+                  ->orWhere('client_email', 'like', "%{$search}%")
+                  ->orWhere('service_name', 'like', "%{$search}%")
+                  ->orWhere('sub_service_name', 'like', "%{$search}%");
+            });
+        }
+
+        if ($statusFilter === 'expired') {
+            $query->where(DB::raw('COALESCE(last_saved_at, updated_at, created_at)'), '<=', $cutoff);
+        } elseif ($statusFilter === 'expiring_soon') {
+            $query->where(DB::raw('COALESCE(last_saved_at, updated_at, created_at)'), '>', $cutoff)
+                  ->where(DB::raw('COALESCE(last_saved_at, updated_at, created_at)'), '<=', $warningCutoff);
+        } elseif ($statusFilter === 'active') {
+            $query->where(DB::raw('COALESCE(last_saved_at, updated_at, created_at)'), '>', $warningCutoff);
+        }
+
+        $applications = $query->orderBy(DB::raw('COALESCE(last_saved_at, updated_at, created_at)'), 'asc')
+            ->paginate(15)
+            ->withQueryString();
+
+        // Annotate each model with calculated expiry dates and countdown badges
+        $applications->getCollection()->transform(function ($app) use ($activeTab) {
+            return ApplicationExpirationService::annotateApplication($app, $activeTab === 'paid' ? 'paid' : 'draft');
+        });
+
+        return view('admin.expirations', compact(
+            'applications',
+            'stats',
+            'settings',
+            'activeTab',
+            'search',
+            'statusFilter'
+        ));
+    }
+
+    /**
+     * Update dynamic application expiration settings (thresholds in days or months).
+     */
+    public function updateExpirationSettings(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->isAdmin() && !$user->hasPermission('settings.view'))) {
+            return redirect()->back()->with('error', 'Access Denied: You do not have permission to modify expiration settings.');
+        }
+
+        $data = $request->validate([
+            'draft_expiry_value' => ['required', 'integer', 'min:1', 'max:365'],
+            'draft_expiry_unit' => ['required', Rule::in(['days', 'months'])],
+            'paid_incomplete_expiry_value' => ['required', 'integer', 'min:1', 'max:365'],
+            'paid_incomplete_expiry_unit' => ['required', Rule::in(['days', 'months'])],
+            'auto_purge_enabled' => ['required', 'boolean'],
+            'purge_action' => ['required', Rule::in(['delete', 'mark_expired'])],
+        ]);
+
+        $settings = SystemSetting::firstOrCreate([]);
+        $settings->update($data);
+
+        \App\Services\AuditLogger::log(
+            'expiration_policy_updated',
+            'SystemSetting',
+            (string) $settings->id,
+            null,
+            null,
+            $data
+        );
+
+        return redirect()->back()->with('success', 'Application expiration policy settings have been successfully updated.');
+    }
+
+    /**
+     * Run on-demand batch purge for expired applications.
+     */
+    public function runExpirationPurge(Request $request)
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->isAdmin() && !$user->hasPermission('applications.delete') && !$user->hasPermission('settings.view'))) {
+            return redirect()->back()->with('error', 'Access Denied: You do not have permission to purge applications.');
+        }
+
+        $action = $request->input('action');
+        $results = ApplicationExpirationService::purgeAllExpired($action);
+
+        $actionWord = ($action === 'mark_expired') ? 'marked as expired' : 'permanently deleted';
+        $msg = "System Expiration Cleanup Completed: {$results['purged_drafts']} unfinished draft(s) and {$results['purged_paid']} paid incomplete application(s) were {$actionWord}. Total processed: {$results['total_purged']}.";
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Immediately purge or delete a specific incomplete application.
+     */
+    public function deleteIncompleteApplication(ServiceRequest $serviceRequest)
+    {
+        $user = auth()->user();
+        if (!$user || (!$user->isAdmin() && !$user->hasPermission('applications.delete'))) {
+            return redirect()->back()->with('error', 'Access Denied: You do not have permission to delete applications.');
+        }
+
+        $ref = $serviceRequest->reference_number;
+        ApplicationExpirationService::purgeApplication($serviceRequest);
+
+        return redirect()->back()->with('success', "Application [{$ref}] and all associated files have been permanently removed.");
+    }
 }
+
 

@@ -102,7 +102,7 @@ class VendorController extends Controller
     public function myServices()
     {
         $user = Auth::user();
-        $vendorServices = $user->vendorServices()->with('service')->latest()->get();
+        $vendorServices = $user->vendorServices()->with(['service.parent', 'service.subServices'])->latest()->get();
         return view('vendor.my-services', ['vendorServices' => $vendorServices]);
     }
 
@@ -112,9 +112,18 @@ class VendorController extends Controller
         $enabledServiceIds = $user->vendorServices()->pluck('service_id')->toArray();
         $availableServices = Service::where('status', 'Active')
             ->whereNotIn('id', $enabledServiceIds)
+            ->with(['parent', 'subServices'])
+            ->latest()
             ->get();
 
-        return view('vendor.services', ['availableServices' => $availableServices]);
+        $primaryServices = $availableServices->whereNull('parent_id')->values();
+        $subServices = $availableServices->whereNotNull('parent_id')->values();
+
+        return view('vendor.services', [
+            'availableServices' => $availableServices,
+            'primaryServices' => $primaryServices,
+            'subServices' => $subServices,
+        ]);
     }
 
     public function enableService(Request $request)

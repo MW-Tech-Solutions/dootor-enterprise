@@ -82,6 +82,7 @@
                 ['href' => route('admin.payment-verification'), 'icon' => 'bi-credit-card-2-front', 'label' => 'Payment Verification', 'permission' => 'applications.view'],
                 ['href' => route('admin.work-queue'), 'icon' => 'bi-clock-history', 'label' => 'Staff Work Queue', 'permission' => 'applications.view'],
                 ['href' => route('admin.subscriptions'), 'icon' => 'bi-file-earmark-check', 'label' => 'Service Applications', 'permission' => 'applications.view'],
+                ['href' => route('admin.expirations'), 'icon' => 'bi-hourglass-split', 'label' => 'App Expirations', 'permission' => 'applications.view'],
                 ['href' => route('admin.users'), 'icon' => 'bi-people', 'label' => 'User Management', 'permission' => 'users.view'],
                 ['href' => route('admin.roles'), 'icon' => 'bi-shield-lock', 'label' => 'Roles & RBAC', 'permission' => 'roles.view'],
                 ['href' => route('admin.services'), 'icon' => 'bi-box-seam', 'label' => 'Services Catalog', 'permission' => 'services.view'],
@@ -93,6 +94,7 @@
                 ['href' => route('admin.reports'), 'icon' => 'bi-graph-up', 'label' => 'Reports & Analytics', 'permission' => 'reports.view'],
                 ['href' => route('support.index'), 'icon' => 'bi-headset', 'label' => 'Support Desk', 'permission' => null],
                 ['href' => route('admin.profile'), 'icon' => 'bi-person-badge', 'label' => 'My Profile', 'permission' => null],
+                ['href' => route('admin.faqs'), 'icon' => 'bi-question-circle', 'label' => 'FAQs Management', 'permission' => null],
                 ['href' => route('admin.settings'), 'icon' => 'bi-sliders', 'label' => 'Settings', 'permission' => 'settings.view'],
             ];
 

@@ -10,6 +10,24 @@ use Illuminate\Support\Facades\Mail;
 
 class PublicController extends Controller
 {
+    public function welcome()
+    {
+        $settings = \App\Models\SystemSetting::firstOrCreate([]);
+        $faqs = \App\Models\Faq::where('status', 'Active')->orderBy('sort_order', 'asc')->get();
+        $primaryServices = \App\Models\Service::where('status', 'Active')
+            ->whereNull('parent_id')
+            ->with(['subServices' => function($q) {
+                $q->where('status', 'Active')
+                  ->orderByRaw('CASE WHEN priority IS NULL OR priority = 0 THEN 999999 ELSE priority END ASC')
+                  ->orderBy('name', 'asc');
+            }])
+            ->orderByRaw('CASE WHEN priority IS NULL OR priority = 0 THEN 999999 ELSE priority END ASC')
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('welcome', compact('settings', 'faqs', 'primaryServices'));
+    }
+
     public function vendorStorefront(User $vendor)
     {
         abort_unless($vendor->role === 'vendor' && $vendor->status === 'Approved', 404);
@@ -38,6 +56,7 @@ class PublicController extends Controller
             'first_name' => ['required', 'string', 'max:80'],
             'last_name'  => ['required', 'string', 'max:80'],
             'email'      => ['required', 'email', 'max:255'],
+            'phone'      => ['nullable', 'string', 'max:50'],
             'subject'    => ['required', 'string', 'max:200'],
             'message'    => ['required', 'string', 'min:10', 'max:3000'],
         ]);
@@ -53,6 +72,7 @@ class PublicController extends Controller
                 $validated['email'],
                 $validated['subject'],
                 $validated['message'],
+                $validated['phone'] ?? null
             ));
 
             return redirect()->to('/#contact')

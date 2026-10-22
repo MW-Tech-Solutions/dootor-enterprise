@@ -20,6 +20,7 @@ class Service extends Model
         'image_url',
         'icon',
         'is_primary',
+        'priority',
         'required_documents',
         'custom_fields',
         'status',
@@ -33,6 +34,7 @@ class Service extends Model
             'processing_fee' => 'float',
             'processing_days' => 'integer',
             'is_primary' => 'boolean',
+            'priority' => 'integer',
             'required_documents' => 'array',
             'custom_fields' => 'array',
         ];
