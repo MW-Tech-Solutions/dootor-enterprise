@@ -420,7 +420,7 @@
 
 <!-- Services Grid -->
 <section id="services" class="py-5 bg-light">
-    <div class="container py-4">
+    <div class="container-fluid px-3 px-md-4 px-xl-5 py-4" style="max-width: 1540px;">
         <div class="text-center max-w-lg mx-auto mb-4">
             <span class="text-uppercase small fw-bold tracking-wide" style="color: #004225; letter-spacing: 1px;">Catalog</span>
             <h2 class="display-5 fw-bold mt-2 text-dark">Services We Assist With</h2>
@@ -450,7 +450,7 @@
                         $subServiceNames = $service->subServices->pluck('name')->implode(' ');
                         $searchableName = strtolower($service->name . ' ' . $subServiceNames);
                     @endphp
-                    <div class="col-md-6 col-lg-4 service-card-container" data-category="{{ getServiceCategory($service->name) }}" data-name="{{ $searchableName }}">
+                    <div class="col-12 col-sm-6 col-lg-4 col-xl-3 service-card-container" data-category="{{ getServiceCategory($service->name) }}" data-name="{{ $searchableName }}">
                         <div class="card service-catalog-card h-100 p-4 d-flex flex-column position-relative overflow-hidden">
                             <!-- Gold Checkmark Badge -->
                             <div class="position-absolute top-0 end-0 mt-3 me-3" title="Verified Consular Service">

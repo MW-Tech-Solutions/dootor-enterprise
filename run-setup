@@ -1,0 +1,166 @@
+#!/usr/bin/env bash
+# ===================================================================
+#           DOOTOR ENTERPRISES - RUN-SETUP SHELL HELPER
+# ===================================================================
+
+# Resolve script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR" || exit 1
+
+# Detect PHP binary
+PHP_BIN="php"
+if [ -f "/c/xampp/php/php.exe" ]; then
+    PHP_BIN="/c/xampp/php/php.exe"
+elif [ -f "C:/xampp/php/php.exe" ]; then
+    PHP_BIN="C:/xampp/php/php.exe"
+fi
+
+# If arguments are passed directly (e.g. ./run-setup migrate), execute immediately
+if [ $# -gt 0 ]; then
+    case "$1" in
+        migrate)
+            "$PHP_BIN" artisan migrate --force
+            exit $?
+            ;;
+        rollback)
+            "$PHP_BIN" artisan migrate:rollback
+            exit $?
+            ;;
+        seed)
+            "$PHP_BIN" artisan db:seed --force
+            exit $?
+            ;;
+        fresh)
+            "$PHP_BIN" artisan migrate:fresh --seed --force
+            exit $?
+            ;;
+        clear|cache:clear)
+            "$PHP_BIN" artisan optimize:clear
+            exit $?
+            ;;
+        optimize)
+            "$PHP_BIN" artisan config:cache
+            "$PHP_BIN" artisan route:cache
+            "$PHP_BIN" artisan view:cache
+            exit $?
+            ;;
+        serve)
+            "$PHP_BIN" artisan serve
+            exit $?
+            ;;
+        purge)
+            "$PHP_BIN" artisan applications:check-expirations
+            exit $?
+            ;;
+        artisan|*)
+            shift
+            "$PHP_BIN" artisan "$@"
+            exit $?
+            ;;
+    esac
+fi
+
+# Interactive menu if run without arguments
+while true; do
+    clear
+    echo "==================================================================="
+    echo "             DOOTOR ENTERPRISES - RUN-SETUP HELPER"
+    echo "==================================================================="
+    echo " PHP Path: $PHP_BIN"
+    echo " Location: $SCRIPT_DIR"
+    echo "==================================================================="
+    echo ""
+    echo " [1] Run Database Migrations (php artisan migrate)"
+    echo " [2] Rollback Last Migration (php artisan migrate:rollback)"
+    echo " [3] Run Database Seeders (php artisan db:seed)"
+    echo " [4] Migrate & Seed Fresh (WARNING: wipes DB) (php artisan migrate:fresh --seed)"
+    echo " [5] Clear All Caches (config, route, view, app cache)"
+    echo " [6] Optimize & Cache (config, route, view cache)"
+    echo " [7] Create Storage Symlink (php artisan storage:link)"
+    echo " [8] Run Expirations Purge Manually (applications:check-expirations)"
+    echo " [9] Start Local Laravel Dev Server (php artisan serve)"
+    echo " [0] Custom Artisan Command"
+    echo " [Q] Exit"
+    echo ""
+    echo "==================================================================="
+    read -r -p "Select an option (0-9, Q): " opt
+
+    case "$opt" in
+        1)
+            echo ""
+            echo "[*] Running Database Migrations..."
+            "$PHP_BIN" artisan migrate --force
+            read -r -p "Press Enter to continue..."
+            ;;
+        2)
+            echo ""
+            echo "[*] Rolling back last migration step..."
+            "$PHP_BIN" artisan migrate:rollback
+            read -r -p "Press Enter to continue..."
+            ;;
+        3)
+            echo ""
+            echo "[*] Running Database Seeders..."
+            "$PHP_BIN" artisan db:seed --force
+            read -r -p "Press Enter to continue..."
+            ;;
+        4)
+            echo ""
+            read -r -p "WARNING: This drops all tables and re-seeds. Are you sure? (y/N): " confirm
+            if [[ "$confirm" =~ ^[Yy]$ ]]; then
+                "$PHP_BIN" artisan migrate:fresh --seed --force
+            else
+                echo "Cancelled."
+            fi
+            read -r -p "Press Enter to continue..."
+            ;;
+        5)
+            echo ""
+            echo "[*] Clearing all caches..."
+            "$PHP_BIN" artisan optimize:clear
+            read -r -p "Press Enter to continue..."
+            ;;
+        6)
+            echo ""
+            echo "[*] Caching config, routes, and views..."
+            "$PHP_BIN" artisan config:cache
+            "$PHP_BIN" artisan route:cache
+            "$PHP_BIN" artisan view:cache
+            read -r -p "Press Enter to continue..."
+            ;;
+        7)
+            echo ""
+            echo "[*] Creating storage symlink..."
+            "$PHP_BIN" artisan storage:link
+            read -r -p "Press Enter to continue..."
+            ;;
+        8)
+            echo ""
+            echo "[*] Running Application Expirations Purge..."
+            "$PHP_BIN" artisan applications:check-expirations
+            read -r -p "Press Enter to continue..."
+            ;;
+        9)
+            echo ""
+            echo "[*] Starting server on http://127.0.0.1:8000 (Ctrl+C to stop)..."
+            "$PHP_BIN" artisan serve
+            read -r -p "Press Enter to continue..."
+            ;;
+        0)
+            echo ""
+            read -r -p "Enter artisan arguments (e.g. migrate:status): " custom_cmd
+            if [ -n "$custom_cmd" ]; then
+                "$PHP_BIN" artisan $custom_cmd
+            fi
+            read -r -p "Press Enter to continue..."
+            ;;
+        [Qq]|exit)
+            echo "Goodbye!"
+            break
+            ;;
+        *)
+            echo "Invalid option."
+            sleep 1
+            ;;
+    esac
+done
