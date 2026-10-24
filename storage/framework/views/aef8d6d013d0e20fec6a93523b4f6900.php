@@ -1,6 +1,7 @@
 <?php $__env->startSection('title', 'Client Dashboard - ' . ($settings->platform_name ?? 'Dooter Enterprises')); ?>
 
 <?php $__env->startSection('styles'); ?>
+<?php echo \Illuminate\View\Factory::parentPlaceholder('styles'); ?>
 <style>
     .stat-card-gradient {
         background: linear-gradient(135deg, #004d25 0%, #006637 55%, #004825 100%);

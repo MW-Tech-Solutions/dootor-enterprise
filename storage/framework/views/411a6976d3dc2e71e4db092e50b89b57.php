@@ -1,6 +1,7 @@
 <?php $__env->startSection('title', 'Services & Sub-Services Catalog - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES')); ?>
 
 <?php $__env->startSection('styles'); ?>
+<?php echo \Illuminate\View\Factory::parentPlaceholder('styles'); ?>
 <style>
     .service-card {
         border: 1px solid #f1f5f9;

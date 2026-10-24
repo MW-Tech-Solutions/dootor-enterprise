@@ -139,12 +139,130 @@
             box-shadow: 0 4px 12px rgba(0, 66, 37, 0.4) !important;
         }
 
+        .sidebar-profile {
+            background: #ffffff;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
         .modal-backdrop {
             z-index: 1050 !important;
         }
 
         .modal {
             z-index: 1060 !important;
+        }
+
+        /* Global Mobile Bottom Navigation Bar Styles */
+        .mobile-bottom-nav {
+            position: fixed !important;
+            bottom: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            width: 100% !important;
+            height: 60px !important;
+            z-index: 999999 !important;
+            background: #ffffff !important;
+            border-top: 1px solid #edf2f7 !important;
+            box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.05) !important;
+            display: flex !important;
+            align-items: center !important;
+            padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+        }
+        .mobile-bottom-nav-inner {
+            width: 100% !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: space-around !important;
+            padding: 3px 4px !important;
+        }
+        .mobile-nav-item {
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #64748b !important;
+            text-decoration: none !important;
+            flex: 1 1 0px !important;
+            text-align: center !important;
+            padding: 2px !important;
+            position: relative !important;
+            transition: all 0.2s ease !important;
+            background: transparent !important;
+            border: none !important;
+            outline: none !important;
+            cursor: pointer !important;
+        }
+        .mobile-nav-item:hover, .mobile-nav-item:focus {
+            color: #004225 !important;
+            text-decoration: none !important;
+            outline: none !important;
+        }
+        .mobile-nav-item.active {
+            color: #004225 !important;
+        }
+        .mobile-nav-icon-wrap {
+            height: 28px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin-bottom: 2px !important;
+        }
+        .active-grid-icon {
+            width: 28px !important;
+            height: 28px !important;
+            background-color: #004225 !important;
+            border-radius: 7px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            box-shadow: 0 2px 6px rgba(0, 66, 37, 0.25) !important;
+        }
+        .mobile-nav-label {
+            font-size: 10.5px !important;
+            font-weight: 500 !important;
+            line-height: 1.2 !important;
+            white-space: nowrap !important;
+            display: block !important;
+        }
+        .mobile-nav-item.active .mobile-nav-label {
+            font-weight: 700 !important;
+            color: #004225 !important;
+        }
+        .mobile-nav-indicator {
+            width: 22px !important;
+            height: 2.5px !important;
+            background-color: #004225 !important;
+            border-radius: 2px !important;
+            margin: 2px auto 0 !important;
+        }
+        .header-bell-btn {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 50% !important;
+            background: #ffffff !important;
+            border: 1px solid #e2e8f0 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            color: #0f172a !important;
+            transition: all 0.2s ease !important;
+            outline: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+        }
+        .header-bell-btn:hover, .header-bell-btn:focus, .header-bell-btn:active {
+            background: #f8fafc !important;
+            border-color: #cbd5e1 !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        @media (max-width: 767.98px) {
+            #globalFloatingWidgets {
+                bottom: 74px !important;
+                right: 16px !important;
+            }
         }
     </style>
     <?php echo $__env->yieldContent('styles'); ?>

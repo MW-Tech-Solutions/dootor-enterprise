@@ -3,6 +3,7 @@
 @section('title', 'Client Dashboard - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('styles')
+@parent
 <style>
     .stat-card-gradient {
         background: linear-gradient(135deg, #004d25 0%, #006637 55%, #004825 100%);

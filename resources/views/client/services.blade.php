@@ -3,6 +3,7 @@
 @section('title', 'Services & Sub-Services Catalog - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
 
 @section('styles')
+@parent
 <style>
     .service-card {
         border: 1px solid #f1f5f9;

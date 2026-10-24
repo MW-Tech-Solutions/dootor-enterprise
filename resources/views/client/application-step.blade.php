@@ -3,6 +3,7 @@
 @section('title', $service->name . ' Pre-Enrollment Form - Application ' . $application->reference_number . ' - Step ' . $step)
 
 @section('styles')
+@parent
 <style>
     .step-progress-bar {
         height: 6px;

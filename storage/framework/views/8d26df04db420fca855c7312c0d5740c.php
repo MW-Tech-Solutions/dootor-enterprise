@@ -1,6 +1,7 @@
 <?php $__env->startSection('title', $service->name . ' Pre-Enrollment Form - Application ' . $application->reference_number . ' - Step ' . $step); ?>
 
 <?php $__env->startSection('styles'); ?>
+<?php echo \Illuminate\View\Factory::parentPlaceholder('styles'); ?>
 <style>
     .step-progress-bar {
         height: 6px;
