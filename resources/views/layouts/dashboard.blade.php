@@ -57,6 +57,88 @@
         border: 1px solid #e2e8f0;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
+
+    /* Mobile Bottom Navigation Bar Styles */
+    .mobile-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        z-index: 1050;
+        background: #ffffff;
+        border-top: 1px solid #edf2f7;
+        box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.04);
+        padding-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        text-decoration: none;
+        flex: 1;
+        text-align: center;
+        padding: 6px 2px 4px;
+        position: relative;
+        transition: all 0.2s ease;
+    }
+    .mobile-nav-item:hover {
+        color: #004225;
+    }
+    .mobile-nav-item.active {
+        color: #004225 !important;
+    }
+    .mobile-nav-icon-wrap {
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2px;
+    }
+    .active-grid-icon {
+        width: 28px;
+        height: 28px;
+        background-color: #004225;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 2px 6px rgba(0, 66, 37, 0.25);
+    }
+    .mobile-nav-label {
+        font-size: 10.5px;
+        font-weight: 500;
+        line-height: 1.2;
+        white-space: nowrap;
+    }
+    .mobile-nav-item.active .mobile-nav-label {
+        font-weight: 700;
+        color: #004225;
+    }
+    .mobile-nav-indicator {
+        width: 22px;
+        height: 2.5px;
+        background-color: #004225;
+        border-radius: 2px;
+        margin-top: 3px;
+    }
+    .header-bell-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #0f172a;
+        transition: all 0.2s ease;
+    }
+    .header-bell-btn:hover {
+        background: #f8fafc;
+        border-color: #cbd5e1;
+    }
 </style>
 @endsection
 
@@ -187,32 +269,63 @@
     </aside>
 
     <!-- Content Area (Independently Scrollable) -->
-    <div class="flex-grow-1 bg-light d-flex flex-column h-100 overflow-y-auto" style="min-width: 0;">
+    <div class="flex-grow-1 bg-light d-flex flex-column h-100 overflow-y-auto" style="min-width: 0; background-color: #f8fafc !important;">
         <!-- Header -->
-        <header class="navbar navbar-expand bg-white border-bottom px-4 py-2 sticky-top">
-            <div class="container-fluid p-0">
-                <!-- Mobile Toggle button -->
-                <button class="btn btn-outline-secondary d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
-                    <i class="bi bi-list fs-4"></i>
-                </button>
+        <header class="navbar navbar-expand bg-white border-bottom px-3 px-md-4 py-2 sticky-top" style="z-index: 1030;">
+            <div class="container-fluid p-0 d-flex align-items-center justify-content-between">
+                @if($role === 'client')
+                    <!-- Client Mobile Brand Header (Exact match to screenshot) -->
+                    <div class="d-flex align-items-center gap-2 d-md-none">
+                        <a href="{{ route('client.dashboard') }}" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
+                            @if($settings && $settings->logo_url)
+                                <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 30px; width: 30px; object-fit: contain;">
+                            @else
+                                <svg width="28" height="28" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
+                                    <!-- Stylized D (Gold) -->
+                                    <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogoNavMobile)" />
+                                    <path d="M28 32C38 32 44 40 44 50C44 60 38 68 28 68V32Z" fill="#FFFFFF" />
+                                    <!-- Stylized E (Dark Green) -->
+                                    <path d="M50 24H80V35H64V44H76V53H64V63H80V74H50V24Z" fill="#004225" />
+                                    <defs>
+                                        <linearGradient id="goldLogoNavMobile" x1="14" y1="20" x2="52" y2="80" gradientUnits="userSpaceOnUse">
+                                            <stop offset="0%" stop-color="#FFE57F" />
+                                            <stop offset="50%" stop-color="#D4AF37" />
+                                            <stop offset="100%" stop-color="#AA820A" />
+                                        </linearGradient>
+                                    </defs>
+                                </svg>
+                            @endif
+                            <span class="fw-bolder text-dark tracking-tight text-uppercase" style="font-size: 14.5px; font-weight: 800; letter-spacing: -0.01em;">{{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}</span>
+                        </a>
+                    </div>
+                    <!-- Desktop Spacer -->
+                    <div class="d-none d-md-block"></div>
+                @else
+                    <!-- Mobile Toggle button for Admin/Vendor -->
+                    <button class="btn btn-outline-secondary d-md-none me-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#mobileSidebar" aria-controls="mobileSidebar">
+                        <i class="bi bi-list fs-4"></i>
+                    </button>
+                    <div class="d-none d-md-block"></div>
+                @endif
 
-                <div class="ms-auto d-flex align-items-center gap-3">
-                    <button class="btn btn-outline-secondary btn-sm position-relative rounded-circle p-2" style="width: 38px; height: 38px;">
-                        <i class="bi bi-bell"></i>
+                <div class="d-flex align-items-center gap-2 gap-sm-3">
+                    <button class="header-bell-btn position-relative" type="button" title="Notifications">
+                        <i class="bi bi-bell fs-6"></i>
+                        <span class="position-absolute rounded-circle" style="top: 7px; right: 7px; width: 7.5px; height: 7.5px; background-color: #f59e0b; border: 1.5px solid #ffffff;"></span>
                     </button>
                     
                     <div class="dropdown">
-                        <button class="btn btn-link p-0 d-flex align-items-center gap-2 text-decoration-none text-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-link p-0 d-flex align-items-center gap-1.5 gap-sm-2 text-decoration-none text-dark dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" style="border: none;">
                             @if($user->avatar_url)
-                                <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 32px; height: 32px; object-fit: cover;">
+                                <img src="{{ app_file_url($user->avatar_url) }}" alt="avatar" class="rounded-circle" style="width: 34px; height: 34px; object-fit: cover;">
                             @else
-                                <div class="rounded-circle bg-gradient text-white d-flex align-items-center justify-content-center fw-bold" style="width: 32px; height: 32px; font-size: 14px;">
+                                <div class="rounded-circle text-dark d-flex align-items-center justify-content-center fw-bold shadow-xs" style="width: 34px; height: 34px; font-size: 12.5px; background-color: #d4af37 !important;">
                                     {{ strtoupper(substr($user->first_name ?? 'U', 0, 1)) }}{{ strtoupper(substr($user->last_name ?? 'M', 0, 1)) }}
                                 </div>
                             @endif
-                            <span class="d-none d-sm-inline">{{ $user->first_name ?? '' }} {{ $user->last_name ?? '' }}</span>
+                            <span class="fw-semibold text-dark text-truncate d-inline-block" style="font-size: 13.5px; max-width: 140px;">{{ $user->first_name ?? '' }} {{ $user->last_name ?? '' }}</span>
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2">
+                        <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2 rounded-3">
                             @if($role === 'admin')
                                 <li><a class="dropdown-item" href="{{ route('admin.profile') }}"><i class="bi bi-person-badge me-2"></i> Admin Profile</a></li>
                             @endif
@@ -234,7 +347,7 @@
         </header>
 
         <!-- Main Dashboard View Content -->
-        <main class="container-fluid p-4 d-flex flex-column" style="min-height: calc(100vh - 60px);">
+        <main class="container-fluid px-3 px-md-4 py-3 py-md-4 d-flex flex-column {{ $role === 'client' ? 'pb-5 mb-5 pb-md-4 mb-md-0' : '' }}" style="min-height: calc(100vh - 60px);">
             <div class="flex-grow-1">
                 @yield('content')
             </div>
@@ -245,6 +358,115 @@
         </main>
     </div>
 </div>
+
+<!-- Mobile Bottom Navigation Bar (Client Portal - Exact 1:1 Match) -->
+@if($role === 'client')
+<div class="mobile-bottom-nav d-md-none">
+    <div class="d-flex align-items-center justify-content-around py-1 px-1">
+        <!-- Dashboard Tab -->
+        <a href="{{ route('client.dashboard') }}" class="mobile-nav-item {{ request()->routeIs('client.dashboard') ? 'active' : '' }}">
+            <div class="mobile-nav-icon-wrap">
+                @if(request()->routeIs('client.dashboard'))
+                    <div class="active-grid-icon">
+                        <svg width="17" height="17" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2.5" y="2.5" width="6" height="6" rx="1.5" fill="#ffffff" />
+                            <rect x="11.5" y="2.5" width="6" height="6" rx="1.5" fill="#ffffff" />
+                            <rect x="2.5" y="11.5" width="6" height="6" rx="1.5" fill="#ffffff" />
+                            <rect x="11.5" y="11.5" width="6" height="6" rx="1.5" fill="#ffffff" />
+                        </svg>
+                    </div>
+                @else
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2.5" y="2.5" width="6" height="6" rx="1.5" fill="#64748b" />
+                        <rect x="11.5" y="2.5" width="6" height="6" rx="1.5" fill="#64748b" />
+                        <rect x="2.5" y="11.5" width="6" height="6" rx="1.5" fill="#64748b" />
+                        <rect x="11.5" y="11.5" width="6" height="6" rx="1.5" fill="#64748b" />
+                    </svg>
+                @endif
+            </div>
+            <span class="mobile-nav-label">Dashboard</span>
+            @if(request()->routeIs('client.dashboard'))
+                <div class="mobile-nav-indicator"></div>
+            @endif
+        </a>
+
+        <!-- My Requests Tab -->
+        <a href="{{ route('client.requests') }}" class="mobile-nav-item {{ request()->routeIs('client.requests*') || request()->routeIs('client.request.*') ? 'active' : '' }}">
+            <div class="mobile-nav-icon-wrap">
+                @if(request()->routeIs('client.requests*') || request()->routeIs('client.request.*'))
+                    <div class="active-grid-icon">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="9" y1="17" x2="9" y2="13"></line>
+                            <line x1="12" y1="17" x2="12" y2="10"></line>
+                            <line x1="15" y1="17" x2="15" y2="15"></line>
+                        </svg>
+                    </div>
+                @else
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="9" y1="17" x2="9" y2="13"></line>
+                        <line x1="12" y1="17" x2="12" y2="10"></line>
+                        <line x1="15" y1="17" x2="15" y2="15"></line>
+                    </svg>
+                @endif
+            </div>
+            <span class="mobile-nav-label">My Requests</span>
+            @if(request()->routeIs('client.requests*') || request()->routeIs('client.request.*'))
+                <div class="mobile-nav-indicator"></div>
+            @endif
+        </a>
+
+        <!-- Browse Services Tab -->
+        <a href="{{ route('client.services') }}" class="mobile-nav-item {{ request()->routeIs('client.services*') || request()->routeIs('client.book*') || request()->routeIs('client.application*') ? 'active' : '' }}">
+            <div class="mobile-nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="{{ request()->routeIs('client.services*') || request()->routeIs('client.book*') || request()->routeIs('client.application*') ? '#004225' : 'currentColor' }}" stroke-width="{{ request()->routeIs('client.services*') || request()->routeIs('client.book*') || request()->routeIs('client.application*') ? '2.4' : '1.8' }}" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+            </div>
+            <span class="mobile-nav-label">Browse Services</span>
+            @if(request()->routeIs('client.services*') || request()->routeIs('client.book*') || request()->routeIs('client.application*'))
+                <div class="mobile-nav-indicator"></div>
+            @endif
+        </a>
+
+        <!-- Support Tickets Tab -->
+        <a href="{{ route('support.index') }}" class="mobile-nav-item {{ request()->routeIs('support*') ? 'active' : '' }}">
+            <div class="mobile-nav-icon-wrap">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="transform: rotate(-30deg);">
+                    <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z"></path>
+                    <line x1="13" y1="5" x2="13" y2="19" stroke-dasharray="2 2"></line>
+                </svg>
+            </div>
+            <span class="mobile-nav-label">Support Tickets</span>
+            @if(request()->routeIs('support*'))
+                <div class="mobile-nav-indicator"></div>
+            @endif
+        </a>
+
+        <!-- Settings Tab -->
+        <a href="{{ route('client.settings') }}" class="mobile-nav-item {{ request()->routeIs('client.settings*') ? 'active' : '' }}">
+            <div class="mobile-nav-icon-wrap">
+                <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="4" y1="6" x2="20" y2="6"></line>
+                    <circle cx="9" cy="6" r="2.5"></circle>
+                    <line x1="4" y1="12" x2="20" y2="12"></line>
+                    <circle cx="15" cy="12" r="2.5"></circle>
+                    <line x1="4" y1="18" x2="20" y2="18"></line>
+                    <circle cx="8" cy="18" r="2.5"></circle>
+                </svg>
+            </div>
+            <span class="mobile-nav-label">Settings</span>
+            @if(request()->routeIs('client.settings*'))
+                <div class="mobile-nav-indicator"></div>
+            @endif
+        </a>
+    </div>
+</div>
+@endif
 
 <!-- Mobile Sidebar Drawer (Offcanvas) -->
 <div class="offcanvas offcanvas-start bg-light border-0" tabindex="-1" id="mobileSidebar" aria-labelledby="mobileSidebarLabel" style="width: 280px; z-index: 1060 !important;">

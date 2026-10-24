@@ -5,9 +5,10 @@
 @section('styles')
 <style>
     .service-card {
-        border: 1px solid #e2e8f0;
-        border-radius: 16px;
+        border: 1px solid #f1f5f9;
+        border-radius: 20px !important;
         background: #ffffff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
         overflow: hidden;
@@ -21,13 +22,14 @@
         width: 52px;
         height: 52px;
         border-radius: 14px;
-        background: linear-gradient(135deg, #004225 0%, #002411 100%);
+        background: #004225;
         color: #d4af37;
         display: flex;
         align-items: center;
         justify-content: center;
         font-size: 22px;
-        box-shadow: 0 4px 10px rgba(0, 66, 37, 0.2);
+        flex-shrink: 0;
+        box-shadow: 0 4px 10px rgba(0, 66, 37, 0.15);
     }
     .btn-brand-primary {
         background-color: #004225 !important;
@@ -41,28 +43,6 @@
         transform: translateY(-1px);
         box-shadow: 0 4px 12px rgba(0, 66, 37, 0.25);
     }
-    .subservice-pill {
-        background: #f8fafc;
-        color: #334155;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        padding: 8px 12px;
-        font-size: 13px;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        text-decoration: none;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .subservice-pill:hover {
-        background: #004225;
-        color: #ffffff;
-        border-color: #004225;
-    }
-    .subservice-pill:hover .text-muted {
-        color: #d4af37 !important;
-    }
     .badge-mother-service {
         background-color: #e6f4ea;
         color: #004225;
@@ -72,125 +52,144 @@
         padding: 4px 10px;
         font-size: 11px;
     }
+    .filter-btn {
+        background: #ffffff;
+        color: #334155;
+        border: 1px solid #e2e8f0 !important;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    .filter-btn:hover {
+        border-color: #004225 !important;
+        color: #004225;
+    }
     .filter-btn.active {
         background-color: #004225 !important;
         color: #ffffff !important;
         border-color: #004225 !important;
+        font-weight: 600;
     }
 </style>
 @endsection
 
 @section('content')
 <div class="container-fluid px-0">
-    <!-- Header Section -->
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 gap-3">
-        <div>
-            <span class="badge bg-success-subtle text-success px-3 py-1.5 rounded-pill font-monospace small fw-bold text-uppercase mb-2" style="color: #004225 !important; background-color: #e6f4ea !important;">
-                <i class="bi bi-shield-check me-1"></i> Verified Consular &amp; Document Services
+    <!-- Header Section (Exact Match to Image 2) -->
+    <div class="mb-3">
+        <div class="d-flex align-items-center justify-content-between mb-2 flex-wrap gap-2">
+            <span class="badge" style="background-color: #e6f4ea; color: #004225; border-radius: 50px; font-weight: 700; font-size: 10px; padding: 6px 12px;">
+                <i class="bi bi-shield-check me-1"></i> VERIFIED CONSULAR &amp; DOCUMENT SERVICES
             </span>
-            <h1 class="h3 fw-bold text-dark mb-1">Official Services &amp; Sub-Services Catalog</h1>
-            <p class="text-secondary small mb-0">Browse verified primary consular services and specialized sub-services to book your application.</p>
-        </div>
-        <div class="d-flex align-items-center gap-2">
-            <span class="badge bg-white border text-dark p-2 px-3 rounded-pill shadow-sm small font-monospace">
-                <i class="bi bi-currency-exchange text-success me-1"></i> Billing Currency: <strong>{{ $currencyCode ?? 'NGN' }}</strong>
+            <span class="badge" style="background-color: #ecfdf5; color: #004225; border-radius: 50px; font-weight: 600; font-size: 10px; padding: 6px 12px;">
+                <i class="bi bi-link-45deg me-1"></i> Billing Currency: {{ $currencyCode ?? 'USD' }}
             </span>
         </div>
+        <h1 class="h3 fw-bold text-dark mb-1" style="font-weight: 800; font-size: 1.55rem; letter-spacing: -0.02em;">Official Services &amp; Sub-Services Catalog</h1>
+        <p class="text-secondary small mb-3" style="color: #64748b; font-size: 13px; line-height: 1.45;">Browse verified primary consular services and specialized sub-services to book your application.</p>
     </div>
 
-    <!-- Filter & Search Bar -->
-    <div class="card border-0 shadow-sm p-3 rounded-4 bg-white mb-4">
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
-            <div class="d-flex flex-wrap gap-2 w-100 w-md-auto">
-                <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1.5 filter-btn active" data-filter="all">
-                    <i class="bi bi-grid me-1"></i> All Services
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1.5 filter-btn" data-filter="primary">
-                    <i class="bi bi-star-fill text-warning me-1"></i> Primary Services ({{ $primaryServices->count() }})
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1.5 filter-btn" data-filter="subservice">
-                    <i class="bi bi-diagram-3 me-1"></i> Sub-Services ({{ $subServices->count() }})
-                </button>
-            </div>
-            <div class="w-100 w-md-auto" style="min-width: 260px;">
-                <div class="input-group input-group-sm">
-                    <span class="input-group-text bg-light border-end-0 rounded-start-pill"><i class="bi bi-search text-muted"></i></span>
-                    <input type="text" id="serviceSearchInput" class="form-control bg-light border-start-0 rounded-end-pill" placeholder="Search services or sub-services...">
-                </div>
-            </div>
-        </div>
+    <!-- Search Bar (Full Width, Matching Image 2) -->
+    <div class="position-relative mb-3">
+        <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-secondary" style="font-size: 14px;"></i>
+        <input type="text" id="serviceSearchInput" class="form-control rounded-pill ps-5 py-2.5 bg-white border" placeholder="Search services or sub-services..." style="border-color: #e2e8f0; font-size: 13.5px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+    </div>
+
+    <!-- Filter Buttons (Matching Image 2) -->
+    <div class="d-flex align-items-center gap-2 mb-4 overflow-x-auto pb-1" style="scrollbar-width: none;">
+        <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 filter-btn" data-filter="all" style="font-size: 12px;">
+            <i class="bi bi-grid me-1"></i> All Services
+        </button>
+        <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 filter-btn active" data-filter="primary" style="font-size: 12px;">
+            <i class="bi bi-star-fill text-warning me-1"></i> Primary Services ({{ $primaryServices->count() }})
+        </button>
+        <button type="button" class="btn btn-sm rounded-pill px-3 py-1.5 filter-btn" data-filter="subservice" style="font-size: 12px;">
+            <i class="bi bi-diagram-3 me-1"></i> Sub-Services ({{ $subServices->count() }})
+        </button>
     </div>
 
     <!-- Primary Services Section -->
     <div class="mb-5 section-group" id="primaryServicesSection">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="h5 fw-bold text-dark mb-0 d-flex align-items-center gap-2">
-                <i class="bi bi-star-fill text-warning"></i> Primary Consular Services ({{ $primaryServices->count() }})
-            </h2>
-            <span class="text-muted small">Select any primary service to begin or view sub-services</span>
-        </div>
-
         @if($primaryServices->count() > 0)
-            <div class="row g-4" id="primaryServicesGrid">
+            <div class="row g-3 g-md-4" id="primaryServicesGrid">
                 @foreach($primaryServices as $service)
+                    @php
+                        // Pick icon matching Image 2
+                        $nameLower = strtolower($service->name);
+                        $serviceIcon = match(true) {
+                            str_contains($nameLower, 'authorization') || str_contains($nameLower, 'letter') || str_contains($nameLower, 'attorney') => 'bi-file-earmark-text',
+                            str_contains($nameLower, 'emergency') || str_contains($nameLower, 'travel') || str_contains($nameLower, 'certificate') => 'bi-airplane',
+                            str_contains($nameLower, 'nin') || str_contains($nameLower, 'identification') => 'bi-card-heading',
+                            str_contains($nameLower, 'passport') => 'bi-book',
+                            str_contains($nameLower, 'waiver') || str_contains($nameLower, 'appointment') => 'bi-calendar-check',
+                            str_contains($nameLower, 'collection') || str_contains($nameLower, 'same day') => 'bi-clock-history',
+                            default => ($service->icon ?? 'bi-box-seam')
+                        };
+                    @endphp
                     <div class="col-12 col-md-6 col-lg-4 service-card-wrapper" data-name="{{ strtolower($service->name . ' ' . $service->description) }}" data-type="primary">
-                        <div class="service-card p-4 h-100 d-flex flex-column">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="service-card p-3.5 p-md-4 h-100 d-flex flex-column">
+                            <div class="d-flex align-items-start gap-3 mb-3">
                                 <div class="service-icon-box">
-                                    <i class="bi {{ $service->icon ?? 'bi-box-seam' }}"></i>
+                                    <i class="bi {{ $serviceIcon }}"></i>
                                 </div>
-                                <div class="d-flex flex-column align-items-end gap-1">
-                                    <span class="badge bg-light text-dark border px-2.5 py-1 rounded-pill small fw-semibold">
-                                        {{ $service->processing_days ? $service->processing_days . ' Days' : 'Fast-track' }}
-                                    </span>
-                                    <span class="badge bg-warning-subtle text-dark rounded-pill px-2 py-0.5" style="font-size: 10px;">Primary Mother</span>
+                                <div class="flex-grow-1 min-w-0">
+                                    <div class="d-flex align-items-center gap-1.5 mb-1.5 flex-wrap">
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #ecfdf5; color: #004225; font-size: 10px; font-weight: 600;">
+                                            <i class="bi bi-clock me-1"></i> {{ $service->processing_days ? $service->processing_days . ' Days' : '5 Days' }}
+                                        </span>
+                                        <span class="badge rounded-pill px-2.5 py-1" style="background-color: #fef3c7; color: #92400e; font-size: 10px; font-weight: 600;">
+                                            Primary Mother
+                                        </span>
+                                    </div>
+                                    <h3 class="h6 fw-bold text-dark mb-0.5" style="font-weight: 800; font-size: 15px;">{{ $service->name }}</h3>
+                                    <p class="text-secondary small mb-0" style="font-size: 12px; color: #64748b !important;">
+                                        {{ $service->short_description ?? Str::limit($service->description, 80) }}
+                                    </p>
                                 </div>
                             </div>
 
-                            <h3 class="h5 fw-bold text-dark mb-2">{{ $service->name }}</h3>
-                            <p class="text-secondary small mb-3 flex-grow-1" style="line-height: 1.5;">
-                                {{ $service->short_description ?? Str::limit($service->description, 110) }}
-                            </p>
-
                             @if($service->subServices->count() > 0)
-                                <div class="bg-light p-2.5 rounded-3 mb-3 border">
+                                <div class="p-2.5 rounded-3 mb-3" style="background-color: #f0fdf4; border: 1px solid #dcfce7; border-radius: 12px !important;">
                                     <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <span class="text-uppercase text-muted fw-bold" style="font-size: 10px; letter-spacing: 0.5px;">
-                                            <i class="bi bi-diagram-3-fill text-success me-1"></i> Sub-Services ({{ $service->subServices->count() }}):
+                                        <span class="text-uppercase fw-bold text-secondary d-flex align-items-center gap-1.5" style="font-size: 10.5px; letter-spacing: 0.03em;">
+                                            <i class="bi bi-people text-success"></i> SUB-SERVICES ({{ $service->subServices->count() }})
                                         </span>
-                                        <a href="javascript:void(0)" class="text-success small fw-semibold text-decoration-none" data-bs-toggle="modal" data-bs-target="#subServiceModal{{ $service->id }}" style="font-size: 11px;">
-                                            View all <i class="bi bi-chevron-right"></i>
+                                        <a href="javascript:void(0)" class="text-success small fw-bold text-decoration-none d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#subServiceModal{{ $service->id }}" style="font-size: 11px; color: #004225 !important;">
+                                            <span>View all</span> <i class="bi bi-arrow-right"></i>
                                         </a>
                                     </div>
                                     <div class="d-flex flex-column gap-1.5">
                                         @foreach($service->subServices->take(3) as $sub)
-                                            <a href="{{ route('client.book', $sub->id) }}" class="subservice-pill">
-                                                <span>{{ $sub->name }}</span>
-                                                <span class="text-muted small fw-bold">{{ $currencySymbol ?? '$' }}{{ number_format($sub->price, 2) }}</span>
-                                            </a>
+                                            <div class="d-flex justify-content-between align-items-center py-1 border-bottom border-light-subtle" style="font-size: 12px;">
+                                                <span class="text-secondary text-truncate me-2">{{ $sub->name }}</span>
+                                                <span class="fw-bold text-dark flex-shrink-0">{{ $currencySymbol ?? '$' }}{{ number_format($sub->price, 2) }}</span>
+                                            </div>
                                         @endforeach
                                     </div>
                                 </div>
-                            @endif
 
-                            <div class="pt-3 border-top d-flex justify-content-between align-items-center mt-auto">
-                                <div>
-                                    <span class="text-muted d-block" style="font-size: 11px;">{{ $service->subServices->count() > 0 ? 'Starting From' : 'Standard Rate' }}</span>
-                                    <span class="fw-bold text-dark fs-5">{{ $currencySymbol ?? '$' }}{{ number_format($service->price, 2) }}</span>
-                                </div>
-
-                                @if($service->subServices->count() > 0)
-                                    <button class="btn btn-brand-primary btn-sm px-3 py-2 rounded-3 d-flex align-items-center gap-1.5" data-bs-toggle="modal" data-bs-target="#subServiceModal{{ $service->id }}">
+                                <div class="d-flex justify-content-between align-items-center pt-2.5 border-top mt-auto" style="border-color: #f1f5f9 !important;">
+                                    <div>
+                                        <span class="text-secondary d-block" style="font-size: 10px;">Starting From</span>
+                                        <span class="fw-bold text-dark fs-5" style="font-weight: 800;">{{ $currencySymbol ?? '$' }}{{ number_format($service->price, 2) }}</span>
+                                    </div>
+                                    <button class="btn btn-brand-primary rounded-pill px-3.5 py-2 fw-bold d-flex align-items-center gap-1.5" style="font-size: 12.5px;" data-bs-toggle="modal" data-bs-target="#subServiceModal{{ $service->id }}">
                                         <span>Choose Option</span>
-                                        <i class="bi bi-chevron-right small"></i>
+                                        <i class="bi bi-arrow-right"></i>
                                     </button>
-                                @else
-                                    <a href="{{ route('client.book', $service->id) }}" class="btn btn-brand-primary btn-sm px-3 py-2 rounded-3 d-flex align-items-center gap-1.5">
+                                </div>
+                            @else
+                                <div class="pt-2.5 border-top mt-auto" style="border-color: #f1f5f9 !important;">
+                                    <div class="mb-2">
+                                        <span class="text-secondary d-block" style="font-size: 10px;">Standard Rate</span>
+                                        <span class="fw-bold text-dark fs-5" style="font-weight: 800;">{{ $currencySymbol ?? '$' }}{{ number_format($service->price, 2) }}</span>
+                                    </div>
+                                    <a href="{{ route('client.book', $service->id) }}" class="btn btn-brand-primary w-100 rounded-pill py-2.5 fw-bold d-flex align-items-center justify-content-center gap-1.5" style="font-size: 13px;">
                                         <span>Start Application</span>
-                                        <i class="bi bi-arrow-right small"></i>
+                                        <i class="bi bi-arrow-right"></i>
                                     </a>
-                                @endif
-                            </div>
+                                </div>
+                            @endif
                         </div>
                     </div>
 
