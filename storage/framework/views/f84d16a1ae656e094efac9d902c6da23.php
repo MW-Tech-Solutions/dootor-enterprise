@@ -59,7 +59,7 @@
                 <span class="fw-bold fs-4 tracking-tight text-white"><?php echo e($settings->platform_name ?? 'DOOTOR ENTERPRISES'); ?></span>
             </a>
             
-            <h2 class="display-6 fw-bold text-white mb-3" style="line-height: 1.2;">NIN, BVN & Documents Consultancy Support</h2>
+            <h2 class="display-6 fw-bold text-white mb-3" style="line-height: 1.2;">NIN, BVN, Passport &amp; Other Migration Facilities Documents Support</h2>
             <p class="text-white-50 mb-5 fs-6">Connecting clients with verified expert agents for expedited official document processing, authentication, and vetting support.</p>
             
             <div class="d-flex flex-column gap-3">
