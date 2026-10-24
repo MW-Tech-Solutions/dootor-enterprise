@@ -211,6 +211,10 @@
                 align-items: center !important;
                 padding-bottom: env(safe-area-inset-bottom, 0px) !important;
             }
+            #globalFloatingWidgets {
+                bottom: 75px !important;
+                right: 16px !important;
+            }
         }
         .mobile-bottom-nav-inner {
             width: 100% !important;
