@@ -146,6 +146,33 @@
             box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         }
 
+        /* Custom spacing helper utilities for high-precision layouts */
+        .p-2\.5 { padding: 0.75rem !important; }
+        .p-3\.5 { padding: 1.25rem !important; }
+        .py-2\.5 { padding-top: 0.65rem !important; padding-bottom: 0.65rem !important; }
+        .py-3\.5 { padding-top: 1.15rem !important; padding-bottom: 1.15rem !important; }
+        .px-2\.5 { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+        .px-3\.5 { padding-left: 1.15rem !important; padding-right: 1.15rem !important; }
+        .gap-1\.5 { gap: 0.375rem !important; }
+        .gap-2\.5 { gap: 0.625rem !important; }
+        .gap-3\.5 { gap: 0.875rem !important; }
+
+        /* Global card padding and spacing protection */
+        .service-card {
+            padding: 20px !important;
+        }
+        .client-request-card {
+            padding: 20px !important;
+        }
+        @media (min-width: 768px) {
+            .service-card {
+                padding: 24px !important;
+            }
+            .client-request-card {
+                padding: 24px !important;
+            }
+        }
+
         .modal-backdrop {
             z-index: 1050 !important;
         }

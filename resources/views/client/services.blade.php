@@ -6,18 +6,18 @@
 @parent
 <style>
     .service-card {
-        border: 1px solid #f1f5f9;
+        border: 1px solid #eef2f6 !important;
         border-radius: 20px !important;
         background: #ffffff;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
         transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         position: relative;
-        overflow: hidden;
+        padding: 22px 20px !important;
     }
     .service-card:hover {
         transform: translateY(-4px);
         box-shadow: 0 14px 28px -6px rgba(0, 66, 37, 0.12), 0 4px 8px -4px rgba(0, 0, 0, 0.04);
-        border-color: #004225;
+        border-color: #004225 !important;
     }
     .service-icon-box {
         width: 52px;
@@ -128,7 +128,7 @@
                         };
                     @endphp
                     <div class="col-12 col-md-6 col-lg-4 service-card-wrapper" data-name="{{ strtolower($service->name . ' ' . $service->description) }}" data-type="primary">
-                        <div class="service-card p-3.5 p-md-4 h-100 d-flex flex-column">
+                        <div class="service-card h-100 d-flex flex-column" style="padding: 22px 20px !important;">
                             <div class="d-flex align-items-start gap-3 mb-3">
                                 <div class="service-icon-box">
                                     <i class="bi {{ $serviceIcon }}"></i>
@@ -280,7 +280,7 @@
             <div class="row g-3" id="subServicesGrid">
                 @foreach($subServices as $sub)
                     <div class="col-12 col-md-6 col-lg-4 service-card-wrapper" data-name="{{ strtolower($sub->name . ' ' . ($sub->parent->name ?? '') . ' ' . $sub->description) }}" data-type="subservice">
-                        <div class="card border h-100 p-3.5 rounded-3 bg-white shadow-sm d-flex flex-column justify-content-between">
+                        <div class="card border-0 shadow-sm h-100 rounded-4 bg-white d-flex flex-column justify-content-between" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
                             <div>
                                 <div class="d-flex justify-content-between align-items-start mb-2">
                                     @if($sub->parent)

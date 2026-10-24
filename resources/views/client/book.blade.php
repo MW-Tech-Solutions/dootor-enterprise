@@ -19,7 +19,7 @@
 <div class="row g-4">
     <!-- Booking Methods Container -->
     <div class="col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden">
+        <div class="card border-0 shadow-sm rounded-4 bg-white overflow-hidden" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important;">
             <!-- Application Method Selector Navigation (Requirement 2) -->
             <div class="card-header bg-light p-3 border-bottom">
                 <style>
@@ -57,7 +57,7 @@
                 </ul>
             </div>
 
-            <div class="card-body p-4">
+            <div class="card-body p-3.5 p-md-4" style="padding: 22px 20px !important;">
                 <div class="tab-content" id="methodTabsContent">
                     
                     <!-- METHOD A: ONLINE APPLICATION -->
@@ -205,7 +205,7 @@
 
     <!-- Right Sidebar: Billing Summary -->
     <div class="col-lg-4">
-        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
             <h3 class="h6 fw-bold text-dark mb-3">Billing & Processing Summary</h3>
             
             <div class="d-flex justify-content-between mb-2 small text-secondary">

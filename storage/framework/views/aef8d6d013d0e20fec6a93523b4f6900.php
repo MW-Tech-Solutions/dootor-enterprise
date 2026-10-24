@@ -54,7 +54,7 @@
 <div class="row g-3 g-md-4 mb-4">
     <!-- Total Applications -->
     <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm p-3 p-md-4 rounded-4 stat-card-gradient h-100">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 stat-card-gradient h-100" style="padding: 22px 20px !important;">
             <div class="d-flex align-items-center justify-content-between mb-3">
                 <span class="small fw-bold text-white text-uppercase tracking-wider" style="font-size: 11px; opacity: 0.95; letter-spacing: 0.04em;">TOTAL APPLICATIONS</span>
                 <div class="rounded-circle p-2 bg-white shadow-sm d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;">
@@ -70,7 +70,7 @@
 
     <!-- In Processing (Paid) -->
     <div class="col-6 col-md-4">
-        <div class="card border-0 shadow-sm p-3 p-md-4 rounded-4 stat-card-white h-100 d-flex flex-column justify-content-between">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 stat-card-white h-100 d-flex flex-column justify-content-between" style="padding: 20px 16px !important;">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 10px; letter-spacing: 0.02em; color: #64748b !important;">IN PROCESSING (PAID)</span>
                 <i class="bi bi-check-circle-fill text-success fs-5"></i>
@@ -88,7 +88,7 @@
 
     <!-- Awaiting Checkout -->
     <div class="col-6 col-md-4">
-        <div class="card border-0 shadow-sm p-3 p-md-4 rounded-4 stat-card-white h-100 d-flex flex-column justify-content-between">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 stat-card-white h-100 d-flex flex-column justify-content-between" style="padding: 20px 16px !important;">
             <div class="d-flex align-items-center justify-content-between mb-2">
                 <span class="fw-bold text-secondary text-uppercase tracking-wider" style="font-size: 10px; letter-spacing: 0.02em; color: #64748b !important;">AWAITING CHECKOUT</span>
                 <div class="rounded-2 d-flex align-items-center justify-content-center" style="background-color: #fffbeb; color: #f59e0b; width: 28px; height: 28px; border: 1px solid #fef3c7;">
@@ -109,7 +109,7 @@
 
 <!-- Active Unfinished Draft Applications Section (Requirement #10) -->
 <?php if(isset($drafts) && $drafts->count() > 0): ?>
-    <div class="card border-0 shadow-sm p-3 p-md-4 rounded-4 bg-white mb-4" style="border-left: 5px solid #d4af37 !important; border-radius: 20px !important;">
+    <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white mb-4" style="border-left: 5px solid #d4af37 !important; border-radius: 20px !important; padding: 22px 20px !important;">
         <div class="mb-3">
             <span class="badge text-dark px-2.5 py-1.5 rounded-pill small fw-bold text-uppercase mb-2 d-inline-flex align-items-center" style="background-color: #f59e0b; font-size: 10px; letter-spacing: 0.04em;">
                 <i class="bi bi-clock-history me-1.5 fw-bold"></i> AUTO-SAVED UNFINISHED WORK
@@ -123,7 +123,7 @@
         <div class="row g-3">
             <?php $__currentLoopData = $drafts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $draft): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                 <div class="col-12 col-md-6">
-                    <div class="p-3 border rounded-3 bg-light h-100 d-flex flex-column justify-content-between" style="border-color: #e2e8f0 !important; border-radius: 14px !important; background-color: #f8fafc !important;">
+                    <div class="p-3.5 border rounded-4 bg-light h-100 d-flex flex-column justify-content-between" style="border-color: #e2e8f0 !important; border-radius: 16px !important; background-color: #f8fafc !important; padding: 18px !important;">
                         <div>
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="font-monospace fw-bold small" style="color: #004225 !important; font-size: 12px; letter-spacing: 0.02em;"><?php echo e($draft->reference_number); ?></span>
@@ -159,7 +159,7 @@
 <?php endif; ?>
 
 <!-- Applications Table Card -->
-<div class="card border-0 shadow-sm p-3 p-md-4 rounded-4 bg-white mb-4">
+<div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white mb-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
         <h2 class="h5 fw-bold text-dark mb-0">My Applications & Processing Tracking</h2>
         <a href="<?php echo e(route('client.services')); ?>" class="btn text-white btn-sm rounded-pill px-3 px-md-4 fw-semibold" style="background-color: #004225;">+ Apply For New Service</a>

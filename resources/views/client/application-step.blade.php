@@ -102,7 +102,7 @@
     </div>
 
     <!-- Stepper Navigation Header (3 Steps) -->
-    <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+    <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white mb-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <div class="d-flex align-items-center gap-2">
                 <div class="step-badge {{ $step == 1 ? 'active' : ($step > 1 ? 'completed' : 'pending') }}">1</div>
@@ -124,7 +124,7 @@
     </div>
 
     <!-- Form Container -->
-    <div class="card border-0 shadow-sm p-4 p-sm-5 rounded-4 bg-white">
+    <div class="card border-0 shadow-sm p-3.5 p-sm-5 rounded-4 bg-white" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 24px 20px !important;">
         <form id="applicationForm" action="{{ route('client.application.submit', $application->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
 

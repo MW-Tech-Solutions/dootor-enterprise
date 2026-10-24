@@ -1,25 +1,25 @@
 <?php $__env->startSection('title', 'Support Tickets'); ?>
 
 <?php $__env->startSection('content'); ?>
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center gap-3 mb-4">
     <div>
-        <h4 class="fw-bold mb-1" style="color: #0f172a;">Customer Support</h4>
-        <p class="text-muted small mb-0">Need help with your application or services? Create a support ticket to chat with our team.</p>
+        <h1 class="h3 fw-bold text-dark mb-1">Customer Support</h1>
+        <p class="text-secondary small mb-0">Need help with your application or services? Create a support ticket to chat with our team.</p>
     </div>
-    <button type="button" class="btn text-white fw-semibold px-4" style="background-color: #004225; border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#newTicketModal">
+    <button type="button" class="btn text-white fw-semibold px-4 py-2.5 rounded-pill shadow-sm" style="background-color: #004225;" data-bs-toggle="modal" data-bs-target="#newTicketModal">
         <i class="bi bi-plus-lg me-2"></i> New Support Ticket
     </button>
 </div>
 
 <?php if(session('success')): ?>
-<div class="alert alert-success alert-dismissible fade show" role="alert">
+<div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
     <?php echo e(session('success')); ?>
 
     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
 </div>
 <?php endif; ?>
 
-<div class="card border-0 shadow-sm" style="border-radius: 12px;">
+<div class="card border-0 shadow-sm rounded-4 bg-white" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; overflow: hidden;">
     <div class="card-body p-0">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">

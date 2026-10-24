@@ -6,7 +6,7 @@
     <p class="text-secondary small">Manage your personal info and user profile settings</p>
 </div>
 
-<div class="card border-0 shadow-sm p-4 rounded-4 bg-white" style="max-width: 600px;">
+<div class="card border-0 shadow-sm p-3.5 p-sm-4 rounded-4 bg-white" style="max-width: 600px; border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
     <form action="<?php echo e(route('client.settings.update')); ?>" method="POST" enctype="multipart/form-data">
         <?php echo csrf_field(); ?>
 

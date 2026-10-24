@@ -38,7 +38,7 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <!-- Message Discussion Thread -->
-        <div class="card border-0 shadow-sm mb-4" style="border-radius: 12px;">
+        <div class="card border-0 shadow-sm mb-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; overflow: hidden;">
             <div class="card-header bg-white border-0 pt-3 px-4">
                 <h6 class="fw-bold mb-0" style="color: #0f172a;">Message History</h6>
             </div>
@@ -77,7 +77,7 @@
         </div>
 
         <!-- Reply Form -->
-        <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
             <div class="card-body p-4">
                 <h6 class="fw-bold mb-3" style="color: #0f172a;">Post a Reply</h6>
                 <form action="{{ route('support.reply', $ticket) }}" method="POST">
@@ -97,7 +97,7 @@
 
     <div class="col-lg-4">
         <!-- Ticket Meta Summary Sidebar -->
-        <div class="card border-0 shadow-sm p-4" style="border-radius: 12px;">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
             <h6 class="fw-bold mb-3" style="color: #0f172a;">Ticket Metadata</h6>
             
             <div class="mb-3">

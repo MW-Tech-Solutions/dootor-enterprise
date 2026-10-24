@@ -12,15 +12,15 @@
     <!-- Mobile Card View (Matches Screenshot Exact 1:1) -->
     <div class="d-md-none">
         @foreach($requests as $request)
-            <div class="card border-0 shadow-sm p-3.5 rounded-4 bg-white mb-3" style="border: 1px solid #f1f5f9 !important; border-radius: 20px !important;">
+            <div class="card border-0 shadow-sm rounded-4 bg-white mb-3 client-request-card" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
                 <!-- Application Ref Header -->
                 <div class="d-flex align-items-center gap-2.5 mb-3">
-                    <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 38px; height: 38px; background-color: #ecfdf5; color: #059669; border: 1px solid #d1fae5; flex-shrink: 0; border-radius: 10px !important;">
-                        <i class="bi bi-file-earmark-text" style="font-size: 18px;"></i>
+                    <div class="rounded-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px; background-color: #ecfdf5; color: #059669; border: 1px solid #d1fae5; flex-shrink: 0; border-radius: 12px !important;">
+                        <i class="bi bi-file-earmark-text" style="font-size: 19px;"></i>
                     </div>
                     <div>
-                        <span class="text-secondary text-uppercase d-block" style="font-size: 10px; font-weight: 600; letter-spacing: 0.02em;">Application Ref</span>
-                        <span class="font-monospace fw-bold" style="color: #004225; font-size: 12.5px;">{{ $request->reference_number ?? ('DE-' . $request->id) }}</span>
+                        <span class="text-secondary text-uppercase d-block" style="font-size: 10px; font-weight: 600; letter-spacing: 0.03em;">Application Ref</span>
+                        <span class="font-monospace fw-bold" style="color: #004225; font-size: 13px;">{{ $request->reference_number ?? ('DE-' . $request->id) }}</span>
                     </div>
                 </div>
 

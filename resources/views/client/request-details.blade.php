@@ -32,7 +32,7 @@
 @endif
 
 <!-- Requirement 8: Interactive Application Progress Stepper / Timeline -->
-<div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+<div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white mb-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
     <h5 class="fw-bold text-dark mb-3"><i class="bi bi-diagram-3 me-2 text-success"></i> Application Lifecycle Progress</h5>
     
     @php
@@ -125,7 +125,7 @@
     <!-- Left Column: Details & Documents -->
     <div class="col-lg-8">
         <!-- Applicant & Service Summary -->
-        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white mb-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
             <h5 class="fw-bold text-dark mb-3">Service & Financial Summary</h5>
             <div class="row g-3 small">
                 <div class="col-sm-6">
@@ -201,7 +201,7 @@
         </div>
 
         <!-- Documents Verification Status -->
-        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white mb-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
             <h5 class="fw-bold text-dark mb-3">Submitted Documents & Verification</h5>
             @if($request->requestDocuments && $request->requestDocuments->count() > 0)
                 <div class="list-group list-group-flush">
@@ -253,7 +253,7 @@
     <!-- Right Column: Status & Credo Payment -->
     <div class="col-lg-4">
         <!-- Status Card -->
-        <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
+        <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 bg-white mb-4" style="border: 1px solid #eef2f6 !important; border-radius: 20px !important; padding: 22px 20px !important;">
             <h5 class="fw-bold text-dark mb-3">Current Application Status</h5>
             
             <div class="p-3 bg-light rounded-3 text-center mb-3">
@@ -291,7 +291,7 @@
                 $currencySymbol = ($settings->default_currency ?? config('services.payment.currency', 'USD')) === 'NGN' ? '₦' : '$';
                 $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'USD');
             @endphp
-            <div class="card border-0 shadow-sm p-4 rounded-4 text-white mb-4" style="background: linear-gradient(135deg, #004225, #006637);">
+            <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 text-white mb-4" style="background: linear-gradient(135deg, #004225, #006637); border-radius: 20px !important; padding: 22px 20px !important;">
                 <h5 class="fw-bold text-white mb-2"><i class="bi bi-credit-card me-2"></i> {{ $gwLabel }} Checkout</h5>
                 <p class="small text-white-50 mb-3">Pay securely online using credit/debit card or bank transfer via {{ $gwLabel }} Gateway.</p>
 
