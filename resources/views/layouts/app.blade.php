@@ -181,21 +181,36 @@
             z-index: 1060 !important;
         }
 
-        /* Global Mobile Bottom Navigation Bar Styles */
-        .mobile-bottom-nav {
-            position: fixed !important;
-            bottom: 0 !important;
-            left: 0 !important;
-            right: 0 !important;
-            width: 100% !important;
-            height: 60px !important;
-            z-index: 999999 !important;
-            background: #ffffff !important;
-            border-top: 1px solid #edf2f7 !important;
-            box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.05) !important;
-            display: flex !important;
-            align-items: center !important;
-            padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+        /* Global Mobile Bottom Navigation Bar Styles - STRICTLY MOBILE ONLY (< 768px) */
+        @media (min-width: 768px) {
+            .mobile-bottom-nav,
+            div.mobile-bottom-nav,
+            nav.mobile-bottom-nav {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+                height: 0 !important;
+                width: 0 !important;
+                overflow: hidden !important;
+            }
+        }
+        @media (max-width: 767.98px) {
+            .mobile-bottom-nav {
+                position: fixed !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                width: 100% !important;
+                height: 60px !important;
+                z-index: 999999 !important;
+                background: #ffffff !important;
+                border-top: 1px solid #edf2f7 !important;
+                box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.05) !important;
+                display: flex !important;
+                align-items: center !important;
+                padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+            }
         }
         .mobile-bottom-nav-inner {
             width: 100% !important;

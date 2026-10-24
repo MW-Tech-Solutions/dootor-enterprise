@@ -52,15 +52,18 @@ class ClientController extends Controller
         $primaryServices = Service::where('status', 'Active')
             ->whereNull('parent_id')
             ->with(['subServices' => function ($q) {
-                $q->where('status', 'Active')->orderBy('name', 'asc');
+                $q->where('status', 'Active')
+                  ->orderByRaw('CASE WHEN priority IS NULL OR priority = 0 THEN 999999 ELSE priority END ASC')
+                  ->orderBy('name', 'asc');
             }])
-            ->orderBy('is_primary', 'desc')
+            ->orderByRaw('CASE WHEN priority IS NULL OR priority = 0 THEN 999999 ELSE priority END ASC')
             ->orderBy('name', 'asc')
             ->get();
 
         $subServices = Service::where('status', 'Active')
             ->whereNotNull('parent_id')
             ->with('parent')
+            ->orderByRaw('CASE WHEN priority IS NULL OR priority = 0 THEN 999999 ELSE priority END ASC')
             ->orderBy('name', 'asc')
             ->get();
 

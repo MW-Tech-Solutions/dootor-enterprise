@@ -216,10 +216,25 @@
     </div>
 </div>
 
-<!-- Mobile Bottom Navigation Bar (Client Portal - Exact 1:1 Match Across All Pages) -->
+<!-- Mobile Bottom Navigation Bar (Client Portal - Strictly Mobile Only < 768px) -->
 @if($role === 'client')
-<div class="mobile-bottom-nav d-md-none" style="position: fixed !important; bottom: 0 !important; left: 0 !important; right: 0 !important; width: 100% !important; height: 60px !important; z-index: 999999 !important; background: #ffffff !important; border-top: 1px solid #edf2f7 !important; box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.05) !important; display: flex !important; align-items: center !important;">
-    <div class="mobile-bottom-nav-inner" style="width: 100% !important; display: flex !important; align-items: center !important; justify-content: space-around !important; padding: 2px 4px !important;">
+<style>
+    @media (min-width: 768px) {
+        .mobile-bottom-nav,
+        div.mobile-bottom-nav,
+        nav.mobile-bottom-nav {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            pointer-events: none !important;
+            height: 0 !important;
+            width: 0 !important;
+            overflow: hidden !important;
+        }
+    }
+</style>
+<div class="mobile-bottom-nav d-md-none">
+    <div class="mobile-bottom-nav-inner">
         <!-- Dashboard Tab -->
         <a href="{{ route('client.dashboard') }}" class="mobile-nav-item {{ request()->routeIs('client.dashboard') ? 'active' : '' }}">
             <div class="mobile-nav-icon-wrap">
