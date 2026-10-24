@@ -46,8 +46,26 @@
     @if($logoUrl)
         <link rel="icon" href="{{ app_file_url($logoUrl) }}">
         <link rel="shortcut icon" href="{{ app_file_url($logoUrl) }}">
-        <link rel="apple-touch-icon" href="{{ app_file_url($logoUrl) }}">
+    @else
+        <link rel="icon" type="image/png" href="/icons/icon-192x192.png">
     @endif
+
+    <!-- PWA & Mobile Web App Meta Tags (Strict Standalone Mode - Hides Top URL Bar) -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#004225">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DOOTOR">
+    <meta name="application-name" content="{{ $platformName ?? 'DOOTOR ENTERPRISES' }}">
+    <meta name="msapplication-TileColor" content="#004225">
+    <meta name="msapplication-TileImage" content="/icons/icon-144x144.png">
+    
+    <!-- iOS Icons & Splash Capabilities -->
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/icons/icon-192x192.png">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -310,10 +328,117 @@
                 right: 16px !important;
             }
         }
+        /* Native App Preloader (Splash Screen) */
+        .app-preloader {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #ffffff;
+            z-index: 99999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
+        }
+        .app-preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .preloader-content {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 24px;
+        }
+        .preloader-logo-wrap {
+            width: 90px;
+            height: 90px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #004225 0%, #0a5c36 100%);
+            box-shadow: 0 12px 30px rgba(0, 66, 37, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 18px;
+            animation: preloaderPulse 1.8s ease-in-out infinite;
+        }
+        .preloader-logo-img {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+        .preloader-brand-title {
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: #004225;
+            margin: 0 0 5px 0;
+        }
+        .preloader-tagline {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+        .preloader-progress-track {
+            width: 150px;
+            height: 3.5px;
+            background-color: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+        .preloader-progress-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            width: 45%;
+            background: linear-gradient(90deg, #004225, #d4af37, #004225);
+            border-radius: 4px;
+            animation: preloaderShimmer 1.4s ease-in-out infinite;
+        }
+        @keyframes preloaderPulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.06);
+                box-shadow: 0 16px 36px rgba(0, 66, 37, 0.35);
+            }
+        }
+        @keyframes preloaderShimmer {
+            0% {
+                left: -45%;
+            }
+            100% {
+                left: 100%;
+            }
+        }
     </style>
     @yield('styles')
 </head>
 <body class="bg-light text-dark">
+    <!-- Native App Preloader (System Logo Splash Screen) -->
+    <div id="appPreloader" class="app-preloader">
+        <div class="preloader-content">
+            <div class="preloader-logo-wrap">
+                <img src="/icons/icon-192x192.png" alt="DOOTOR Logo" class="preloader-logo-img">
+            </div>
+            <h2 class="preloader-brand-title">{{ $platformName ?? 'DOOTOR ENTERPRISES' }}</h2>
+            <span class="preloader-tagline">Consular &amp; Administrative Services</span>
+            <div class="preloader-progress-track">
+                <div class="preloader-progress-bar"></div>
+            </div>
+        </div>
+    </div>
     @yield('body')
 
     <!-- Global Toast / Alerts -->
@@ -432,6 +557,89 @@
             }
         });
     </script>
+
+    <!-- Native App Preloader & PWA Registration Scripts -->
+    <script>
+        (function() {
+            var preloader = document.getElementById('appPreloader');
+            function dismissPreloader() {
+                if (preloader && !preloader.classList.contains('fade-out')) {
+                    preloader.classList.add('fade-out');
+                    setTimeout(function() {
+                        if (preloader.parentNode) {
+                            preloader.parentNode.removeChild(preloader);
+                        }
+                    }, 450);
+                }
+            }
+            window.addEventListener('load', function() {
+                setTimeout(dismissPreloader, 320);
+            });
+            // Fail-safe timeout so user is never blocked
+            setTimeout(dismissPreloader, 1800);
+        })();
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('PWA ServiceWorker registered with scope:', reg.scope);
+                }).catch(function(err) {
+                    console.warn('PWA ServiceWorker error:', err);
+                });
+            });
+        }
+
+        // PWA Install Prompt Handler
+        var deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', function(e) {
+            e.preventDefault();
+            deferredPrompt = e;
+            var installBanner = document.getElementById('pwaInstallBanner');
+            if (installBanner && !sessionStorage.getItem('pwa_banner_dismissed')) {
+                installBanner.style.display = 'block';
+            }
+        });
+
+        window.installPwaApp = function() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then(function(choiceResult) {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted PWA installation');
+                    }
+                    deferredPrompt = null;
+                    var installBanner = document.getElementById('pwaInstallBanner');
+                    if (installBanner) installBanner.style.display = 'none';
+                });
+            } else {
+                window.location.href = "{{ route('app.download.apk') }}";
+            }
+        };
+
+        window.dismissPwaBanner = function() {
+            sessionStorage.setItem('pwa_banner_dismissed', 'true');
+            var installBanner = document.getElementById('pwaInstallBanner');
+            if (installBanner) installBanner.style.display = 'none';
+        };
+    </script>
+
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" class="position-fixed start-50 translate-middle-x px-3" style="bottom: 74px; z-index: 999998; max-width: 480px; width: 94%; display: none;">
+        <div class="card border-0 shadow-lg p-2.5 rounded-4 bg-white" style="border: 1px solid rgba(0,66,37,0.15) !important;">
+            <div class="d-flex align-items-center gap-2.5">
+                <img src="/icons/icon-192x192.png" alt="App Icon" class="rounded-3 shadow-sm flex-shrink-0" style="width: 42px; height: 42px; object-fit: contain; background: #004225;">
+                <div class="flex-grow-1 min-w-0">
+                    <h6 class="fw-bold mb-0 text-dark" style="font-size: 13.5px;">Install DOOTOR App</h6>
+                    <span class="text-secondary small d-block" style="font-size: 11px;">Instant launch &amp; full screen without URL bar</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-dark rounded-pill px-3 py-1.5 fw-semibold flex-shrink-0" onclick="installPwaApp()" style="background-color: #004225; border-color: #004225; font-size: 12px;">
+                    Install
+                </button>
+                <button type="button" class="btn-close ms-1 flex-shrink-0" onclick="dismissPwaBanner()" style="font-size: 10px;"></button>
+            </div>
+        </div>
+    </div>
 
     @yield('scripts')
     @stack('scripts')

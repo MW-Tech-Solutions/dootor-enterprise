@@ -15,6 +15,38 @@ use Illuminate\Support\Facades\Route;
 Route::get('/api/location/african-countries', [LocationApiController::class, 'africanCountries']);
 Route::get('/api/location/divisions', [LocationApiController::class, 'divisions']);
 
+// PWA Digital Asset Links for Android Standalone TWA (Eliminates Top URL Bar)
+Route::get('/.well-known/assetlinks.json', function () {
+    $path = public_path('.well-known/assetlinks.json');
+    if (file_exists($path)) {
+        return response()->file($path, ['Content-Type' => 'application/json']);
+    }
+    return response()->json([
+        [
+            'relation' => ['delegate_permission/common.handle_all_urls'],
+            'target' => [
+                'namespace' => 'android_app',
+                'package_name' => 'com.dootor.enterprises.twa',
+                'sha256_cert_fingerprints' => [
+                    'F8:1C:3F:89:C3:6C:9B:61:94:C3:57:4E:99:C9:8F:D6:7A:B4:71:0D:3D:2B:A6:49:12:F1:C8:48:99:A2:3B:11'
+                ]
+            ]
+        ]
+    ]);
+});
+
+// Direct Native Android APK Download Route
+Route::get('/download/app', function () {
+    $path = public_path('downloads/dootor-enterprises.apk');
+    if (file_exists($path)) {
+        return response()->download($path, 'dootor-enterprises.apk', [
+            'Content-Type' => 'application/vnd.android.package-archive',
+            'Content-Disposition' => 'attachment; filename="dootor-enterprises.apk"'
+        ]);
+    }
+    abort(404, 'APK package not found');
+})->name('app.download.apk');
+
 // Public Welcome Homepage
 Route::get('/', [PublicController::class, 'welcome'])->name('home');
 

@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.dootor.enterprises.twa",
+      "sha256_cert_fingerprints": [
+        "F8:1C:3F:89:C3:6C:9B:61:94:C3:57:4E:99:C9:8F:D6:7A:B4:71:0D:3D:2B:A6:49:12:F1:C8:48:99:A2:3B:11"
+      ]
+    }
+  }
+]
