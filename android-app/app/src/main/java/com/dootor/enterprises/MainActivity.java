@@ -3,8 +3,8 @@ package com.dootor.enterprises;
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebResourceRequest;
@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -23,7 +22,6 @@ public class MainActivity extends AppCompatActivity {
     private static final int FILE_CHOOSER_REQUEST_CODE = 1001;
 
     private WebView webView;
-    private SwipeRefreshLayout swipeRefresh;
     private ValueCallback<Uri[]> uploadMessageArray;
 
     @Override
@@ -31,10 +29,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        swipeRefresh = findViewById(R.id.swipeRefresh);
         webView = findViewById(R.id.webView);
-
-        setupSwipeRefresh();
         setupWebView();
 
         if (savedInstanceState == null) {
@@ -42,11 +37,6 @@ public class MainActivity extends AppCompatActivity {
         } else {
             webView.restoreState(savedInstanceState);
         }
-    }
-
-    private void setupSwipeRefresh() {
-        swipeRefresh.setColorSchemeResources(R.color.brand_green, R.color.brand_gold);
-        swipeRefresh.setOnRefreshListener(() -> webView.reload());
     }
 
     private void setupWebView() {
@@ -62,7 +52,12 @@ public class MainActivity extends AppCompatActivity {
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
 
-        // Append custom user agent identifier
+        // Native smooth scrolling & touch response
+        webView.setOverScrollMode(View.OVER_SCROLL_NEVER);
+        webView.setVerticalScrollBarEnabled(false);
+        webView.setHorizontalScrollBarEnabled(false);
+
+        // Custom User Agent tag
         String defaultUa = settings.getUserAgentString();
         settings.setUserAgentString(defaultUa + " DOOTOR_PWA_ANDROID");
 
@@ -79,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
             private boolean handleUrl(String url) {
-                // External intents: WhatsApp, Phone calls, Emails
                 if (url.startsWith("https://wa.me") || url.startsWith("whatsapp://") ||
                     url.startsWith("tel:") || url.startsWith("mailto:")) {
                     try {
@@ -92,12 +86,12 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
 
-                // Stay inside WebView for dootor domain or payment gateways
+                // Internal app pages and payment flows stay in WebView
                 if (url.contains("dootor-enterprises.com") || url.contains("paystack") || url.contains("credo")) {
                     return false;
                 }
 
-                // Other external links open in system browser
+                // External links open in system browser
                 try {
                     Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
                     startActivity(intent);
@@ -105,12 +99,6 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     return false;
                 }
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                super.onPageFinished(view, url);
-                swipeRefresh.setRefreshing(false);
             }
         });
 

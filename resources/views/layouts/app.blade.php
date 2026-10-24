@@ -430,7 +430,35 @@
     <div id="appPreloader" class="app-preloader">
         <div class="preloader-content">
             <div class="preloader-logo-wrap">
-                <img src="/icons/icon-192x192.png" alt="DOOTOR Logo" class="preloader-logo-img">
+                @if(!empty($logoUrl))
+                    <img src="{{ app_file_url($logoUrl) }}" alt="DOOTOR Logo" class="preloader-logo-img" onerror="this.onerror=null; this.src='/icons/icon-192x192.png'; this.onerror=function(){ this.style.display='none'; document.getElementById('preloaderSvgFallback').style.display='block'; };">
+                    <svg id="preloaderSvgFallback" width="54" height="54" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogoPreload)" />
+                        <path d="M28 32C38 32 44 40 44 50C44 60 38 68 28 68V32Z" fill="#FFFFFF" />
+                        <path d="M50 24H80V35H64V44H76V53H64V63H80V74H50V24Z" fill="#FFFFFF" />
+                        <defs>
+                            <linearGradient id="goldLogoPreload" x1="14" y1="20" x2="52" y2="80" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#FFE57F" />
+                                <stop offset="50%" stop-color="#D4AF37" />
+                                <stop offset="100%" stop-color="#AA820A" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                @else
+                    <img src="/icons/icon-192x192.png" alt="DOOTOR Logo" class="preloader-logo-img" onerror="this.style.display='none'; document.getElementById('preloaderSvgFallback').style.display='block';">
+                    <svg id="preloaderSvgFallback" width="54" height="54" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: none;">
+                        <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogoPreload)" />
+                        <path d="M28 32C38 32 44 40 44 50C44 60 38 68 28 68V32Z" fill="#FFFFFF" />
+                        <path d="M50 24H80V35H64V44H76V53H64V63H80V74H50V24Z" fill="#FFFFFF" />
+                        <defs>
+                            <linearGradient id="goldLogoPreload" x1="14" y1="20" x2="52" y2="80" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#FFE57F" />
+                                <stop offset="50%" stop-color="#D4AF37" />
+                                <stop offset="100%" stop-color="#AA820A" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                @endif
             </div>
             <h2 class="preloader-brand-title">{{ $platformName ?? 'DOOTOR ENTERPRISES' }}</h2>
             <span class="preloader-tagline">Consular &amp; Administrative Services</span>
@@ -497,11 +525,11 @@
 
     <!-- Global Floating Widgets (WhatsApp & Go To Top Button) -->
     <div id="globalFloatingWidgets" class="position-fixed" style="bottom: 25px; right: 25px; z-index: 9990; display: flex; flex-direction: column; gap: 12px; align-items: center;">
-        <!-- Go To Top Button (Appears on scroll > 250px) -->
+        <!-- Go To Top Button (Appears when scrolled > 100px) -->
         <button id="scrollToTopBtn" 
                 type="button" 
                 class="btn rounded-circle shadow-lg d-flex align-items-center justify-content-center p-0" 
-                style="width: 48px; height: 48px; background-color: #004225; border: 1.5px solid rgba(212, 175, 55, 0.6); color: #ffffff; opacity: 0; visibility: hidden; transform: translateY(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;"
+                style="width: 48px; height: 48px; background-color: #004225; border: 1.5px solid rgba(212, 175, 55, 0.6); color: #ffffff; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(12px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer;"
                 title="Scroll to Top"
                 onclick="scrollToTop()">
             <i class="bi bi-chevron-up fs-5"></i>
@@ -522,7 +550,7 @@
     <script>
         function scrollToTop() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
-            var dashScroll = document.querySelector('.overflow-y-auto');
+            var dashScroll = document.getElementById('dashboardMainScroll') || document.querySelector('.overflow-y-auto');
             if (dashScroll) {
                 dashScroll.scrollTo({ top: 0, behavior: 'smooth' });
             }
@@ -534,24 +562,28 @@
 
             function checkScrollPosition() {
                 var scTop = window.scrollY || document.documentElement.scrollTop || 0;
-                var dashScroll = document.querySelector('.overflow-y-auto');
+                var dashScroll = document.getElementById('dashboardMainScroll') || document.querySelector('.overflow-y-auto');
                 if (dashScroll && dashScroll.scrollTop > scTop) {
                     scTop = dashScroll.scrollTop;
                 }
 
-                if (scTop > 250) {
+                if (scTop > 100) {
                     btn.style.opacity = '1';
                     btn.style.visibility = 'visible';
+                    btn.style.pointerEvents = 'auto';
                     btn.style.transform = 'translateY(0)';
                 } else {
                     btn.style.opacity = '0';
                     btn.style.visibility = 'hidden';
+                    btn.style.pointerEvents = 'none';
                     btn.style.transform = 'translateY(12px)';
                 }
             }
 
-            window.addEventListener('scroll', checkScrollPosition, { passive: true });
-            var dashScroll = document.querySelector('.overflow-y-auto');
+            // Listen in capture phase so inner overflow container scroll events trigger checkScrollPosition
+            window.addEventListener('scroll', checkScrollPosition, { capture: true, passive: true });
+            
+            var dashScroll = document.getElementById('dashboardMainScroll');
             if (dashScroll) {
                 dashScroll.addEventListener('scroll', checkScrollPosition, { passive: true });
             }

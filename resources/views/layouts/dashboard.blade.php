@@ -126,7 +126,7 @@
     </aside>
 
     <!-- Content Area (Independently Scrollable) -->
-    <div class="flex-grow-1 bg-light d-flex flex-column h-100 overflow-y-auto" style="min-width: 0; background-color: #f8fafc !important;">
+    <div id="dashboardMainScroll" class="flex-grow-1 bg-light d-flex flex-column h-100 overflow-y-auto" style="min-width: 0; background-color: #f8fafc !important;">
         <!-- Header -->
         <header class="navbar navbar-expand bg-white border-bottom px-3 px-md-4 py-2 sticky-top" style="z-index: 1030;">
             <div class="container-fluid p-0 d-flex align-items-center justify-content-between">
