@@ -490,11 +490,10 @@
                             @endif
 
                             <div class="pt-3 border-top d-flex align-items-center justify-content-between gap-2 mt-auto">
-                                <div>
-                                    <span class="text-muted extra-small d-block" style="font-size: 11px; font-weight: 500;">Official Pre-Enrollment Fee</span>
-                                    <strong class="text-dark fs-5 fw-bold" style="letter-spacing: -0.5px;">{{ $currencySymbol ?? '$' }}{{ number_format($service->price, 2) }}</strong>
-                                </div>
-                                <a href="{{ route('login') }}" class="btn btn-dark btn-sm rounded-pill px-3.5 py-2 font-monospace small d-inline-flex align-items-center gap-1.5 fw-semibold shadow-sm text-decoration-none" style="background-color: #004225; border-color: #004225;">
+                                <span class="badge bg-light text-secondary border px-2.5 py-1 extra-small fw-semibold d-inline-flex align-items-center gap-1" style="font-size: 11px;">
+                                    <i class="bi bi-shield-check text-success"></i> Direct Online Processing
+                                </span>
+                                <a href="{{ route('login') }}" class="btn btn-dark btn-sm rounded-pill px-4 py-2 font-monospace small d-inline-flex align-items-center gap-1.5 fw-semibold shadow-sm text-decoration-none" style="background-color: #004225; border-color: #004225;">
                                     <span>Apply Now</span> <i class="bi bi-arrow-right"></i>
                                 </a>
                             </div>

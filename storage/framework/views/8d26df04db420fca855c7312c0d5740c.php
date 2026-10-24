@@ -70,6 +70,69 @@
         border-color: #004225;
         background: #ffffff;
     }
+
+    /* Mobile view optimizations for step form navigation, document cards, and modal actions */
+    .step-nav-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    @media (max-width: 575.98px) {
+        .step-bottom-nav {
+            display: flex !important;
+            flex-direction: row !important;
+            align-items: center !important;
+            gap: 10px !important;
+            width: 100% !important;
+        }
+        .step-bottom-nav > * {
+            flex: 1 1 0px !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+            font-size: 13px !important;
+            text-align: center !important;
+        }
+        .step-bottom-nav .btn-prev {
+            flex: 0 0 auto !important;
+            width: auto !important;
+            padding-left: 14px !important;
+            padding-right: 14px !important;
+        }
+        .step-bottom-nav .btn-next-action {
+            flex: 1 1 auto !important;
+        }
+        .doc-item-row {
+            padding: 10px 12px !important;
+        }
+        .doc-item-actions {
+            flex-shrink: 0 !important;
+        }
+        .doc-item-actions .btn {
+            font-size: 11.5px !important;
+            padding: 4px 8px !important;
+        }
+        .modal-footer-responsive {
+            display: flex !important;
+            flex-direction: column-reverse !important;
+            gap: 8px !important;
+            width: 100% !important;
+            padding: 0 !important;
+        }
+        .modal-footer-responsive > * {
+            width: 100% !important;
+            margin: 0 !important;
+            text-align: center !important;
+            padding: 9px 16px !important;
+            font-size: 13.5px !important;
+        }
+    }
 </style>
 <?php $__env->stopSection(); ?>
 
@@ -320,25 +383,28 @@
                         </div>
 
                         <div class="row g-2 justify-content-center max-w-md mx-auto" style="max-width: 600px;">
-                            <div class="col-sm-6">
+                            <div class="col-12 col-sm-6">
                                 <?php if(count($serviceDocChecklist) > 0): ?>
-                                    <select id="docNameSelect" class="form-select form-select-sm" onchange="toggleCustomDocInput(this)">
+                                    <select id="docNameSelect" class="form-select form-select-sm py-2" onchange="toggleCustomDocInput(this)">
                                         <option value="">-- Select Required Document --</option>
                                         <?php $__currentLoopData = $serviceDocChecklist; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $reqDoc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <option value="<?php echo e($reqDoc['name']); ?>"><?php echo e($reqDoc['name']); ?> <?php echo e($reqDoc['is_compulsory'] ? '(Compulsory)' : '(Optional)'); ?></option>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         <option value="__custom__">+ Other Custom Document Title</option>
                                     </select>
-                                    <input type="text" id="docNameInput" class="form-control form-control-sm mt-2 d-none" placeholder="e.g. Additional Passport Page">
+                                    <input type="text" id="docNameInput" class="form-control form-control-sm mt-2 py-2 d-none" placeholder="e.g. Additional Passport Page">
                                 <?php else: ?>
-                                    <input type="text" id="docNameInput" class="form-control form-control-sm" placeholder="e.g. Passport Photograph">
+                                    <input type="text" id="docNameInput" class="form-control form-control-sm py-2" placeholder="e.g. Passport Photograph">
                                 <?php endif; ?>
                             </div>
-                            <div class="col-sm-4">
-                                <input type="file" id="docFileInput" class="form-control form-control-sm" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            <div class="col-12 col-sm-4">
+                                <input type="file" id="docFileInput" class="form-control form-control-sm py-1.5" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
                             </div>
-                            <div class="col-sm-2">
-                                <button type="button" id="uploadDocBtn" class="btn btn-brand-primary btn-sm w-100">Upload</button>
+                            <div class="col-12 col-sm-2">
+                                <button type="button" id="uploadDocBtn" class="btn btn-brand-primary btn-sm w-100 py-2 fw-semibold d-flex align-items-center justify-content-center gap-1 shadow-sm">
+                                    <i class="bi bi-upload"></i>
+                                    <span>Upload</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -347,19 +413,19 @@
                     <h6 class="fw-bold text-dark mb-2">Uploaded Supporting Documents (<span id="docCount"><?php echo e($application->requestDocuments->count()); ?></span>)</h6>
                     <div id="uploadedDocsList" class="d-flex flex-column gap-2 mb-4">
                         <?php $__empty_1 = true; $__currentLoopData = $application->requestDocuments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $doc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                            <div class="p-3 border rounded-3 bg-light d-flex align-items-center justify-content-between" id="docRow<?php echo e($doc->id); ?>">
-                                <div class="d-flex align-items-center gap-3">
-                                    <div class="bg-white p-2 rounded-circle border">
+                            <div class="p-2.5 p-sm-3 border rounded-3 bg-light d-flex align-items-center justify-content-between doc-item-row" id="docRow<?php echo e($doc->id); ?>">
+                                <div class="d-flex align-items-center gap-2.5 min-w-0 me-2" style="min-width: 0;">
+                                    <div class="bg-white p-2 rounded-circle border flex-shrink-0 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
                                         <i class="bi bi-file-earmark-pdf-fill text-danger fs-5"></i>
                                     </div>
-                                    <div>
-                                        <h6 class="fw-bold mb-0 text-dark small"><?php echo e($doc->document_name); ?></h6>
-                                        <span class="text-muted" style="font-size: 11px;"><?php echo e($doc->file_name ?? 'Uploaded File'); ?> • Status: <strong class="text-success"><?php echo e($doc->status); ?></strong></span>
+                                    <div class="overflow-hidden" style="min-width: 0;">
+                                        <h6 class="fw-bold mb-0 text-dark small text-truncate" style="font-size: 13px;"><?php echo e($doc->document_name); ?></h6>
+                                        <span class="text-muted d-block text-truncate" style="font-size: 11px;"><?php echo e($doc->file_name ?? 'Uploaded File'); ?> • Status: <strong class="text-success"><?php echo e($doc->status); ?></strong></span>
                                     </div>
                                 </div>
-                                <div class="d-flex align-items-center gap-2">
-                                    <a href="<?php echo e(app_file_url($doc->file_path)); ?>" target="_blank" class="btn btn-outline-secondary btn-sm py-1 px-2.5" style="font-size: 12px;"><i class="bi bi-eye"></i> View</a>
-                                    <button type="button" class="btn btn-outline-danger btn-sm py-1 px-2 delete-doc-btn" data-id="<?php echo e($doc->id); ?>"><i class="bi bi-trash"></i></button>
+                                <div class="d-flex align-items-center gap-1.5 flex-shrink-0 doc-item-actions">
+                                    <a href="<?php echo e(app_file_url($doc->file_path)); ?>" target="_blank" class="btn btn-outline-secondary btn-sm py-1 px-2.5 d-inline-flex align-items-center gap-1" style="font-size: 12px;"><i class="bi bi-eye"></i> <span>View</span></a>
+                                    <button type="button" class="btn btn-outline-danger btn-sm py-1 px-2 delete-doc-btn d-inline-flex align-items-center justify-content-center" data-id="<?php echo e($doc->id); ?>"><i class="bi bi-trash"></i></button>
                                 </div>
                             </div>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
@@ -458,26 +524,27 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Bottom Action Navigation -->
-            <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+            <!-- Bottom Action Navigation (Clean, Touch-Friendly Mobile Layout) -->
+            <div class="d-flex justify-content-between align-items-center pt-3 border-top step-bottom-nav">
                 <?php if($step > 1): ?>
-                    <a href="<?php echo e(route('client.application.step', ['serviceRequest' => $application->id, 'step' => $step - 1])); ?>" class="btn btn-outline-secondary px-4 py-2 rounded-3">
-                        <i class="bi bi-arrow-left me-1"></i> Previous Step
+                    <a href="<?php echo e(route('client.application.step', ['serviceRequest' => $application->id, 'step' => $step - 1])); ?>" class="btn btn-outline-secondary px-3.5 py-2.5 rounded-3 btn-prev d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm">
+                        <i class="bi bi-arrow-left"></i>
+                        <span>Previous Step</span>
                     </a>
                 <?php else: ?>
                     <div></div>
                 <?php endif; ?>
 
                 <?php if($step < 3): ?>
-                    <button type="button" id="btnOpenConfirmStepModal" class="btn btn-brand-primary px-4 py-2 rounded-3">
+                    <button type="button" id="btnOpenConfirmStepModal" class="btn btn-brand-primary px-4 py-2.5 rounded-3 btn-next-action d-inline-flex align-items-center justify-content-center gap-1.5 shadow-sm fw-bold">
                         <span>Save &amp; Next Step</span>
-                        <i class="bi bi-arrow-right ms-1"></i>
+                        <i class="bi bi-arrow-right"></i>
                     </button>
                 <?php else: ?>
                     <!-- Step 3: Continue to Payment Button -->
-                    <button type="button" id="btnOpenConfirmPaymentModal" class="btn btn-success px-5 py-2.5 rounded-3 fw-bold shadow-sm" style="background-color: #004225; border: none;">
+                    <button type="button" id="btnOpenConfirmPaymentModal" class="btn btn-success px-4 px-sm-5 py-2.5 rounded-3 fw-bold shadow-sm btn-next-action d-inline-flex align-items-center justify-content-center gap-2" style="background-color: #004225; border: none;">
                         <span>Continue to Payment</span>
-                        <i class="bi bi-credit-card-2-front ms-2"></i>
+                        <i class="bi bi-credit-card-2-front"></i>
                     </button>
                 <?php endif; ?>
             </div>
@@ -516,8 +583,8 @@
                     <span>Your entries will be automatically saved before advancing to the next stage.</span>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" data-bs-dismiss="modal">
+            <div class="modal-footer border-0 pt-0 modal-footer-responsive">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3.5 btn-sm" data-bs-dismiss="modal">
                     Review Details
                 </button>
                 <button type="button" id="confirmNextStepBtn" class="btn btn-success rounded-pill px-4 btn-sm fw-bold" style="background-color: #004225; border: none;">
@@ -559,8 +626,8 @@
                     <span>You will now be redirected directly to the secured payment gateway to complete your transaction.</span>
                 </div>
             </div>
-            <div class="modal-footer border-0 pt-0">
-                <button type="button" class="btn btn-outline-secondary rounded-pill px-3 btn-sm" data-bs-dismiss="modal">
+            <div class="modal-footer border-0 pt-0 modal-footer-responsive">
+                <button type="button" class="btn btn-outline-secondary rounded-pill px-3.5 btn-sm" data-bs-dismiss="modal">
                     Cancel / Review
                 </button>
                 <button type="button" id="confirmPaymentSubmitBtn" class="btn btn-success rounded-pill px-4 btn-sm fw-bold" style="background-color: #004225; border: none;">

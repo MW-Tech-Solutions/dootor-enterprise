@@ -230,8 +230,20 @@
                 padding-bottom: env(safe-area-inset-bottom, 0px) !important;
             }
             #globalFloatingWidgets {
-                bottom: 75px !important;
-                right: 16px !important;
+                bottom: 72px !important;
+                right: 12px !important;
+                gap: 8px !important;
+            }
+            #scrollToTopBtn {
+                width: 40px !important;
+                height: 40px !important;
+            }
+            #globalFloatingWidgets a {
+                width: 44px !important;
+                height: 44px !important;
+            }
+            #globalFloatingWidgets a i {
+                font-size: 24px !important;
             }
         }
         .mobile-bottom-nav-inner {

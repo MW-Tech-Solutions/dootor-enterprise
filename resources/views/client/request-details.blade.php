@@ -327,26 +327,30 @@
                 </span>
             </div>
 
-            <!-- Financial Metrics Highlight Tiles -->
+            <!-- Financial Metrics Highlight Tiles (Responsive Amount Boxes) -->
             <div class="row g-2 mb-3">
                 <div class="col-4">
-                    <div class="p-2.5 rounded-3 text-center" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
-                        <span class="text-secondary d-block" style="font-size: 11px;">Total Fee</span>
-                        <strong class="text-dark fs-6 d-block mt-0.5">{{ $currencySymbol ?? '$' }}{{ number_format($request->price, 2) }}</strong>
+                    <div class="financial-tile p-2 p-sm-2.5 rounded-3 text-center d-flex flex-column justify-content-center h-100" style="background-color: #f8fafc; border: 1px solid #e2e8f0; min-height: 72px;">
+                        <span class="text-secondary d-block financial-tile-label" style="font-size: 11px; font-weight: 500; letter-spacing: -0.01em;">Total Fee</span>
+                        <div class="financial-tile-amount text-dark fw-bold mt-1" style="font-size: clamp(0.78rem, 3.2vw, 1.05rem); line-height: 1.2; word-break: break-word;">
+                            {{ $currencySymbol ?? '$' }}{{ number_format($request->price, 2) }}
+                        </div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="p-2.5 rounded-3 text-center" style="background-color: #f0fdf4; border: 1px solid #bbf7d0;">
-                        <span class="text-success d-block" style="font-size: 11px; font-weight: 600;">Amount Paid</span>
-                        <strong class="text-success fs-6 d-block mt-0.5" style="color: #004225 !important;">{{ $currencySymbol ?? '$' }}{{ number_format($request->amount_paid, 2) }}</strong>
+                    <div class="financial-tile p-2 p-sm-2.5 rounded-3 text-center d-flex flex-column justify-content-center h-100" style="background-color: #f0fdf4; border: 1px solid #bbf7d0; min-height: 72px;">
+                        <span class="text-success d-block financial-tile-label" style="font-size: 11px; font-weight: 600; letter-spacing: -0.01em;">Amount Paid</span>
+                        <div class="financial-tile-amount text-success fw-bold mt-1" style="color: #004225 !important; font-size: clamp(0.78rem, 3.2vw, 1.05rem); line-height: 1.2; word-break: break-word;">
+                            {{ $currencySymbol ?? '$' }}{{ number_format($request->amount_paid, 2) }}
+                        </div>
                     </div>
                 </div>
                 <div class="col-4">
-                    <div class="p-2.5 rounded-3 text-center {{ $request->outstanding_balance > 0 ? 'bg-danger bg-opacity-10' : 'bg-light' }}" style="border: 1px solid {{ $request->outstanding_balance > 0 ? 'rgba(239,68,68,0.3)' : '#e2e8f0' }};">
-                        <span class="{{ $request->outstanding_balance > 0 ? 'text-danger' : 'text-secondary' }} d-block" style="font-size: 11px; font-weight: 600;">Balance</span>
-                        <strong class="{{ $request->outstanding_balance > 0 ? 'text-danger' : 'text-dark' }} fs-6 d-block mt-0.5">
+                    <div class="financial-tile p-2 p-sm-2.5 rounded-3 text-center d-flex flex-column justify-content-center h-100 {{ $request->outstanding_balance > 0 ? 'bg-danger bg-opacity-10' : 'bg-light' }}" style="border: 1px solid {{ $request->outstanding_balance > 0 ? 'rgba(239,68,68,0.3)' : '#e2e8f0' }}; min-height: 72px;">
+                        <span class="{{ $request->outstanding_balance > 0 ? 'text-danger' : 'text-secondary' }} d-block financial-tile-label" style="font-size: 11px; font-weight: 600; letter-spacing: -0.01em;">Balance</span>
+                        <div class="financial-tile-amount {{ $request->outstanding_balance > 0 ? 'text-danger' : 'text-dark' }} fw-bold mt-1" style="font-size: clamp(0.78rem, 3.2vw, 1.05rem); line-height: 1.2; word-break: break-word;">
                             {{ $currencySymbol ?? '$' }}{{ number_format($request->outstanding_balance, 2) }}
-                        </strong>
+                        </div>
                     </div>
                 </div>
             </div>
