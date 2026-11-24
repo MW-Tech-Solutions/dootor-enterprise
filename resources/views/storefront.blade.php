@@ -1,6 +1,31 @@
 @extends('layouts.app')
 
-@section('title', $storefront->storefront_name . ' - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('title', $storefront->storefront_name . ' - Verified Document Partner | ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('meta_description', 'Explore verified document handling, NIN verification, and administrative services provided by ' . $storefront->storefront_name . ' in ' . ($vendor->state ?? 'Lagos') . ', Nigeria.')
+@section('canonical_url', route('vendor.storefront', $vendor))
+
+@section('seo_schema')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": {!! json_encode($storefront->storefront_name) !!},
+    "description": {!! json_encode('Verified document handling and administrative services in ' . ($vendor->state ?? 'Lagos') . ', Nigeria.') !!},
+    "url": "{{ route('vendor.storefront', $vendor) }}",
+    @if($vendor->avatar_url)
+    "image": "{{ app_file_url($vendor->avatar_url) }}",
+    @endif
+    "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "{{ $vendor->state ?? 'Lagos' }}",
+        "addressCountry": "NG"
+    },
+    "parentOrganization": {
+        "@id": "{{ url('/#organization') }}"
+    }
+}
+</script>
+@endsection
 
 @section('styles')
 @php
@@ -35,7 +60,7 @@
     <div class="container relative-content z-2">
         <div class="d-flex flex-column flex-md-row align-items-center align-items-md-end gap-4 text-white text-center text-md-start">
             @if($vendor->avatar_url)
-                <img src="{{ app_file_url($vendor->avatar_url) }}" alt="avatar" class="rounded-circle border border-4 border-white shadow-lg" style="width: 120px; height: 120px; object-fit: cover; margin-bottom: -40px;">
+                <img src="{{ app_file_url($vendor->avatar_url) }}" alt="{{ $storefront->storefront_name }} Verified Partner Avatar" class="rounded-circle border border-4 border-white shadow-lg" style="width: 120px; height: 120px; object-fit: cover; margin-bottom: -40px;">
             @else
                 <div class="rounded-circle bg-white text-dark d-flex align-items-center justify-content-center fw-bold shadow-lg border border-4 border-white" style="width: 120px; height: 120px; font-size: 40px; margin-bottom: -40px;">
                     {{ strtoupper(substr($vendor->first_name ?? 'V', 0, 1)) }}

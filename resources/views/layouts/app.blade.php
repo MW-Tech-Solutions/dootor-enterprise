@@ -40,7 +40,121 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="api-base-url" content="{{ url('/api/location') }}">
-    <title>@yield('title', $platformName)</title>
+
+    @php
+        $defaultTitle = $platformName . ' | Administrative Document Consultancy & Corporate Services';
+        $pageTitle = trim($__env->yieldContent('title', $defaultTitle));
+        $metaDescription = trim($__env->yieldContent('meta_description', $settings->hero_subtitle ?? 'Professional administrative document consultancy in Nigeria. Fast-track international passport approvals, visas, court affidavits, NIN modifications, and verified corporate services.'));
+        $metaKeywords = trim($__env->yieldContent('meta_keywords', 'dootor enterprises, document procurement, business registration nigeria, international passport application, nigerian visa, court affidavit, nin verification, bvn, npc birth certificate, expatriate quota, police character certificate'));
+        $canonicalUrl = trim($__env->yieldContent('canonical_url', url()->current()));
+        $ogType = trim($__env->yieldContent('og_type', 'website'));
+        $ogImage = trim($__env->yieldContent('og_image', $logoUrl ? app_file_url($logoUrl) : asset('icons/icon-512x512.png')));
+        $twitterHandle = !empty($settings->twitter_url) ? '@' . ltrim(parse_url($settings->twitter_url, PHP_URL_PATH) ?? '', '/') : '@dootor_ent';
+    @endphp
+
+    <title>{{ $pageTitle }}</title>
+
+    <!-- Standard SEO Meta Tags for Google -->
+    <meta name="description" content="{{ $metaDescription }}">
+    <meta name="keywords" content="{{ $metaKeywords }}">
+    <meta name="author" content="{{ $platformName }}">
+    <meta name="robots" content="@yield('meta_robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1')">
+    <meta name="googlebot" content="@yield('meta_googlebot', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1')">
+    <link rel="canonical" href="{{ $canonicalUrl }}">
+
+    <!-- Google Site Verification -->
+    @if(config('services.google.site_verification') || !empty($settings->google_site_verification))
+        <meta name="google-site-verification" content="{{ config('services.google.site_verification') ?? $settings->google_site_verification }}">
+    @endif
+    @yield('google_verification')
+
+    <!-- Open Graph / Facebook / WhatsApp Meta Tags -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="{{ $ogType }}">
+    <meta property="og:site_name" content="{{ $platformName }}">
+    <meta property="og:title" content="@yield('og_title', $pageTitle)">
+    <meta property="og:description" content="@yield('og_description', $metaDescription)">
+    <meta property="og:url" content="{{ $canonicalUrl }}">
+    <meta property="og:image" content="{{ $ogImage }}">
+    <meta property="og:image:secure_url" content="{{ $ogImage }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="{{ $platformName }} Logo & Brand Banner">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="{{ $twitterHandle }}">
+    <meta name="twitter:creator" content="{{ $twitterHandle }}">
+    <meta name="twitter:title" content="@yield('og_title', $pageTitle)">
+    <meta name="twitter:description" content="@yield('og_description', $metaDescription)">
+    <meta name="twitter:image" content="{{ $ogImage }}">
+
+    <!-- Schema.org JSON-LD Structured Data for Google Search -->
+    <script type="application/ld+json">
+    {
+        "@@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "{{ url('/#organization') }}",
+                "name": "{{ $platformName }}",
+                "legalName": "{{ $settings->company_name ?? $platformName }}",
+                "url": "{{ url('/') }}",
+                "logo": {
+                    "@type": "ImageObject",
+                    "@id": "{{ url('/#logo') }}",
+                    "url": "{{ $logoUrl ? app_file_url($logoUrl) : asset('icons/icon-512x512.png') }}",
+                    "caption": "{{ $platformName }}"
+                },
+                "image": "{{ $logoUrl ? app_file_url($logoUrl) : asset('icons/icon-512x512.png') }}",
+                @if(!empty($settings->contact_phone) || !empty($settings->contact_email))
+                "contactPoint": [{
+                    "@type": "ContactPoint",
+                    "telephone": "{{ $settings->contact_phone ?? '' }}",
+                    "contactType": "customer service",
+                    "email": "{{ $settings->contact_email ?? '' }}",
+                    "areaServed": "NG",
+                    "availableLanguage": ["en"]
+                }],
+                @endif
+                @if(!empty($settings->contact_address))
+                "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "{{ $settings->contact_address }}",
+                    "addressCountry": "NG"
+                },
+                @endif
+                "sameAs": [
+                    @php
+                        $socials = array_values(array_filter([
+                            $settings->facebook_url ?? null,
+                            $settings->twitter_url ?? null,
+                            $settings->instagram_url ?? null,
+                            $settings->linkedin_url ?? null,
+                            $settings->youtube_url ?? null,
+                            $settings->tiktok_url ?? null,
+                        ]));
+                    @endphp
+                    @foreach($socials as $idx => $sUrl)
+                        "{{ $sUrl }}"{{ !$loop->last ? ',' : '' }}
+                    @endforeach
+                ]
+            },
+            {
+                "@type": "WebSite",
+                "@id": "{{ url('/#website') }}",
+                "url": "{{ url('/') }}",
+                "name": "{{ $platformName }}",
+                "description": "{{ $settings->hero_subtitle ?? 'Administrative Document Consultancy & Corporate Services' }}",
+                "publisher": {
+                    "@id": "{{ url('/#organization') }}"
+                },
+                "inLanguage": "en"
+            }
+        ]
+    }
+    </script>
+    @yield('seo_schema')
     
     <!-- Dynamic Favicon (Admin Uploaded System Logo) -->
     @if($logoUrl)

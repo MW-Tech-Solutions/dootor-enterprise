@@ -1,3 +1,6 @@
+<?php $__env->startSection('meta_robots', 'noindex, nofollow, noarchive'); ?>
+<?php $__env->startSection('meta_googlebot', 'noindex, nofollow, noarchive'); ?>
+
 <?php $__env->startSection('body'); ?>
 <?php
     $user = Auth::user();

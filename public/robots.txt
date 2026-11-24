@@ -1,2 +1,26 @@
+# Robots.txt for DOOTOR ENTERPRISES
+# Optimized for Googlebot and major search engine crawlers
+
 User-agent: *
-Disallow:
+Allow: /
+Allow: /terms-and-conditions
+Allow: /privacy-policy
+Allow: /refund-policy
+Allow: /v/
+Allow: /login
+Allow: /register
+Allow: /register-client
+
+# Disallow private user/admin dashboards, internal APIs and sensitive application flows
+Disallow: /admin/
+Disallow: /vendor/
+Disallow: /client/
+Disallow: /api/
+Disallow: /storage/
+Disallow: /reset-password/
+Disallow: /payment/
+Disallow: /support/
+Disallow: /download/
+
+# Dynamic XML Sitemap Index
+Sitemap: https://www.dootor-enterprises.com/sitemap.xml

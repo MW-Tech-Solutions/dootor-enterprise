@@ -40,7 +40,122 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="api-base-url" content="<?php echo e(url('/api/location')); ?>">
-    <title><?php echo $__env->yieldContent('title', $platformName); ?></title>
+
+    <?php
+        $defaultTitle = $platformName . ' | Administrative Document Consultancy & Corporate Services';
+        $pageTitle = trim($__env->yieldContent('title', $defaultTitle));
+        $metaDescription = trim($__env->yieldContent('meta_description', $settings->hero_subtitle ?? 'Professional administrative document consultancy in Nigeria. Fast-track international passport approvals, visas, court affidavits, NIN modifications, and verified corporate services.'));
+        $metaKeywords = trim($__env->yieldContent('meta_keywords', 'dootor enterprises, document procurement, business registration nigeria, international passport application, nigerian visa, court affidavit, nin verification, bvn, npc birth certificate, expatriate quota, police character certificate'));
+        $canonicalUrl = trim($__env->yieldContent('canonical_url', url()->current()));
+        $ogType = trim($__env->yieldContent('og_type', 'website'));
+        $ogImage = trim($__env->yieldContent('og_image', $logoUrl ? app_file_url($logoUrl) : asset('icons/icon-512x512.png')));
+        $twitterHandle = !empty($settings->twitter_url) ? '@' . ltrim(parse_url($settings->twitter_url, PHP_URL_PATH) ?? '', '/') : '@dootor_ent';
+    ?>
+
+    <title><?php echo e($pageTitle); ?></title>
+
+    <!-- Standard SEO Meta Tags for Google -->
+    <meta name="description" content="<?php echo e($metaDescription); ?>">
+    <meta name="keywords" content="<?php echo e($metaKeywords); ?>">
+    <meta name="author" content="<?php echo e($platformName); ?>">
+    <meta name="robots" content="<?php echo $__env->yieldContent('meta_robots', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'); ?>">
+    <meta name="googlebot" content="<?php echo $__env->yieldContent('meta_googlebot', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'); ?>">
+    <link rel="canonical" href="<?php echo e($canonicalUrl); ?>">
+
+    <!-- Google Site Verification -->
+    <?php if(config('services.google.site_verification') || !empty($settings->google_site_verification)): ?>
+        <meta name="google-site-verification" content="<?php echo e(config('services.google.site_verification') ?? $settings->google_site_verification); ?>">
+    <?php endif; ?>
+    <?php echo $__env->yieldContent('google_verification'); ?>
+
+    <!-- Open Graph / Facebook / WhatsApp Meta Tags -->
+    <meta property="og:locale" content="en_US">
+    <meta property="og:type" content="<?php echo e($ogType); ?>">
+    <meta property="og:site_name" content="<?php echo e($platformName); ?>">
+    <meta property="og:title" content="<?php echo $__env->yieldContent('og_title', $pageTitle); ?>">
+    <meta property="og:description" content="<?php echo $__env->yieldContent('og_description', $metaDescription); ?>">
+    <meta property="og:url" content="<?php echo e($canonicalUrl); ?>">
+    <meta property="og:image" content="<?php echo e($ogImage); ?>">
+    <meta property="og:image:secure_url" content="<?php echo e($ogImage); ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="<?php echo e($platformName); ?> Logo & Brand Banner">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="<?php echo e($twitterHandle); ?>">
+    <meta name="twitter:creator" content="<?php echo e($twitterHandle); ?>">
+    <meta name="twitter:title" content="<?php echo $__env->yieldContent('og_title', $pageTitle); ?>">
+    <meta name="twitter:description" content="<?php echo $__env->yieldContent('og_description', $metaDescription); ?>">
+    <meta name="twitter:image" content="<?php echo e($ogImage); ?>">
+
+    <!-- Schema.org JSON-LD Structured Data for Google Search -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "Organization",
+                "@id": "<?php echo e(url('/#organization')); ?>",
+                "name": "<?php echo e($platformName); ?>",
+                "legalName": "<?php echo e($settings->company_name ?? $platformName); ?>",
+                "url": "<?php echo e(url('/')); ?>",
+                "logo": {
+                    "@type": "ImageObject",
+                    "@id": "<?php echo e(url('/#logo')); ?>",
+                    "url": "<?php echo e($logoUrl ? app_file_url($logoUrl) : asset('icons/icon-512x512.png')); ?>",
+                    "caption": "<?php echo e($platformName); ?>"
+                },
+                "image": "<?php echo e($logoUrl ? app_file_url($logoUrl) : asset('icons/icon-512x512.png')); ?>",
+                <?php if(!empty($settings->contact_phone) || !empty($settings->contact_email)): ?>
+                "contactPoint": [{
+                    "@type": "ContactPoint",
+                    "telephone": "<?php echo e($settings->contact_phone ?? ''); ?>",
+                    "contactType": "customer service",
+                    "email": "<?php echo e($settings->contact_email ?? ''); ?>",
+                    "areaServed": "NG",
+                    "availableLanguage": ["en"]
+                }],
+                <?php endif; ?>
+                <?php if(!empty($settings->contact_address)): ?>
+                "address": {
+                    "@type": "PostalAddress",
+                    "streetAddress": "<?php echo e($settings->contact_address); ?>",
+                    "addressCountry": "NG"
+                },
+                <?php endif; ?>
+                "sameAs": [
+                    <?php
+                        $socials = array_values(array_filter([
+                            $settings->facebook_url ?? null,
+                            $settings->twitter_url ?? null,
+                            $settings->instagram_url ?? null,
+                            $settings->linkedin_url ?? null,
+                            $settings->youtube_url ?? null,
+                            $settings->tiktok_url ?? null,
+                        ]));
+                    ?>
+                    <?php $__currentLoopData = $socials; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $idx => $sUrl): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        "<?php echo e($sUrl); ?>"<?php echo e(!$loop->last ? ',' : ''); ?>
+
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                ]
+            },
+            {
+                "@type": "WebSite",
+                "@id": "<?php echo e(url('/#website')); ?>",
+                "url": "<?php echo e(url('/')); ?>",
+                "name": "<?php echo e($platformName); ?>",
+                "description": "<?php echo e($settings->hero_subtitle ?? 'Administrative Document Consultancy & Corporate Services'); ?>",
+                "publisher": {
+                    "@id": "<?php echo e(url('/#organization')); ?>"
+                },
+                "inLanguage": "en"
+            }
+        ]
+    }
+    </script>
+    <?php echo $__env->yieldContent('seo_schema'); ?>
     
     <!-- Dynamic Favicon (Admin Uploaded System Logo) -->
     <?php if($logoUrl): ?>

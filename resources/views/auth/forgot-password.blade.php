@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Forgot Password - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('meta_robots', 'noindex, nofollow')
+@section('meta_googlebot', 'noindex, nofollow')
 
 @section('styles')
 <style>

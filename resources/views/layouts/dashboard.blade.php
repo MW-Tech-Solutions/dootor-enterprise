@@ -1,5 +1,8 @@
 @extends('layouts.app')
 
+@section('meta_robots', 'noindex, nofollow, noarchive')
+@section('meta_googlebot', 'noindex, nofollow, noarchive')
+
 @section('body')
 @php
     $user = Auth::user();

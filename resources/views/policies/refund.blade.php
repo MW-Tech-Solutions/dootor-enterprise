@@ -1,6 +1,31 @@
 @extends('layouts.app')
 
 @section('title', 'Refund & Cancellation Policy - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('meta_description', 'Official terms governing cancellations, processing windows, and refund eligibility on ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES') . '.')
+@section('canonical_url', route('refund.policy'))
+
+@section('seo_schema')
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+        {
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ url('/') }}"
+        },
+        {
+            "@type": "ListItem",
+            "position": 2,
+            "name": "Refund Policy",
+            "item": "{{ route('refund.policy') }}"
+        }
+    ]
+}
+</script>
+@endsection
 
 @section('body')
 <div class="bg-dark text-white py-5 position-relative" style="background: linear-gradient(135deg, #001a0c 0%, #003b1c 100%) !important;">

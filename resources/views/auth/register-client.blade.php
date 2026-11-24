@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Register Client - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('title', 'Create Client Account - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('meta_description', 'Create a free client account on ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES') . ' to apply for international passport, visa, affidavits, and document verification services.')
+@section('canonical_url', route('register.client'))
 
 @section('styles')
 <style>

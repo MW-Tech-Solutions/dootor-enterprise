@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Join as Vendor - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('title', 'Join as an Approved Agent / Vendor - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('meta_description', 'Become a registered service provider or partner agent with ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES') . ' and offer document handling services.')
+@section('canonical_url', route('register'))
 
 @section('styles')
 <style>

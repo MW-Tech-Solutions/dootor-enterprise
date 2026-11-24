@@ -101,5 +101,99 @@ class PublicController extends Controller
         $settings = \App\Models\SystemSetting::firstOrCreate([]);
         return view('policies.privacy', compact('settings'));
     }
+
+    /**
+     * Generate dynamic XML sitemap for Google and search crawlers.
+     */
+    public function sitemap()
+    {
+        $settings = \App\Models\SystemSetting::first();
+        $latestService = \App\Models\Service::latest('updated_at')->first();
+        $latestUpdate = max(
+            $settings?->updated_at?->toAtomString() ?? now()->toAtomString(),
+            $latestService?->updated_at?->toAtomString() ?? now()->toAtomString()
+        );
+
+        $urls = [
+            [
+                'loc' => route('home'),
+                'lastmod' => $latestUpdate,
+                'changefreq' => 'weekly',
+                'priority' => '1.0',
+            ],
+            [
+                'loc' => route('terms.conditions'),
+                'lastmod' => $settings?->updated_at?->toAtomString() ?? now()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ],
+            [
+                'loc' => route('privacy.policy'),
+                'lastmod' => $settings?->updated_at?->toAtomString() ?? now()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ],
+            [
+                'loc' => route('refund.policy'),
+                'lastmod' => $settings?->updated_at?->toAtomString() ?? now()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.5',
+            ],
+            [
+                'loc' => route('register.client'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.7',
+            ],
+            [
+                'loc' => route('register'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.6',
+            ],
+            [
+                'loc' => route('login'),
+                'lastmod' => now()->startOfMonth()->toAtomString(),
+                'changefreq' => 'monthly',
+                'priority' => '0.4',
+            ],
+        ];
+
+        // Include verified approved vendors with active storefronts
+        $vendors = User::where('role', 'vendor')
+            ->where('status', 'Approved')
+            ->has('vendorServices')
+            ->get();
+
+        foreach ($vendors as $vendor) {
+            $urls[] = [
+                'loc' => route('vendor.storefront', $vendor),
+                'lastmod' => $vendor->updated_at?->toAtomString() ?? now()->toAtomString(),
+                'changefreq' => 'weekly',
+                'priority' => '0.8',
+            ];
+        }
+
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n";
+        $xml .= '        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"' . "\n";
+        $xml .= '        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">' . "\n";
+
+        foreach ($urls as $entry) {
+            $xml .= "    <url>\n";
+            $xml .= "        <loc>" . htmlspecialchars($entry['loc'], ENT_XML1, 'UTF-8') . "</loc>\n";
+            $xml .= "        <lastmod>" . $entry['lastmod'] . "</lastmod>\n";
+            $xml .= "        <changefreq>" . $entry['changefreq'] . "</changefreq>\n";
+            $xml .= "        <priority>" . $entry['priority'] . "</priority>\n";
+            $xml .= "    </url>\n";
+        }
+
+        $xml .= '</urlset>';
+
+        return response($xml, 200, [
+            'Content-Type' => 'application/xml; charset=utf-8',
+            'X-Robots-Tag' => 'noindex, follow',
+        ]);
+    }
 }
 

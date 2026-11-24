@@ -50,6 +50,9 @@ Route::get('/download/app', function () {
 // Public Welcome Homepage
 Route::get('/', [PublicController::class, 'welcome'])->name('home');
 
+// Dynamic XML Sitemap for Google & Search Engines
+Route::get('/sitemap.xml', [PublicController::class, 'sitemap'])->name('sitemap');
+
 // Public Contact Form Submission
 Route::post('/contact', [PublicController::class, 'sendContact'])->name('contact.send');
 

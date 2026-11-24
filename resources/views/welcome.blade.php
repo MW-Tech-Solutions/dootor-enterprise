@@ -1,6 +1,57 @@
 @extends('layouts.app')
 
-@section('title', $settings->platform_name ?? 'DOOTOR ENTERPRISES')
+@section('title', ($settings->platform_name ?? 'DOOTOR ENTERPRISES') . ' | Fast Business Registration, Passport & Document Services')
+@section('meta_description', 'Official administrative document consultancy in Nigeria. Fast-track international passport approvals, visas, court affidavits, NIN modifications, and verified business registration.')
+@section('canonical_url', route('home'))
+
+@section('seo_schema')
+@if(isset($faqs) && $faqs->count() > 0)
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        @foreach($faqs as $f)
+        {
+            "@type": "Question",
+            "name": {!! json_encode($f->question) !!},
+            "acceptedAnswer": {
+                "@type": "Answer",
+                "text": {!! json_encode(strip_tags($f->answer)) !!}
+            }
+        }{{ !$loop->last ? ',' : '' }}
+        @endforeach
+    ]
+}
+</script>
+@endif
+
+@if(isset($primaryServices) && $primaryServices->count() > 0)
+<script type="application/ld+json">
+{
+    "@@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Administrative & Corporate Services",
+    "itemListElement": [
+        @foreach($primaryServices as $idx => $s)
+        {
+            "@type": "ListItem",
+            "position": {{ $idx + 1 }},
+            "item": {
+                "@type": "Service",
+                "name": {!! json_encode($s->name) !!},
+                "description": {!! json_encode(strip_tags($s->description ?? $s->short_description ?? '')) !!},
+                "provider": {
+                    "@id": "{{ url('/#organization') }}"
+                }
+            }
+        }{{ !$loop->last ? ',' : '' }}
+        @endforeach
+    ]
+}
+</script>
+@endif
+@endsection
 
 @section('styles')
 <style>
@@ -188,7 +239,7 @@
     <div class="container d-flex align-items-center justify-content-between">
         <a class="d-flex align-items-center gap-1 fw-bold text-dark text-decoration-none" href="/">
             @if($settings && $settings->logo_url)
-                <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
+                <img src="{{ app_file_url($settings->logo_url) }}" alt="{{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }} Official Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
             @else
                 <svg width="34" height="34" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg" class="me-1">
                     <path d="M20 20C40 20 52 32 52 50C52 68 40 80 20 80C14 80 14 74 14 74V26C14 26 14 20 20 20Z" fill="url(#goldLogo)" />

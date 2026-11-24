@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
-@section('title', 'Login - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('title', 'Client & Partner Login - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('meta_description', 'Log in to your ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES') . ' account to track application progress, manage service requests, and upload documents.')
+@section('canonical_url', route('login'))
 
 @section('styles')
 <style>

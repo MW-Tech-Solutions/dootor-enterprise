@@ -1,6 +1,8 @@
 @extends('layouts.app')
 
 @section('title', 'Verify Code - ' . ($settings->platform_name ?? 'DOOTOR ENTERPRISES'))
+@section('meta_robots', 'noindex, nofollow')
+@section('meta_googlebot', 'noindex, nofollow')
 
 @section('styles')
 <style>
