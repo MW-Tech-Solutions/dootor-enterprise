@@ -363,10 +363,14 @@
         <div class="col-6"><div style="font-size: 11px;"><span class="checkbox-box"></span> Proof of Address / Utility Bill / Affidavit</div></div>
         @if(!empty($requiredDocuments) && is_array($requiredDocuments))
             @foreach($requiredDocuments as $doc)
-                @if(!in_array(strtolower($doc), ['passport', 'nin', 'international passport', 'passport photograph']))
+                @php
+                    $docName = is_array($doc) ? ($doc['name'] ?? ($doc['document_name'] ?? '')) : (string)$doc;
+                    $docName = trim((string)$docName);
+                @endphp
+                @if($docName !== '' && !in_array(strtolower($docName), ['passport', 'nin', 'international passport', 'passport photograph']))
                     <div class="col-6">
                         <div style="font-size: 11px; font-weight: 500;">
-                            <span class="checkbox-box"></span> {{ $doc }}
+                            <span class="checkbox-box"></span> {{ $docName }}
                         </div>
                     </div>
                 @endif

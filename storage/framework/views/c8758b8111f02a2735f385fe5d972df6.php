@@ -690,4 +690,4 @@
     <?php echo $__env->yieldPushContent('scripts'); ?>
 </body>
 </html>
-<?php /**PATH C:\xampp\htdocs\DOOTOR ENTERPRISES\resources\views\layouts\app.blade.php ENDPATH**/ ?>
+<?php /**PATH C:\xampp\htdocs\DOOTOR ENTERPRISES\resources\views/layouts/app.blade.php ENDPATH**/ ?>

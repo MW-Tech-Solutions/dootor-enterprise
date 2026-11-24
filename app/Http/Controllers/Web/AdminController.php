@@ -1250,27 +1250,61 @@ class AdminController extends Controller
     {
         $serviceIds = $request->input('service_ids', []);
         $allServices = Service::all();
+        $targetDocName = trim($documentType->name);
 
         foreach ($allServices as $service) {
             $raw = $service->required_documents;
             if (is_string($raw)) {
                 $raw = json_decode($raw, true) ?: [];
             }
-            $currentDocs = is_array($raw) ? array_map('trim', $raw) : [];
-
-            $shouldHave = in_array((string) $service->id, array_map('strval', $serviceIds));
-
-            if ($shouldHave) {
-                if (!in_array($documentType->name, $currentDocs)) {
-                    $currentDocs[] = $documentType->name;
-                }
-            } else {
-                $currentDocs = array_values(array_filter($currentDocs, function ($docName) use ($documentType) {
-                    return strtolower(trim($docName)) !== strtolower(trim($documentType->name));
-                }));
+            if (!is_array($raw)) {
+                $raw = [];
             }
 
-            $service->update(['required_documents' => $currentDocs]);
+            // Normalize existing documents while preserving structure and compulsory flag
+            $structuredDocs = [];
+            $existingIndex = -1;
+
+            foreach ($raw as $item) {
+                if (is_array($item)) {
+                    $name = trim((string)($item['name'] ?? ($item['document_name'] ?? '')));
+                    $isCompulsory = isset($item['is_compulsory']) ? (bool)$item['is_compulsory'] : true;
+                } else {
+                    $name = trim((string)$item);
+                    $isCompulsory = true;
+                }
+
+                if ($name === '') {
+                    continue;
+                }
+
+                $structuredDocs[] = [
+                    'name' => $name,
+                    'is_compulsory' => $isCompulsory,
+                ];
+
+                if (strcasecmp($name, $targetDocName) === 0) {
+                    $existingIndex = count($structuredDocs) - 1;
+                }
+            }
+
+            $shouldHave = in_array((string) $service->id, array_map('strval', $serviceIds), true);
+
+            if ($shouldHave) {
+                if ($existingIndex === -1) {
+                    $structuredDocs[] = [
+                        'name' => $targetDocName,
+                        'is_compulsory' => true,
+                    ];
+                }
+            } else {
+                if ($existingIndex !== -1) {
+                    unset($structuredDocs[$existingIndex]);
+                    $structuredDocs = array_values($structuredDocs);
+                }
+            }
+
+            $service->update(['required_documents' => $structuredDocs]);
         }
 
         return redirect()->back()->with('success', 'Service assignments updated for document type "' . $documentType->name . '".');

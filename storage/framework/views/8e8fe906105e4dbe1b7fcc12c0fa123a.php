@@ -27,6 +27,49 @@
 <div class="card border-0 shadow-sm rounded-4 overflow-hidden bg-white">
     <div class="card-body p-0">
         <?php if($documentTypes->count() > 0): ?>
+        <?php
+            $isDocInService = function($service, $typeName) {
+                $raw = $service->required_documents;
+                if (is_string($raw)) {
+                    $raw = json_decode($raw, true) ?: [];
+                }
+                if (!is_array($raw)) {
+                    return false;
+                }
+
+                $cleanType = strtolower(preg_replace('/[^a-z0-9]/i', '', (string)$typeName));
+                if ($cleanType === '') {
+                    return false;
+                }
+
+                foreach ($raw as $item) {
+                    $docName = is_array($item) ? ($item['name'] ?? ($item['document_name'] ?? '')) : (string)$item;
+                    $trimmed = trim((string)$docName);
+                    if ($trimmed === '') {
+                        continue;
+                    }
+
+                    if (strcasecmp($trimmed, $typeName) === 0) {
+                        return true;
+                    }
+
+                    $cleanItem = strtolower(preg_replace('/[^a-z0-9]/i', '', $trimmed));
+                    if ($cleanItem === '') {
+                        continue;
+                    }
+
+                    if ($cleanType === $cleanItem) {
+                        return true;
+                    }
+
+                    if (strlen($cleanItem) > 3 && (str_contains($cleanType, $cleanItem) || str_contains($cleanItem, $cleanType))) {
+                        return true;
+                    }
+                }
+
+                return false;
+            };
+        ?>
         <div class="table-responsive">
             <table class="table align-middle mb-0">
                 <thead class="bg-light">
@@ -41,23 +84,6 @@
                 <tbody>
                     <?php $__currentLoopData = $documentTypes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $type): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php
-                        $isDocInService = function($service, $typeName) {
-                            $raw = $service->required_documents;
-                            if (is_string($raw)) $raw = json_decode($raw, true) ?: [];
-                            $assigned = is_array($raw) ? array_map('trim', $raw) : [];
-
-                            if (in_array($typeName, $assigned)) return true;
-                            $cleanType = strtolower(preg_replace('/[^a-z0-9]/i', '', $typeName));
-                            foreach ($assigned as $item) {
-                                $cleanItem = strtolower(preg_replace('/[^a-z0-9]/i', '', $item));
-                                if ($cleanType === $cleanItem) return true;
-                                if (strlen($cleanItem) > 3 && (str_contains($cleanType, $cleanItem) || str_contains($cleanItem, $cleanType))) {
-                                    return true;
-                                }
-                            }
-                            return false;
-                        };
-
                         // Dynamically filter which admin-added services currently have this document in required_documents
                         $assignedServices = $allServices->filter(function($svc) use ($type, $isDocInService) {
                             return $isDocInService($svc, $type->name);
@@ -254,4 +280,4 @@
 </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\DOOTOR ENTERPRISES\resources\views\admin\document-types.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('layouts.dashboard', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\xampp\htdocs\DOOTOR ENTERPRISES\resources\views/admin/document-types.blade.php ENDPATH**/ ?>
