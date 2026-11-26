@@ -88,9 +88,15 @@
                         </div>
                     </div>
                 @endif
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill extra-small" style="font-size: 10px;">
+                        <i class="bi bi-patch-check-fill me-1"></i> ICAO 9303 Standard
+                    </span>
+                    <span class="text-muted extra-small" style="font-size: 11px;">Min 400×400px · Portrait</span>
+                </div>
                 <input type="file" name="passport_photo" id="{{ $fieldId }}" class="form-control form-control-sm rounded-3 dynamic-passport-input" accept="image/jpeg,image/png,image/webp" {{ $isRequired && !$passPhoto ? 'required' : '' }}>
                 <div class="form-text extra-small text-muted mt-1" style="font-size: 11px;">
-                    <i class="bi bi-info-circle me-1"></i> Upload recent passport photograph with clear white background (JPG, PNG max 5MB).
+                    <i class="bi bi-info-circle me-1"></i> Must meet <strong>ICAO Standard</strong>: plain light/white background, sharp focus, direct front-facing view, portrait ratio.
                 </div>
             </div>
 

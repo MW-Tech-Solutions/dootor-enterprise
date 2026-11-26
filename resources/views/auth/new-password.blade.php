@@ -40,7 +40,7 @@
         <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.15), transparent 60%); pointer-events: none;"></div>
         
         <div>
-            <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
+            <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
                 @if($settings && $settings->logo_url)
                     <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
                 @else

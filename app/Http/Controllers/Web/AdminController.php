@@ -109,6 +109,129 @@ class AdminController extends Controller
         ]);
     }
 
+    public function storeUser(Request $request)
+    {
+        $allRoleSlugs = \App\Models\Role::pluck('slug')->toArray();
+        $allRoleIds = \App\Models\Role::pluck('id')->toArray();
+        $allowedRoles = array_unique(array_merge(['admin', 'vendor', 'client'], $allRoleSlugs, array_map('strval', $allRoleIds)));
+
+        $data = $request->validate([
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'password' => ['required', 'string', 'min:8'],
+            'role' => ['required', Rule::in($allowedRoles)],
+            'status' => ['required', Rule::in(['Approved', 'Pending', 'Disabled'])],
+        ]);
+
+        $selectedVal = $data['role'];
+        $roleModel = is_numeric($selectedVal)
+            ? \App\Models\Role::find((int) $selectedVal)
+            : \App\Models\Role::where('slug', $selectedVal)->orWhere('name', $selectedVal)->first();
+
+        $baseRole = ($roleModel && in_array($roleModel->slug, ['client', 'vendor'])) || in_array($selectedVal, ['client', 'vendor'])
+            ? ($roleModel->slug ?? $selectedVal)
+            : 'admin';
+
+        $user = User::create([
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'password' => \Illuminate\Support\Facades\Hash::make($data['password']),
+            'role' => $baseRole,
+            'status' => $data['status'],
+        ]);
+
+        if ($roleModel) {
+            $user->roles()->sync([$roleModel->id]);
+        }
+
+        return redirect()->back()->with('success', 'Staff/User account created and role assigned successfully.');
+    }
+
+    /**
+     * Admin Shortcut: Create Client & Request Service on Behalf
+     */
+    public function proxyBooking()
+    {
+        $clients = User::where('role', 'client')->orderBy('first_name')->get(['id', 'first_name', 'last_name', 'email']);
+        $services = Service::whereNull('parent_id')
+            ->with(['subServices' => fn($q) => $q->orderBy('name')])
+            ->orderBy('name')
+            ->get();
+        $staffMembers = User::where('role', 'admin')->with('roles')->orderBy('first_name')->get();
+
+        return view('admin.proxy-booking', compact('clients', 'services', 'staffMembers'));
+    }
+
+    public function storeProxyBooking(Request $request)
+    {
+        $request->validate([
+            'client_mode' => ['required', Rule::in(['new', 'existing'])],
+            'existing_client_id' => ['required_if:client_mode,existing', 'nullable', 'exists:users,id'],
+            'first_name' => ['required_if:client_mode,new', 'nullable', 'string', 'max:255'],
+            'last_name' => ['required_if:client_mode,new', 'nullable', 'string', 'max:255'],
+            'email' => ['required_if:client_mode,new', 'nullable', 'email', 'max:255', 'unique:users,email'],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'password' => ['nullable', 'string', 'min:8'],
+            'service_id' => ['required', 'exists:services,id'],
+            'sub_service_id' => ['nullable', 'exists:services,id'],
+            'country_applying_from' => ['nullable', 'string', 'max:120'],
+            'country_service_requested' => ['nullable', 'string', 'max:120'],
+            'payment_status' => ['required', Rule::in(['Paid', 'Unpaid'])],
+            'assigned_staff_id' => ['nullable', 'exists:users,id'],
+            'notes' => ['nullable', 'string', 'max:2000'],
+        ]);
+
+        if ($request->client_mode === 'new') {
+            $client = User::create([
+                'first_name' => $request->first_name,
+                'last_name' => $request->last_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'password' => \Illuminate\Support\Facades\Hash::make($request->password ?: 'Dootor@1234'),
+                'role' => 'client',
+                'status' => 'Approved',
+            ]);
+        } else {
+            $client = User::findOrFail($request->existing_client_id);
+        }
+
+        $primaryService = Service::findOrFail($request->service_id);
+        $subService = $request->sub_service_id ? Service::find($request->sub_service_id) : null;
+        $price = $subService && $subService->price > 0 ? $subService->price : ($primaryService->price ?? 0);
+        $isPaid = $request->payment_status === 'Paid';
+        $ref = 'DTR-' . strtoupper(\Illuminate\Support\Str::random(8));
+
+        $sr = \App\Models\ServiceRequest::create([
+            'reference_number' => $ref,
+            'application_method' => 'admin_proxy',
+            'service_id' => $primaryService->id,
+            'sub_service_id' => $subService?->id,
+            'service_name' => $primaryService->name,
+            'sub_service_name' => $subService?->name,
+            'price' => $price,
+            'amount_paid' => $isPaid ? $price : 0,
+            'outstanding_balance' => $isPaid ? 0 : $price,
+            'client_id' => $client->id,
+            'client_name' => $client->name,
+            'client_email' => $client->email,
+            'country_applying_from' => $request->country_applying_from ?: 'Global',
+            'country_service_requested' => $request->country_service_requested ?: 'International',
+            'assigned_staff_id' => $request->assigned_staff_id ?: null,
+            'assigned_at' => $request->assigned_staff_id ? now() : null,
+            'status' => $request->assigned_staff_id ? \App\Models\ServiceRequest::STATUS_ASSIGNED : \App\Models\ServiceRequest::STATUS_SUBMITTED,
+            'payment_status' => $request->payment_status,
+            'payment_gateway' => $isPaid ? 'admin_offline' : null,
+            'submitted_at' => now(),
+            'form_data' => $request->notes ? ['admin_proxy_notes' => $request->notes, 'created_by_admin' => Auth::user()->name] : ['created_by_admin' => Auth::user()->name],
+        ]);
+
+        return redirect()->back()->with('success', "Service request <strong>{$sr->reference_number}</strong> created for <strong>{$client->name}</strong>.");
+    }
+
     public function updateUser(Request $request, User $user)
     {
         $allRoleSlugs = \App\Models\Role::pluck('slug')->toArray();
@@ -212,6 +335,7 @@ class AdminController extends Controller
             'priority' => ['nullable', 'integer', 'min:0'],
             'required_documents' => ['nullable', 'array'],
             'custom_fields' => ['nullable', 'array'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
         ]);
 
         if (!empty($data['parent_id'])) {
@@ -222,6 +346,11 @@ class AdminController extends Controller
         }
 
         $data['priority'] = (int) ($data['priority'] ?? 0);
+
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('services', 'public');
+            $data['image_url'] = 'storage/' . $path;
+        }
 
         Service::create($data);
 
@@ -245,6 +374,8 @@ class AdminController extends Controller
             'priority' => ['nullable', 'integer', 'min:0'],
             'required_documents' => ['nullable', 'array'],
             'custom_fields' => ['nullable', 'array'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,svg', 'max:5120'],
+            'remove_image' => ['nullable', 'boolean'],
         ]);
 
         if (!empty($data['parent_id'])) {
@@ -256,6 +387,13 @@ class AdminController extends Controller
 
         if (array_key_exists('priority', $data)) {
             $data['priority'] = (int) ($data['priority'] ?? 0);
+        }
+
+        if ($request->boolean('remove_image')) {
+            $data['image_url'] = null;
+        } elseif ($request->hasFile('image')) {
+            $path = $request->file('image')->store('services', 'public');
+            $data['image_url'] = 'storage/' . $path;
         }
 
         $service->update($data);
@@ -325,7 +463,7 @@ class AdminController extends Controller
             'remove_hero_bg' => ['nullable', 'boolean'],
             'default_currency' => ['nullable', 'string', 'max:10'],
             'maintenance_mode' => ['nullable', 'boolean'],
-            'payment_gateway' => ['nullable', Rule::in(['paystack', 'credo'])],
+            'payment_gateway' => ['nullable', Rule::in(['paypal', 'moneris', 'credo', 'paystack'])],
             'payments_enabled' => ['nullable', 'boolean'],
             'payment_mode' => ['nullable', Rule::in(['test', 'live'])],
             'paystack_public_key' => ['nullable', 'string'],
@@ -334,6 +472,11 @@ class AdminController extends Controller
             'credo_public_key' => ['nullable', 'string'],
             'credo_secret_key' => ['nullable', 'string'],
             'credo_base_url' => ['nullable', 'string'],
+            'paypal_client_id' => ['nullable', 'string', 'max:500'],
+            'paypal_client_secret' => ['nullable', 'string', 'max:500'],
+            'moneris_store_id' => ['nullable', 'string', 'max:255'],
+            'moneris_api_token' => ['nullable', 'string', 'max:255'],
+            'moneris_checkout_id' => ['nullable', 'string', 'max:255'],
             'terms_conditions' => ['nullable', 'string'],
             'refund_policy' => ['nullable', 'string'],
             'privacy_policy' => ['nullable', 'string'],
@@ -343,6 +486,8 @@ class AdminController extends Controller
             'linkedin_url' => ['nullable', 'string', 'max:255'],
             'whatsapp_number' => ['nullable', 'string', 'max:50'],
             'youtube_url' => ['nullable', 'string', 'max:255'],
+            'promo_video_url' => ['nullable', 'string', 'max:500'],
+            'promo_video_title' => ['nullable', 'string', 'max:255'],
             'tiktok_url' => ['nullable', 'string', 'max:255'],
             'contact_email' => ['nullable', 'email', 'max:255'],
             'contact_phone' => ['nullable', 'string', 'max:50'],
@@ -353,6 +498,9 @@ class AdminController extends Controller
             'paid_incomplete_expiry_unit' => ['nullable', Rule::in(['days', 'months'])],
             'auto_purge_enabled' => ['nullable', 'boolean'],
             'purge_action' => ['nullable', Rule::in(['delete', 'mark_expired'])],
+            'gemini_api_key' => ['nullable', 'string', 'max:500'],
+            'chatbot_enabled' => ['nullable', 'boolean'],
+            'chatbot_system_prompt' => ['nullable', 'string', 'max:4000'],
         ]);
 
         if ($request->hasFile('logo_file')) {
@@ -1785,6 +1933,168 @@ class AdminController extends Controller
         ApplicationExpirationService::purgeApplication($serviceRequest);
 
         return redirect()->back()->with('success', "Application [{$ref}] and all associated files have been permanently removed.");
+    }
+
+    /**
+     * Comprehensive Traffic & Link Click Analytics
+     */
+    public function analytics(Request $request)
+    {
+        $totalVisits = \App\Models\AnalyticsEvent::where('event_type', 'page_view')->count();
+        $uniqueVisitors = \App\Models\AnalyticsEvent::distinct('ip_address')->count('ip_address');
+        $totalClicks = \App\Models\AnalyticsEvent::where('event_type', '!=', 'page_view')->count();
+        
+        $socialBreakdown = \App\Models\AnalyticsEvent::where('category', 'social')
+            ->selectRaw('label, count(*) as total')
+            ->groupBy('label')
+            ->orderByDesc('total')
+            ->get();
+
+        $serviceClicks = \App\Models\AnalyticsEvent::where('category', 'service')
+            ->selectRaw('label, count(*) as total')
+            ->groupBy('label')
+            ->orderByDesc('total')
+            ->take(10)
+            ->get();
+
+        // 7-day daily trend
+        $dailyTrend = \App\Models\AnalyticsEvent::where('created_at', '>=', now()->subDays(7))
+            ->selectRaw("DATE(created_at) as log_date, count(*) as total")
+            ->groupBy('log_date')
+            ->orderBy('log_date', 'asc')
+            ->pluck('total', 'log_date')
+            ->toArray();
+
+        $recentEvents = \App\Models\AnalyticsEvent::with('user')->latest()->take(20)->get();
+
+        return view('admin.analytics', compact(
+            'totalVisits',
+            'uniqueVisitors',
+            'totalClicks',
+            'socialBreakdown',
+            'serviceClicks',
+            'dailyTrend',
+            'recentEvents'
+        ));
+    }
+
+    /**
+     * IT Support, System Diagnostics & Server Health Desk
+     */
+    public function itSupport(Request $request)
+    {
+        $phpVersion = PHP_VERSION;
+        $laravelVersion = app()->version();
+        $serverSoftware = $_SERVER['SERVER_SOFTWARE'] ?? 'Apache/XAMPP';
+        $dbStatus = 'Connected';
+        try {
+            \Illuminate\Support\Facades\DB::connection()->getPdo();
+        } catch (\Throwable $e) {
+            $dbStatus = 'Disconnected: ' . $e->getMessage();
+        }
+
+        $logPath = storage_path('logs/laravel.log');
+        $logLines = [];
+        if (file_exists($logPath)) {
+            $file = file($logPath);
+            $logLines = array_slice($file, -40);
+        }
+
+        $diskFree = @disk_free_space(base_path());
+        $diskTotal = @disk_total_space(base_path());
+        $diskFreeMb = $diskFree ? round($diskFree / (1024 * 1024), 1) : 0;
+        $diskTotalMb = $diskTotal ? round($diskTotal / (1024 * 1024), 1) : 0;
+
+        return view('admin.it-support', compact(
+            'phpVersion',
+            'laravelVersion',
+            'serverSoftware',
+            'dbStatus',
+            'logLines',
+            'diskFreeMb',
+            'diskTotalMb'
+        ));
+    }
+
+    /**
+     * Clear system caches & run Laravel maintenance commands with one click
+     */
+    public function clearSystemCache(Request $request)
+    {
+        $action = $request->input('action', 'all');
+
+        switch ($action) {
+            case 'view':
+                \Illuminate\Support\Facades\Artisan::call('view:clear');
+                $msg = 'Compiled Blade views cleared (view:clear).';
+                break;
+            case 'cache':
+                \Illuminate\Support\Facades\Artisan::call('cache:clear');
+                $msg = 'Application cache cleared (cache:clear).';
+                break;
+            case 'config':
+                \Illuminate\Support\Facades\Artisan::call('config:clear');
+                $msg = 'Configuration cache cleared (config:clear).';
+                break;
+            case 'route':
+                \Illuminate\Support\Facades\Artisan::call('route:clear');
+                $msg = 'Route cache cleared (route:clear).';
+                break;
+            case 'migrate':
+                \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                $msg = 'Database migrations executed (migrate --force): ' . trim(\Illuminate\Support\Facades\Artisan::output());
+                break;
+            case 'storage_link':
+                \Illuminate\Support\Facades\Artisan::call('storage:link');
+                $msg = 'Storage symlink verified/created (storage:link).';
+                break;
+            case 'optimize':
+            case 'all':
+            default:
+                \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+                \Illuminate\Support\Facades\Artisan::call('view:clear');
+                \Illuminate\Support\Facades\Artisan::call('cache:clear');
+                \Illuminate\Support\Facades\Artisan::call('config:clear');
+                \Illuminate\Support\Facades\Artisan::call('route:clear');
+                $msg = 'All Laravel caches (optimize:clear, view, cache, config & routes) have been purged successfully.';
+                break;
+        }
+
+        return redirect()->back()->with('success', $msg);
+    }
+
+    /**
+     * Client Reviews Management CRUD
+     */
+    public function reviewsIndex(Request $request)
+    {
+        $reviews = \App\Models\Review::with('user')->latest()->paginate(25);
+        $totalReviews = \App\Models\Review::count();
+        $pendingReviews = \App\Models\Review::where('is_approved', false)->count();
+        $averageRating = round(\App\Models\Review::avg('rating') ?? 5.0, 1);
+
+        return view('admin.reviews', compact('reviews', 'totalReviews', 'pendingReviews', 'averageRating'));
+    }
+
+    public function reviewsToggleApprove(\App\Models\Review $review)
+    {
+        $review->update(['is_approved' => !$review->is_approved]);
+        $status = $review->is_approved ? 'Approved' : 'Unapproved';
+        return redirect()->back()->with('success', "Review from {$review->client_name} marked as {$status}.");
+    }
+
+    public function reviewsToggleFeature(\App\Models\Review $review)
+    {
+        $review->update(['is_featured' => !$review->is_featured]);
+        $status = $review->is_featured ? 'Featured on Homepage' : 'Hidden from Homepage Featured';
+        return redirect()->back()->with('success', "Review from {$review->client_name} {$status}.");
+    }
+
+    public function reviewsDelete(\App\Models\Review $review)
+    {
+        $clientName = $review->client_name;
+        $review->delete();
+        return redirect()->back()->with('success', "Review by {$clientName} was deleted.");
     }
 }
 

@@ -42,10 +42,10 @@
     <meta name="api-base-url" content="{{ url('/api/location') }}">
 
     @php
-        $defaultTitle = $platformName . ' | Administrative Document Consultancy & Corporate Services';
-        $pageTitle = trim($__env->yieldContent('title', $defaultTitle));
-        $metaDescription = trim($__env->yieldContent('meta_description', $settings->hero_subtitle ?? 'Professional administrative document consultancy in Nigeria. Fast-track international passport approvals, visas, court affidavits, NIN modifications, and verified corporate services.'));
-        $metaKeywords = trim($__env->yieldContent('meta_keywords', 'dootor enterprises, document procurement, business registration nigeria, international passport application, nigerian visa, court affidavit, nin verification, bvn, npc birth certificate, expatriate quota, police character certificate'));
+        $defaultTitle = $platformName . ' | Global Consular & Administrative Document Consultancy';
+        $pageTitle = html_entity_decode(trim($__env->yieldContent('title', $defaultTitle)), ENT_QUOTES, 'UTF-8');
+        $metaDescription = html_entity_decode(trim($__env->yieldContent('meta_description', $settings->hero_subtitle ?? 'Global consular & administrative document consultancy. Fast-track international passport renewals, visas, court affidavits, identity verifications, and verified corporate services.')), ENT_QUOTES, 'UTF-8');
+        $metaKeywords = html_entity_decode(trim($__env->yieldContent('meta_keywords', 'dootor enterprises, international passport application, consular visa services, court affidavit, legal attestation, apostille, identity verification, corporate document consultancy')), ENT_QUOTES, 'UTF-8');
         $canonicalUrl = trim($__env->yieldContent('canonical_url', url()->current()));
         $ogType = trim($__env->yieldContent('og_type', 'website'));
         $ogImage = trim($__env->yieldContent('og_image', $logoUrl ? app_file_url($logoUrl) : asset('icons/icon-512x512.png')));

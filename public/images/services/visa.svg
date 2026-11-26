@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg_v" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b"/>
+      <stop offset="50%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#030712"/>
+    </linearGradient>
+    <linearGradient id="accent_v" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#60a5fa"/>
+      <stop offset="100%" stop-color="#3b82f6"/>
+    </linearGradient>
+    <filter id="shadow_v">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="600" height="380" rx="20" fill="url(#bg_v)"/>
+  <circle cx="100" cy="100" r="120" fill="#3b82f6" opacity="0.07"/>
+  <!-- Visa Document Card -->
+  <g transform="translate(120, 50)" filter="url(#shadow_v)">
+    <rect width="360" height="260" rx="16" fill="#ffffff" stroke="#cbd5e1"/>
+    <!-- Header -->
+    <rect width="360" height="52" rx="16" fill="#1e293b"/>
+    <rect y="36" width="360" height="16" fill="#1e293b"/>
+    <text x="24" y="32" font-family="'Outfit', sans-serif" font-size="14" font-weight="800" fill="#ffffff" letter-spacing="1">ENTRY VISA / EVISA</text>
+    <rect x="250" y="16" width="90" height="22" rx="11" fill="#3b82f6"/>
+    <text x="295" y="31" font-family="'Outfit', sans-serif" font-size="10" font-weight="700" fill="#ffffff" text-anchor="middle">VALID ENTRY</text>
+    <!-- Content details -->
+    <rect x="24" y="70" width="70" height="85" rx="6" fill="#e2e8f0" stroke="#94a3b8"/>
+    <circle cx="59" cy="100" r="16" fill="#cbd5e1"/>
+    <path d="M40 135 Q59 120 78 135" stroke="#cbd5e1" stroke-width="12" fill="none"/>
+    <text x="110" y="85" font-family="'Outfit', sans-serif" font-size="11" font-weight="700" fill="#0f172a">VISA TYPE: MULTI-ENTRY (MEV)</text>
+    <text x="110" y="105" font-family="'Outfit', sans-serif" font-size="10" fill="#64748b">STATUS: APPROVED &amp; ISSUED</text>
+    <text x="110" y="125" font-family="'Outfit', sans-serif" font-size="10" fill="#64748b">CATEGORIES: SEV / MEV / TWP / STR</text>
+    <text x="110" y="145" font-family="'Outfit', sans-serif" font-size="10" fill="#10b981" font-weight="600">&#10003; EMBASSY VERIFIED</text>
+    <!-- Barcode & Stamp -->
+    <line x1="24" y1="175" x2="336" y2="175" stroke="#e2e8f0" stroke-width="1"/>
+    <!-- Fake Barcode -->
+    <g transform="translate(24, 195)">
+      <rect x="0" y="0" width="3" height="40" fill="#0f172a"/>
+      <rect x="6" y="0" width="6" height="40" fill="#0f172a"/>
+      <rect x="16" y="0" width="2" height="40" fill="#0f172a"/>
+      <rect x="22" y="0" width="5" height="40" fill="#0f172a"/>
+      <rect x="30" y="0" width="3" height="40" fill="#0f172a"/>
+      <rect x="36" y="0" width="7" height="40" fill="#0f172a"/>
+      <rect x="46" y="0" width="2" height="40" fill="#0f172a"/>
+      <rect x="52" y="0" width="4" height="40" fill="#0f172a"/>
+      <rect x="60" y="0" width="6" height="40" fill="#0f172a"/>
+      <rect x="70" y="0" width="3" height="40" fill="#0f172a"/>
+      <rect x="76" y="0" width="5" height="40" fill="#0f172a"/>
+      <rect x="85" y="0" width="2" height="40" fill="#0f172a"/>
+    </g>
+    <!-- Stamp -->
+    <g transform="translate(260, 205) rotate(-8)">
+      <rect x="-40" y="-18" width="80" height="36" rx="4" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="3 2"/>
+      <text x="0" y="-2" font-family="'Outfit', sans-serif" font-size="9" font-weight="800" fill="#dc2626" text-anchor="middle">IMMIGRATION</text>
+      <text x="0" y="10" font-family="'Outfit', sans-serif" font-size="8" font-weight="700" fill="#dc2626" text-anchor="middle">CLEARED</text>
+    </g>
+  </g>
+  <!-- Floating Plane -->
+  <g transform="translate(470, 70)" filter="url(#shadow_v)">
+    <circle cx="30" cy="30" r="28" fill="#3b82f6"/>
+    <path d="M20 32 L30 18 L34 18 L28 30 L42 30 L45 25 L48 25 L46 32 L48 39 L45 39 L42 34 L28 34 L34 46 L30 46 Z" fill="#ffffff"/>
+  </g>
+</svg>

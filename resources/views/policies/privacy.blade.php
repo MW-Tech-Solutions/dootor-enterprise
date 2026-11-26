@@ -30,7 +30,7 @@
 @section('body')
 <div class="bg-dark text-white py-5 position-relative" style="background: linear-gradient(135deg, #001a0c 0%, #003b1c 100%) !important;">
     <div class="container py-4">
-        <a href="/" class="btn btn-outline-light btn-sm rounded-pill mb-3"><i class="bi bi-arrow-left me-1"></i> Return Home</a>
+        <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm rounded-pill mb-3"><i class="bi bi-arrow-left me-1"></i> Return Home</a>
         <h1 class="display-6 fw-bold mb-2">Data &amp; Privacy Protection Statement</h1>
         <p class="text-white-50 small mb-0">How your personal data, identity documents, and application records are encrypted, stored, and protected.</p>
     </div>

@@ -41,7 +41,7 @@
         <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.15), transparent 60%); pointer-events: none;"></div>
         
         <div>
-            <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
+            <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
                 @if($settings && $settings->logo_url)
                     <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
                 @else
@@ -63,8 +63,8 @@
                 <span class="fw-bold fs-4 tracking-tight text-white">{{ $settings->platform_name ?? 'DOOTOR ENTERPRISES' }}</span>
             </a>
             
-            <h2 class="display-6 fw-bold text-white mb-3" style="line-height: 1.2;">NIN, BVN, Passport &amp; Other Migration Facilities Documents Support</h2>
-            <p class="text-white-50 mb-5 fs-6">Connecting clients with verified expert agents for expedited official document processing, authentication, and vetting support.</p>
+            <h2 class="display-6 fw-bold text-white mb-3" style="line-height: 1.2;">Global Consular &amp; Administrative Services Portal</h2>
+            <p class="text-white-50 mb-5 fs-6">Connecting clients with verified expert liaison agents for expedited international document processing, authentication, and consular vetting.</p>
             
             <div class="d-flex flex-column gap-3">
                 <div class="d-flex align-items-start gap-3">
@@ -73,7 +73,7 @@
                     </div>
                     <div>
                         <h5 class="mb-0 text-white fw-semibold small">100% Vetted Expert Consultants</h5>
-                        <p class="text-white-50 small mb-0">Direct access to experienced agents specialized in identity and immigration tasks.</p>
+                        <p class="text-white-50 small mb-0">Direct access to experienced agents specialized in identity and consular workflows.</p>
                     </div>
                 </div>
                 
@@ -83,7 +83,7 @@
                     </div>
                     <div>
                         <h5 class="mb-0 text-white fw-semibold small">Secure Document Verification</h5>
-                        <p class="text-white-50 small mb-0">Encrypted portal ensuring your passport, BVN, and identity details are private.</p>
+                        <p class="text-white-50 small mb-0">Bank-grade AES-256 encryption ensuring your passport, records, and credentials are completely private.</p>
                     </div>
                 </div>
 
@@ -100,7 +100,7 @@
         </div>
 
         <div class="border-top border-secondary border-opacity-20 pt-4 mt-5">
-            <span class="d-block small text-white-50" style="font-size: 11px; line-height: 1.4;">WE ARE NOT GOVERNMENT OFFICIALS, AFFILIATES, OR AN ANNEX OF THE NIGERIAN HIGH COMMISSION.</span>
+            <span class="d-block small text-white-50" style="font-size: 11px; line-height: 1.4;">OFFICIAL NOTICE: DOOTOR ENTERPRISES IS AN INDEPENDENT ADMINISTRATIVE DOCUMENTATION &amp; CONSULAR LIAISON CONSULTANCY.</span>
         </div>
     </div>
 
@@ -109,7 +109,7 @@
         <div class="card border-0 shadow-sm p-4 p-sm-5 rounded-4 bg-white" style="max-width: 460px; width: 100%;">
             <!-- Mobile Brand Logo header (hidden on desktop) -->
             <div class="text-center mb-4 d-block d-lg-none">
-                <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
+                <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
                     @if($settings && $settings->logo_url)
                         <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 38px; width: 38px; object-fit: contain;">
                     @else
@@ -158,7 +158,10 @@
                     </div>
                     <div class="input-group">
                         <span class="input-group-text bg-light border-end-0 text-muted" style="border-color: #dee2e6;"><i class="bi bi-lock"></i></span>
-                        <input type="password" name="password" id="password" class="form-control bg-light border-start-0 rounded-end-3" placeholder="••••••••" style="border-color: #dee2e6;" required>
+                        <input type="password" name="password" id="password" class="form-control bg-light border-start-0 border-end-0" placeholder="••••••••" style="border-color: #dee2e6;" required>
+                        <button type="button" class="btn btn-light border border-start-0 text-muted rounded-end-3" onclick="togglePasswordVisibility('password', this)" style="border-color: #dee2e6 !important;" aria-label="Toggle password visibility">
+                            <i class="bi bi-eye"></i>
+                        </button>
                     </div>
                 </div>
 
@@ -185,4 +188,21 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    function togglePasswordVisibility(fieldId, btn) {
+        var input = document.getElementById(fieldId);
+        if (!input) return;
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) { icon.className = 'bi bi-eye-slash'; }
+        } else {
+            input.type = 'password';
+            if (icon) { icon.className = 'bi bi-eye'; }
+        }
+    }
+</script>
 @endsection

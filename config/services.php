@@ -51,6 +51,19 @@ return [
         'callback_url' => env('PAYSTACK_CALLBACK_URL') ?: env('PAYSTACK_FRONTEND_CALLBACK_URL'),
     ],
 
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID', ''),
+        'client_secret' => env('PAYPAL_CLIENT_SECRET', ''),
+        'mode' => env('PAYPAL_MODE', env('PAYMENT_MODE', 'live')),
+    ],
+
+    'moneris' => [
+        'store_id' => env('MONERIS_STORE_ID', ''),
+        'api_token' => env('MONERIS_API_TOKEN', ''),
+        'checkout_id' => env('MONERIS_CHECKOUT_ID', ''),
+        'mode' => env('MONERIS_MODE', env('PAYMENT_MODE', 'live')),
+    ],
+
     'payment' => [
         'gateway' => env('PAYMENT_GATEWAY', 'paystack'),
         'currency' => env('PORTAL_BASE_CURRENCY', 'USD'),

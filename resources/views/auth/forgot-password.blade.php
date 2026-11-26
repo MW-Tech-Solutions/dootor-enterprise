@@ -41,7 +41,7 @@
         <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.15), transparent 60%); pointer-events: none;"></div>
         
         <div>
-            <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
+            <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
                 @if($settings && $settings->logo_url)
                     <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
                 @else
@@ -77,7 +77,7 @@
         <div class="card border-0 shadow-sm p-4 p-sm-5 rounded-4 bg-white" style="max-width: 460px; width: 100%;">
             <!-- Mobile Brand Logo header (hidden on desktop) -->
             <div class="text-center mb-4 d-block d-lg-none">
-                <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
+                <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
                     @if($settings && $settings->logo_url)
                         <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 38px; width: 38px; object-fit: contain;">
                     @else

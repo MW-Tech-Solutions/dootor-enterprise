@@ -1,0 +1,12 @@
+[28-Sep-2026 09:58:31 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Migrations\Migration" not found in /home/dootoren/public_html/database/migrations/2026_09_27_300000_add_terms_and_refund_policy_to_system_settings.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/dootoren/public_html/database/migrations/2026_09_27_300000_add_terms_and_refund_policy_to_system_settings.php on line 8
+[28-Sep-2026 09:58:49 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Migrations\Migration" not found in /home/dootoren/public_html/database/migrations/2026_09_27_300000_add_terms_and_refund_policy_to_system_settings.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/dootoren/public_html/database/migrations/2026_09_27_300000_add_terms_and_refund_policy_to_system_settings.php on line 8
+[28-Sep-2026 10:29:50 UTC] PHP Fatal error:  Uncaught Error: Class "Illuminate\Database\Migrations\Migration" not found in /home/dootoren/public_html/database/migrations/2026_09_27_300000_add_terms_and_refund_policy_to_system_settings.php:8
+Stack trace:
+#0 {main}
+  thrown in /home/dootoren/public_html/database/migrations/2026_09_27_300000_add_terms_and_refund_policy_to_system_settings.php on line 8

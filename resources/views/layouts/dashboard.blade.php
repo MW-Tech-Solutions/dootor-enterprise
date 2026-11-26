@@ -35,6 +35,11 @@
                 ['href' => Route::has('admin.email-broadcast') ? route('admin.email-broadcast') : url('/admin/email-broadcast'), 'icon' => 'bi-send-check', 'label' => 'Send Broadcast Email', 'permission' => 'email.send'],
                 ['href' => route('admin.audit-logs'), 'icon' => 'bi-journal-code', 'label' => 'Audit Logs', 'permission' => 'audit.view'],
                 ['href' => route('admin.reports'), 'icon' => 'bi-graph-up', 'label' => 'Reports & Analytics', 'permission' => 'reports.view'],
+                ['href' => route('admin.analytics'), 'icon' => 'bi-graph-up-arrow', 'label' => 'Traffic & Clicks Analytics', 'permission' => 'analytics.view'],
+                ['href' => route('admin.reviews'), 'icon' => 'bi-star-half', 'label' => 'Customer Reviews', 'permission' => 'reviews.manage'],
+                ['href' => route('admin.it-support'), 'icon' => 'bi-cpu', 'label' => 'IT Support & Health', 'permission' => 'it_support.view'],
+                ['href' => route('admin.live-chat'), 'icon' => 'bi-chat-dots', 'label' => 'Live Support Chat', 'permission' => 'live_chat.manage'],
+                ['href' => route('admin.proxy-booking'), 'icon' => 'bi-person-plus', 'label' => 'Quick Client & Request', 'permission' => 'applications.proxy_create'],
                 ['href' => route('support.index'), 'icon' => 'bi-headset', 'label' => 'Support Desk', 'permission' => null],
                 ['href' => route('admin.profile'), 'icon' => 'bi-person-badge', 'label' => 'My Profile', 'permission' => null],
                 ['href' => route('admin.faqs'), 'icon' => 'bi-question-circle', 'label' => 'FAQs Management', 'permission' => null],
@@ -72,7 +77,7 @@
     <!-- Sidebar Navigation (Desktop) -->
     <aside class="bg-white border-end d-none d-md-flex flex-column flex-shrink-0 p-3 h-100" style="width: 280px; z-index: 1040; overflow-y: auto;">
         <div class="mb-4 px-3">
-            <a href="/" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
+            <a href="{{ route('home') }}" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
                 @if($settings && $settings->logo_url)
                     <img src="{{ app_file_url($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 32px; width: 32px; object-fit: contain;">
                 @else

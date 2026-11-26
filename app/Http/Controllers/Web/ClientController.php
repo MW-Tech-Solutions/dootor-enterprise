@@ -68,14 +68,14 @@ class ClientController extends Controller
             ->get();
 
         $settings = SystemSetting::first();
-        $currencyCode = strtoupper((string) ($settings->default_currency ?? config('services.payment.currency', 'NGN')));
+        $currencyCode = strtoupper((string) ($settings->default_currency ?? config('services.payment.currency', 'USD')));
         $currencySymbol = match($currencyCode) {
-            'NGN' => '₦',
             'USD' => '$',
+            'NGN' => '₦',
             'GBP' => '£',
             'EUR' => '€',
             'CAD' => 'CA$',
-            default => $currencyCode . ' ',
+            default => '$',
         };
 
         return view('client.services', compact('primaryServices', 'subServices', 'settings', 'currencyCode', 'currencySymbol'));
@@ -281,6 +281,37 @@ class ClientController extends Controller
         $file = $request->file('document_file');
         $docName = $request->input('document_name');
 
+        // ICAO Standard Passport Photograph Validation (ICAO 9303 specifications)
+        if (str_contains(strtolower($docName), 'passport photo') || str_contains(strtolower($docName), 'passport photograph')) {
+            $imageInfo = @getimagesize($file->getRealPath());
+            if (!$imageInfo) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'The passport photograph must be a valid image file (JPG or PNG).'
+                ], 422);
+            }
+            $width = $imageInfo[0];
+            $height = $imageInfo[1];
+            $aspectRatio = $width / max(1, $height);
+
+            if ($width < 380 || $height < 380) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Photograph does not meet ICAO 9303 minimum resolution standards. Minimum required is 400x400 px (Uploaded: {$width}x{$height} px)."
+                ], 422);
+            }
+            if ($aspectRatio > 1.25 || $aspectRatio < 0.65) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => "Photograph must be portrait/square format per ICAO 9303 standards (aspect ratio ~0.7 to 1.15). Uploaded aspect ratio is " . round($aspectRatio, 2) . " ({$width}x{$height} px)."
+                ], 422);
+            }
+
+            // Sync with passport_photo_path on the request record
+            $passPath = \App\Helpers\FileUploadHelper::store($file, 'passports');
+            $serviceRequest->update(['passport_photo_path' => '/storage/' . $passPath]);
+        }
+
         $path = \App\Helpers\FileUploadHelper::store($file, 'requests');
         $originalName = $file->getClientOriginalName();
 
@@ -415,7 +446,19 @@ class ClientController extends Controller
 
         $passportPath = null;
         if ($request->hasFile('passport_photo')) {
-            $pPath = \App\Helpers\FileUploadHelper::store($request->file('passport_photo'), 'passports');
+            $photo = $request->file('passport_photo');
+            $imageInfo = @getimagesize($photo->getRealPath());
+            if ($imageInfo) {
+                $width = $imageInfo[0];
+                $height = $imageInfo[1];
+                $aspectRatio = $width / max(1, $height);
+                if ($width < 380 || $height < 380 || $aspectRatio > 1.25 || $aspectRatio < 0.65) {
+                    return back()->withInput()->withErrors([
+                        'passport_photo' => "The uploaded photograph does not satisfy ICAO 9303 standard specifications. Required: Portrait orientation (aspect ratio ~0.7 to 1.15) and minimum resolution of 400x400 px. Uploaded: {$width}x{$height} px."
+                    ]);
+                }
+            }
+            $pPath = \App\Helpers\FileUploadHelper::store($photo, 'passports');
             $passportPath = '/storage/' . $pPath;
         }
 

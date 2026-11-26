@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    // Gemini AI API Key
+    'gemini_api_key' => env('GEMINI_API_KEY', ''),
+
 ];

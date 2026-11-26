@@ -41,7 +41,7 @@
         <div class="position-absolute top-0 start-0 w-100 h-100" style="background: radial-gradient(circle at 10% 10%, rgba(212, 175, 55, 0.15), transparent 60%); pointer-events: none;"></div>
         
         <div>
-            <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
+            <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-white mb-5">
                 @if($settings && $settings->logo_url)
                     <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 48px; width: 48px; object-fit: contain;">
                 @else
@@ -90,7 +90,7 @@
         </div>
 
         <div class="border-top border-secondary border-opacity-20 pt-4 mt-5">
-            <span class="d-block small text-white-50" style="font-size: 11px; line-height: 1.4;">WE ARE NOT GOVERNMENT OFFICIALS, AFFILIATES, OR AN ANNEX OF THE NIGERIAN HIGH COMMISSION.</span>
+            <span class="d-block small text-white-50" style="font-size: 11px; line-height: 1.4;">OFFICIAL NOTICE: DOOTOR ENTERPRISES IS AN INDEPENDENT ADMINISTRATIVE DOCUMENTATION &amp; CONSULAR LIAISON CONSULTANCY.</span>
         </div>
     </div>
 
@@ -99,7 +99,7 @@
         <div class="card border-0 shadow-sm p-4 p-sm-5 rounded-4 bg-white" style="max-width: 520px; width: 100%;">
             <!-- Mobile Brand Logo header (hidden on desktop) -->
             <div class="text-center mb-4 d-block d-lg-none">
-                <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
+                <a href="{{ route('home') }}" class="d-inline-flex align-items-center gap-2 text-decoration-none text-dark mb-2">
                     @if($settings && $settings->logo_url)
                         <img src="{{ asset($settings->logo_url) }}" alt="Logo" class="rounded" style="height: 38px; width: 38px; object-fit: contain;">
                     @else
@@ -172,18 +172,28 @@
                 </div>
 
 
-                <!-- Password Fields -->
+                <!-- Password Fields with Visibility Toggles -->
                 <div class="row g-2 mb-4">
                     <div class="col-sm-6">
                         <label for="password" class="form-label small fw-medium">Password</label>
-                        <input type="password" name="password" id="password" class="form-control bg-light rounded-3 @error('password') is-invalid @enderror" placeholder="••••••••" style="border-color: #dee2e6;" required>
+                        <div class="input-group">
+                            <input type="password" name="password" id="password" class="form-control bg-light rounded-start-3 @error('password') is-invalid @enderror" placeholder="••••••••" style="border-color: #dee2e6;" required>
+                            <button type="button" class="btn btn-light border border-start-0 text-muted rounded-end-3" onclick="togglePasswordVisibility('password', this)" style="border-color: #dee2e6 !important;" aria-label="Toggle password visibility">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                         @error('password')
                             <div class="text-danger small mt-1" style="font-size: 11px;">{{ $message }}</div>
                         @enderror
                     </div>
                     <div class="col-sm-6">
                         <label for="password_confirmation" class="form-label small fw-medium">Confirm Password</label>
-                        <input type="password" name="password_confirmation" id="password_confirmation" class="form-control bg-light rounded-3" placeholder="••••••••" style="border-color: #dee2e6;" required>
+                        <div class="input-group">
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="form-control bg-light rounded-start-3" placeholder="••••••••" style="border-color: #dee2e6;" required>
+                            <button type="button" class="btn btn-light border border-start-0 text-muted rounded-end-3" onclick="togglePasswordVisibility('password_confirmation', this)" style="border-color: #dee2e6 !important;" aria-label="Toggle confirm password visibility">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -354,4 +364,21 @@
     </div>
 </div>
 
+@endsection
+
+@section('scripts')
+<script>
+    function togglePasswordVisibility(fieldId, btn) {
+        var input = document.getElementById(fieldId);
+        if (!input) return;
+        var icon = btn.querySelector('i');
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (icon) { icon.className = 'bi bi-eye-slash'; }
+        } else {
+            input.type = 'password';
+            if (icon) { icon.className = 'bi bi-eye'; }
+        }
+    }
+</script>
 @endsection

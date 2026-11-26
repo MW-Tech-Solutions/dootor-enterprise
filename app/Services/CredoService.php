@@ -14,10 +14,12 @@ class CredoService
 
     public function __construct()
     {
-        $this->paymentMode = trim((string) (config('services.credo.mode') ?: env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live'))));
-        $this->baseUrl = trim((string) (config('services.credo.base_url') ?: env('CREDO_BASE_URL', 'https://api.credocentral.com')));
-        $this->secretKey = trim((string) (config('services.credo.secret_key') ?: env('CREDO_SECRET_KEY', '')));
-        $this->publicKey = trim((string) (config('services.credo.public_key') ?: env('CREDO_PUBLIC_KEY', '')));
+        $setting = \App\Models\SystemSetting::first();
+        $this->paymentMode = strtolower(trim((string) ($setting?->payment_mode ?: config('services.credo.mode') ?: env('CREDO_PAYMENT_MODE', env('PAYMENT_MODE', 'live')))));
+        $defaultBase = in_array($this->paymentMode, ['test', 'sandbox']) ? 'https://api.credodemo.com' : 'https://api.credocentral.com';
+        $this->baseUrl = trim((string) ($setting?->credo_base_url ?: config('services.credo.base_url') ?: env('CREDO_BASE_URL', $defaultBase)));
+        $this->secretKey = trim((string) ($setting?->credo_secret_key ?: config('services.credo.secret_key') ?: env('CREDO_SECRET_KEY', '')));
+        $this->publicKey = trim((string) ($setting?->credo_public_key ?: config('services.credo.public_key') ?: env('CREDO_PUBLIC_KEY', '')));
     }
 
     /**

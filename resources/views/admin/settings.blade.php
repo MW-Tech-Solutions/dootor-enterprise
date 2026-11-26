@@ -86,6 +86,11 @@
                 <i class="bi bi-hourglass-split me-1.5"></i> App Expirations
             </button>
         </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="tab-chatbot-btn" data-bs-toggle="pill" data-bs-target="#tab-chatbot" type="button" role="tab" aria-controls="tab-chatbot" aria-selected="false">
+                <i class="bi bi-robot me-1.5"></i> AI Chatbot
+            </button>
+        </li>
     </ul>
 </div>
 
@@ -328,6 +333,25 @@
                             <input type="url" name="tiktok_url" id="tiktok_url" class="form-control rounded-end-3" value="{{ old('tiktok_url', $settings->tiktok_url) }}" placeholder="https://tiktok.com/@yourhandle">
                         </div>
                     </div>
+
+                    <!-- Homepage Featured YouTube Video URL -->
+                    <div class="col-md-6">
+                        <label for="promo_video_url" class="form-label small fw-semibold">Homepage Featured YouTube Video URL</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-danger social-input-icon"><i class="bi bi-play-btn-fill"></i></span>
+                            <input type="url" name="promo_video_url" id="promo_video_url" class="form-control rounded-end-3" value="{{ old('promo_video_url', $settings->promo_video_url) }}" placeholder="https://www.youtube.com/watch?v=... or https://youtu.be/...">
+                        </div>
+                        <small class="text-muted" style="font-size: 11px;">Displayed in the floating Featured Video modal on the homepage.</small>
+                    </div>
+
+                    <!-- Homepage Featured Video Pill Title -->
+                    <div class="col-md-6">
+                        <label for="promo_video_title" class="form-label small fw-semibold">Featured Video Button Label</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light text-warning social-input-icon"><i class="bi bi-megaphone-fill"></i></span>
+                            <input type="text" name="promo_video_title" id="promo_video_title" class="form-control rounded-end-3" value="{{ old('promo_video_title', $settings->promo_video_title) }}" placeholder="Featured: Official Services Video">
+                        </div>
+                    </div>
                 </div>
 
                 <hr class="my-4 border-light">
@@ -375,7 +399,7 @@
             <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-4">
                 <div>
                     <h2 class="h5 fw-bold text-dark mb-1"><i class="bi bi-credit-card-2-front me-2 text-success"></i> Payment Gateways &amp; Currency</h2>
-                    <p class="text-secondary small mb-0">Select your active payment gateway, billing currency (NGN / USD), and configure API keys for Paystack and Credo.</p>
+                    <p class="text-secondary small mb-0">Select your active payment gateway, billing currency (USD / CAD / NGN), and configure API keys for PayPal, Moneris, Credo, and Paystack.</p>
                 </div>
                 <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1.5 small">
                     <i class="bi bi-shield-check me-1"></i> Live Settings
@@ -386,28 +410,39 @@
                 @csrf
                 
                 @php
-                    $currentGateway = old('payment_gateway', $settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paystack'));
-                    $currentCurrency = old('default_currency', $settings->default_currency ?? config('services.payment.currency') ?: env('PORTAL_BASE_CURRENCY', 'NGN'));
+                    $currentGateway = old('payment_gateway', $settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paypal'));
+                    $currentCurrency = old('default_currency', $settings->default_currency ?? config('services.payment.currency') ?: env('PORTAL_BASE_CURRENCY', 'USD'));
                     $paymentMode = old('payment_mode', $settings->payment_mode ?? config('services.credo.mode') ?: env('PAYMENT_MODE', 'live'));
                     $paystackPublicKey = old('paystack_public_key', $settings->paystack_public_key ?? config('services.paystack.public_key') ?: env('PAYSTACK_PUBLIC_KEY', ''));
                     $paystackSecretKey = old('paystack_secret_key', $settings->paystack_secret_key ?? config('services.paystack.secret_key') ?: env('PAYSTACK_SECRET_KEY', ''));
                     $credoPublicKey = old('credo_public_key', $settings->credo_public_key ?? config('services.credo.public_key') ?: env('CREDO_PUBLIC_KEY', ''));
                     $credoSecretKey = old('credo_secret_key', $settings->credo_secret_key ?? config('services.credo.secret_key') ?: env('CREDO_SECRET_KEY', ''));
+                    $credoBaseUrl = old('credo_base_url', $settings->credo_base_url ?? config('services.credo.base_url') ?: '');
+                    $paypalClientId = old('paypal_client_id', $settings->paypal_client_id ?? config('services.paypal.client_id') ?: '');
+                    $paypalClientSecret = old('paypal_client_secret', $settings->paypal_client_secret ?? config('services.paypal.client_secret') ?: '');
+                    $monerisStoreId = old('moneris_store_id', $settings->moneris_store_id ?? config('services.moneris.store_id') ?: '');
+                    $monerisApiToken = old('moneris_api_token', $settings->moneris_api_token ?? config('services.moneris.api_token') ?: '');
+                    $monerisCheckoutId = old('moneris_checkout_id', $settings->moneris_checkout_id ?? config('services.moneris.checkout_id') ?: '');
                 @endphp
 
                 <div class="row g-3 mb-3">
                     <div class="col-sm-6">
                         <label for="payment_gateway" class="form-label small fw-semibold">Primary Active Gateway</label>
                         <select name="payment_gateway" id="payment_gateway" class="form-select rounded-3 fw-semibold">
+                            <option value="paypal" {{ strtolower($currentGateway) === 'paypal' ? 'selected' : '' }}>PayPal (Orders REST v2)</option>
+                            <option value="moneris" {{ strtolower($currentGateway) === 'moneris' ? 'selected' : '' }}>Moneris Checkout (Canada)</option>
+                            <option value="credo" {{ strtolower($currentGateway) === 'credo' ? 'selected' : '' }}>Credo Central Gateway</option>
                             <option value="paystack" {{ strtolower($currentGateway) === 'paystack' ? 'selected' : '' }}>Paystack Gateway</option>
-                            <option value="credo" {{ strtolower($currentGateway) === 'credo' ? 'selected' : '' }}>Credo Gateway</option>
                         </select>
                     </div>
                     <div class="col-sm-6">
                         <label for="default_currency" class="form-label small fw-semibold">Billing Currency</label>
                         <select name="default_currency" id="default_currency" class="form-select rounded-3 fw-semibold">
-                            <option value="NGN" {{ strtoupper($currentCurrency) === 'NGN' ? 'selected' : '' }}>NGN (₦ - Nigerian Naira)</option>
                             <option value="USD" {{ strtoupper($currentCurrency) === 'USD' ? 'selected' : '' }}>USD ($ - US Dollar)</option>
+                            <option value="CAD" {{ strtoupper($currentCurrency) === 'CAD' ? 'selected' : '' }}>CAD (CA$ - Canadian Dollar)</option>
+                            <option value="GBP" {{ strtoupper($currentCurrency) === 'GBP' ? 'selected' : '' }}>GBP (£ - British Pound)</option>
+                            <option value="EUR" {{ strtoupper($currentCurrency) === 'EUR' ? 'selected' : '' }}>EUR (€ - Euro)</option>
+                            <option value="NGN" {{ strtoupper($currentCurrency) === 'NGN' ? 'selected' : '' }}>NGN (₦ - Nigerian Naira)</option>
                         </select>
                     </div>
                 </div>
@@ -416,8 +451,8 @@
                     <div class="col-sm-6">
                         <label for="payment_mode" class="form-label small fw-semibold">Transaction Environment</label>
                         <select name="payment_mode" id="payment_mode" class="form-select rounded-3">
-                            <option value="live" {{ strtolower($paymentMode) === 'live' ? 'selected' : '' }}>Live Environment</option>
-                            <option value="test" {{ strtolower($paymentMode) === 'test' ? 'selected' : '' }}>Test / Sandbox</option>
+                            <option value="live" {{ strtolower($paymentMode) === 'live' ? 'selected' : '' }}>Live / Production Environment</option>
+                            <option value="test" {{ strtolower($paymentMode) === 'test' ? 'selected' : '' }}>Test / Sandbox / QA</option>
                         </select>
                     </div>
                     <div class="col-sm-6">
@@ -431,53 +466,114 @@
 
                 <hr class="my-4 border-light">
 
-                <!-- Paystack Credentials -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <i class="bi bi-wallet2 text-primary fs-5"></i>
-                    <h3 class="h6 fw-bold text-dark mb-0">Paystack Gateway Credentials</h3>
+                <!-- PayPal Credentials -->
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-paypal text-primary fs-5"></i>
+                        <h3 class="h6 fw-bold text-dark mb-0">PayPal REST API v2 Credentials</h3>
+                    </div>
+                    <span class="badge bg-primary-subtle text-primary rounded-pill extra-small">Global Cards &amp; PayPal</span>
                 </div>
 
-                <div class="mb-3">
-                    <label for="paystack_public_key" class="form-label small fw-semibold">Paystack Public Key</label>
-                    <div class="input-group">
-                        <input type="text" name="paystack_public_key" id="paystack_public_key" class="form-control font-monospace small" value="{{ $paystackPublicKey }}" placeholder="pk_live_...">
-                        <span class="input-group-text bg-light text-muted"><i class="bi bi-key-fill"></i></span>
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="paypal_client_id" class="form-label small fw-semibold">PayPal Client ID</label>
+                        <input type="text" name="paypal_client_id" id="paypal_client_id" class="form-control font-monospace small" value="{{ $paypalClientId }}" placeholder="AZDxjDScFpQtjWTOUtWKbyN_bDt4OgqaF4eYXlewfBP4...">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="paypal_client_secret" class="form-label small fw-semibold">PayPal Client Secret</label>
+                        <div class="input-group">
+                            <input type="password" name="paypal_client_secret" id="paypal_client_secret" class="form-control font-monospace small" value="{{ $paypalClientSecret }}" placeholder="EL1tWxOqWv...">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleEnvSecretVisibility('paypal_client_secret', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="paystack_secret_key" class="form-label small fw-semibold">Paystack Secret Key</label>
-                    <div class="input-group">
-                        <input type="password" name="paystack_secret_key" id="paystack_secret_key" class="form-control font-monospace small" value="{{ $paystackSecretKey }}" placeholder="sk_live_...">
-                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleEnvSecretVisibility('paystack_secret_key', this)">
-                            <i class="bi bi-eye"></i>
-                        </button>
+                <hr class="my-4 border-light">
+
+                <!-- Moneris Credentials -->
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-credit-card-fill text-danger fs-5"></i>
+                        <h3 class="h6 fw-bold text-dark mb-0">Moneris Checkout v2 Credentials (Canada)</h3>
+                    </div>
+                    <span class="badge bg-danger-subtle text-danger rounded-pill extra-small">Visa / Mastercard / Interac</span>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="moneris_store_id" class="form-label small fw-semibold">Moneris Store ID</label>
+                        <input type="text" name="moneris_store_id" id="moneris_store_id" class="form-control font-monospace small" value="{{ $monerisStoreId }}" placeholder="store2 or monca...">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="moneris_checkout_id" class="form-label small fw-semibold">Moneris Checkout ID</label>
+                        <input type="text" name="moneris_checkout_id" id="moneris_checkout_id" class="form-control font-monospace small" value="{{ $monerisCheckoutId }}" placeholder="chkt...">
+                    </div>
+                    <div class="col-md-4">
+                        <label for="moneris_api_token" class="form-label small fw-semibold">Moneris API Token</label>
+                        <div class="input-group">
+                            <input type="password" name="moneris_api_token" id="moneris_api_token" class="form-control font-monospace small" value="{{ $monerisApiToken }}" placeholder="API Token">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleEnvSecretVisibility('moneris_api_token', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <hr class="my-4 border-light">
 
                 <!-- Credo Credentials -->
-                <div class="d-flex align-items-center gap-2 mb-3">
-                    <i class="bi bi-box-arrow-up-right text-primary fs-5"></i>
-                    <h3 class="h6 fw-bold text-dark mb-0">Credo Gateway Credentials</h3>
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-box-arrow-up-right text-success fs-5"></i>
+                        <h3 class="h6 fw-bold text-dark mb-0">Credo Central Gateway Credentials</h3>
+                    </div>
+                    <span class="badge bg-success-subtle text-success rounded-pill extra-small">Card &amp; Bank Transfer</span>
                 </div>
 
-                <div class="mb-3">
-                    <label for="credo_public_key" class="form-label small fw-semibold">Credo Public Key</label>
-                    <div class="input-group">
+                <div class="row g-3 mb-4">
+                    <div class="col-md-4">
+                        <label for="credo_public_key" class="form-label small fw-semibold">Credo Public Key</label>
                         <input type="text" name="credo_public_key" id="credo_public_key" class="form-control font-monospace small" value="{{ $credoPublicKey }}" placeholder="1PUB...">
-                        <span class="input-group-text bg-light text-muted"><i class="bi bi-key-fill"></i></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="credo_secret_key" class="form-label small fw-semibold">Credo Secret Key</label>
+                        <div class="input-group">
+                            <input type="password" name="credo_secret_key" id="credo_secret_key" class="form-control font-monospace small" value="{{ $credoSecretKey }}" placeholder="1PRI...">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleEnvSecretVisibility('credo_secret_key', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <label for="credo_base_url" class="form-label small fw-semibold">Credo Base URL (Optional)</label>
+                        <input type="url" name="credo_base_url" id="credo_base_url" class="form-control font-monospace small" value="{{ $credoBaseUrl }}" placeholder="https://api.credocentral.com">
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <label for="credo_secret_key" class="form-label small fw-semibold">Credo Secret Key</label>
-                    <div class="input-group">
-                        <input type="password" name="credo_secret_key" id="credo_secret_key" class="form-control font-monospace small" value="{{ $credoSecretKey }}" placeholder="1PRI...">
-                        <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleEnvSecretVisibility('credo_secret_key', this)">
-                            <i class="bi bi-eye"></i>
-                        </button>
+                <hr class="my-4 border-light">
+
+                <!-- Paystack Credentials -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <i class="bi bi-wallet2 text-primary fs-5"></i>
+                    <h3 class="h6 fw-bold text-dark mb-0">Paystack Gateway Credentials (Optional)</h3>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-6">
+                        <label for="paystack_public_key" class="form-label small fw-semibold">Paystack Public Key</label>
+                        <input type="text" name="paystack_public_key" id="paystack_public_key" class="form-control font-monospace small" value="{{ $paystackPublicKey }}" placeholder="pk_live_...">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="paystack_secret_key" class="form-label small fw-semibold">Paystack Secret Key</label>
+                        <div class="input-group">
+                            <input type="password" name="paystack_secret_key" id="paystack_secret_key" class="form-control font-monospace small" value="{{ $paystackSecretKey }}" placeholder="sk_live_...">
+                            <button type="button" class="btn btn-outline-secondary btn-sm px-3" onclick="toggleEnvSecretVisibility('paystack_secret_key', this)">
+                                <i class="bi bi-eye"></i>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -715,6 +811,115 @@
         </div>
     </div>
 
+    <!-- TAB 7: AI CHATBOT (GEMINI API) -->
+    <div class="tab-pane fade" id="tab-chatbot" role="tabpanel" aria-labelledby="tab-chatbot-btn">
+        <div class="card border-0 shadow-sm p-4 p-sm-5 rounded-4 bg-white">
+            <div class="border-bottom pb-3 mb-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div>
+                        <h2 class="h5 fw-bold text-dark mb-1"><i class="bi bi-robot me-2 text-success"></i> Google Gemini AI Assistant &amp; Chatbot</h2>
+                        <p class="text-secondary small mb-0">Configure your Google Gemini API key and strictly define the operational boundaries of the homepage AI assistant.</p>
+                    </div>
+                    <span class="badge {{ ($settings->gemini_api_key && ($settings->chatbot_enabled ?? true)) ? 'bg-success-subtle text-success border border-success' : 'bg-warning-subtle text-warning border border-warning' }} px-3 py-2 rounded-pill fs-7">
+                        <i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i>
+                        {{ ($settings->gemini_api_key && ($settings->chatbot_enabled ?? true)) ? 'AI Chatbot Active' : 'Setup Required / Disabled' }}
+                    </span>
+                </div>
+            </div>
+
+            <form action="{{ route('admin.settings.update') }}#tab-chatbot" method="POST">
+                @csrf
+
+                <!-- Status Banner / Info Alert -->
+                <div class="alert alert-info border-0 rounded-4 p-3 mb-4 d-flex align-items-start gap-3 bg-light">
+                    <div class="rounded-circle bg-success text-white p-2 d-flex align-items-center justify-content-center flex-shrink-0" style="width: 36px; height: 36px;">
+                        <i class="bi bi-shield-lock-fill"></i>
+                    </div>
+                    <div class="small text-secondary">
+                        <strong class="text-dark d-block mb-1">Bounded Knowledge &amp; Strict Domain Guardrails</strong>
+                        The Gemini model will ONLY respond to inquiries regarding <strong>DOOTOR ENTERPRISES</strong> (passports, travel visas, documents, NIN/BVN, affidavits, and attestation procedures). Any off-topic questions (coding, general trivia, politics, etc.) are automatically and politely declined.
+                    </div>
+                </div>
+
+                <!-- Enable / Disable Switch -->
+                <div class="card border rounded-4 p-3 mb-4 bg-light-subtle">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div>
+                            <h6 class="fw-bold mb-1 text-dark">Chatbot Live Status</h6>
+                            <p class="text-muted small mb-0">Turn the front-facing Gemini AI drawer assistant on or off across the public platform.</p>
+                        </div>
+                        <div class="form-check form-switch m-0">
+                            <input type="hidden" name="chatbot_enabled" value="0">
+                            <input class="form-check-input fs-5" type="checkbox" name="chatbot_enabled" value="1" id="chatbotEnabledSwitch" {{ old('chatbot_enabled', $settings->chatbot_enabled ?? true) ? 'checked' : '' }}>
+                            <label class="form-check-label fw-semibold text-dark ms-2 small" for="chatbotEnabledSwitch">
+                                Enable Chatbot
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gemini API Key -->
+                <div class="mb-4">
+                    <label class="form-label fw-bold text-dark small mb-1">
+                        Google Gemini API Key <span class="text-danger">*</span>
+                    </label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-key-fill"></i></span>
+                        <input type="password" 
+                               name="gemini_api_key" 
+                               id="gemini_api_key" 
+                               class="form-control border-start-0 border-end-0 py-2.5 font-monospace" 
+                               value="{{ old('gemini_api_key', $settings->gemini_api_key) }}" 
+                               placeholder="AIzaSy..." 
+                               autocomplete="off">
+                        <button class="btn btn-outline-secondary border-start-0" type="button" onclick="toggleEnvSecretVisibility('gemini_api_key', this)">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </div>
+                    <div class="form-text small text-muted mt-1">
+                        Get your API key from <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-decoration-underline text-success fw-semibold">Google AI Studio <i class="bi bi-box-arrow-up-right"></i></a>. Uses the ultra-fast <code>gemini-2.0-flash</code> model.
+                    </div>
+                </div>
+
+                <!-- Chatbot System Prompt / Instructions -->
+                <div class="mb-4">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label class="form-label fw-bold text-dark small mb-0">
+                            Custom System Prompt &amp; Scope Restriction
+                        </label>
+                        <button type="button" class="btn btn-sm btn-link text-decoration-none text-success p-0 small" onclick="resetDefaultPrompt()">
+                            <i class="bi bi-arrow-counterclockwise"></i> Reset to DOOTOR Strict Default
+                        </button>
+                    </div>
+                    <textarea name="chatbot_system_prompt" 
+                              id="chatbot_system_prompt" 
+                              rows="8" 
+                              class="form-control font-monospace small" 
+                              style="line-height: 1.5;"
+                              placeholder="Enter instructions restricting what the assistant can and cannot say...">{{ old('chatbot_system_prompt', $settings->chatbot_system_prompt ?? "You are the official AI assistant for DOOTOR ENTERPRISES, an international administrative documentation and consular liaison consultancy specializing in passports, travel documents, visa processing guidance, NIN/BVN documentation, court affidavits, legal attestations, identity records, and consular services.
+
+STRICT BOUNDARY & RULES:
+- You must ONLY answer questions directly related to DOOTOR ENTERPRISES, its services, processes, document requirements, and client application workflows.
+- If a user asks about anything unrelated to DOOTOR ENTERPRISES or its services (e.g., general trivia, science, coding, politics, personal questions, unrelated news), politely decline: 'I am the DOOTOR ENTERPRISES assistant and can only answer questions related to our services and document processing. How can I assist you with your document or application today?'
+- Never provide legal advice; always advise consulting a certified legal or consular professional.
+- For pricing questions, advise: 'Pricing and fee schedules are accessible directly inside your client dashboard upon login or in our Services Catalog.'
+- For urgent human intervention, direct the user to our WhatsApp support or click 'Chat with Agent' to connect to Live Support.
+- Always maintain a warm, polite, and professional tone.") }}</textarea>
+                    <div class="form-text small text-muted mt-1">
+                        This prompt is sent as the <code>system_instruction</code> on every message to ensure the model never strays outside DOOTOR ENTERPRISES services.
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-end pt-3 border-top">
+                    <button type="submit" class="btn btn-success rounded-pill px-4 py-2.5 fw-semibold shadow-sm d-flex align-items-center gap-2" style="background-color: #004225; border: none;">
+                        <i class="bi bi-check2-circle"></i>
+                        <span>Save AI Chatbot Settings</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -730,6 +935,22 @@ function toggleEnvSecretVisibility(inputId, btn) {
     } else {
         input.type = 'password';
         icon.className = 'bi bi-eye';
+    }
+}
+
+function resetDefaultPrompt() {
+    const defaultPrompt = `You are the official AI assistant for DOOTOR ENTERPRISES, an international administrative documentation and consular liaison consultancy specializing in passports, travel documents, visa processing guidance, NIN/BVN documentation, court affidavits, legal attestations, identity records, and consular services.
+
+STRICT BOUNDARY & RULES:
+- You must ONLY answer questions directly related to DOOTOR ENTERPRISES, its services, processes, document requirements, and client application workflows.
+- If a user asks about anything unrelated to DOOTOR ENTERPRISES or its services (e.g., general trivia, science, coding, politics, personal questions, unrelated news), politely decline: 'I am the DOOTOR ENTERPRISES assistant and can only answer questions related to our services and document processing. How can I assist you with your document or application today?'
+- Never provide legal advice; always advise consulting a certified legal or consular professional.
+- For pricing questions, advise: 'Pricing and fee schedules are accessible directly inside your client dashboard upon login or in our Services Catalog.'
+- For urgent human intervention, direct the user to our WhatsApp support or click 'Chat with Agent' to connect to Live Support.
+- Always maintain a warm, polite, and professional tone.`;
+    const textarea = document.getElementById('chatbot_system_prompt');
+    if (textarea) {
+        textarea.value = defaultPrompt;
     }
 }
 

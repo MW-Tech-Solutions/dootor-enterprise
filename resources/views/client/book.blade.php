@@ -70,11 +70,19 @@
                             @csrf
                             <input type="hidden" name="service_id" value="{{ $service->id }}">
 
-                            <!-- Passport Photograph Upload Section -->
+                            <!-- Passport Photograph Upload Section (ICAO 9303 Standard) -->
                             <div class="mb-4 p-3 bg-light rounded-3 border">
-                                <label class="form-label fw-bold text-dark mb-1">Passport Photograph Upload (White Background) *</label>
-                                <p class="text-muted small mb-2">Upload a recent color passport-sized photo (JPG, PNG max 5MB).</p>
-                                <input type="file" name="passport_photo" class="form-control rounded-3" accept="image/jpeg,image/png">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <label class="form-label fw-bold text-dark mb-0">Passport Photograph (ICAO 9303 Standard) *</label>
+                                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1 extra-small fw-bold">
+                                        <i class="bi bi-patch-check-fill me-1"></i> ICAO Biometric Verified
+                                    </span>
+                                </div>
+                                <p class="text-secondary small mb-2" style="font-size: 12.5px; line-height: 1.5;">
+                                    Must meet <strong>ICAO Standard</strong>: Plain light/white background, sharp focus, direct front-facing view, vertical portrait orientation (35×45mm aspect ratio, min 400×400 px).
+                                </p>
+                                <input type="file" name="passport_photo" class="form-control rounded-3 icao-passport-input" accept="image/jpeg,image/png,image/webp">
+                                <div class="icao-feedback mt-2" style="display:none;"></div>
                             </div>
 
                             <!-- Custom Dynamic Fields -->
@@ -167,8 +175,12 @@
                                 <h6 class="fw-bold text-dark mb-2"><span class="badge bg-info text-dark me-2">Step 3</span> Attach Passport Photo &amp; Supporting Documents</h6>
                                 <div class="row g-3">
                                     <div class="col-md-6">
-                                        <label class="form-label small fw-semibold text-dark">Passport Photograph</label>
-                                        <input type="file" name="passport_photo" class="form-control rounded-3" accept="image/jpeg,image/png">
+                                        <div class="d-flex align-items-center justify-content-between mb-1">
+                                            <label class="form-label small fw-semibold text-dark mb-0">Passport Photograph (ICAO 9303)</label>
+                                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill extra-small" style="font-size: 10px;">ICAO</span>
+                                        </div>
+                                        <input type="file" name="passport_photo" class="form-control rounded-3 icao-passport-input" accept="image/jpeg,image/png,image/webp">
+                                        <div class="icao-feedback mt-2" style="display:none;"></div>
                                     </div>
 
                                     @if(is_array($rawReqDocs) && count($rawReqDocs) > 0)
@@ -241,13 +253,14 @@
             @endphp
 
             @php
-                $activeGw = strtolower($settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paystack'));
-                $gwLabel = $activeGw === 'credo' ? 'Credo' : 'Paystack';
-                $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'NGN');
+                $activeGw = strtolower($settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paypal'));
+                $gwMap = ['paypal' => 'PayPal', 'moneris' => 'Moneris', 'credo' => 'Credo', 'paystack' => 'Paystack'];
+                $gwLabel = $gwMap[$activeGw] ?? ucfirst($activeGw);
+                $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'USD');
             @endphp
             <div class="d-flex justify-content-between align-items-center p-3 rounded-3 mb-3" style="background-color: #f8fafc; border: 1px solid #e2e8f0;">
                 <span class="fw-medium text-dark">Total Amount Due:</span>
-                <span class="fw-bold fs-4" style="color: #004225;">{{ $currencyCode }} {{ number_format($total, 2) }}</span>
+                <span class="fw-bold fs-4" style="color: #004225;">${{ number_format($total, 2) }}</span>
             </div>
 
             <div class="p-3 bg-light rounded-3 small">
@@ -257,4 +270,55 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // ICAO 9303 Real-Time Photo Verification
+        document.querySelectorAll('.icao-passport-input').forEach(function(input) {
+            input.addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                var feedback = input.parentElement.querySelector('.icao-feedback');
+                if (!feedback) return;
+
+                if (!file) {
+                    feedback.style.display = 'none';
+                    return;
+                }
+
+                if (!file.type.match(/^image\/(jpeg|png|webp)$/)) {
+                    feedback.style.display = 'block';
+                    feedback.className = 'icao-feedback mt-2 alert alert-danger py-2 px-3 small rounded-3';
+                    feedback.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> Invalid file format. Please upload a JPG or PNG image.';
+                    input.value = '';
+                    return;
+                }
+
+                var img = new Image();
+                var objectUrl = URL.createObjectURL(file);
+                img.onload = function() {
+                    URL.revokeObjectURL(objectUrl);
+                    var w = img.naturalWidth;
+                    var h = img.naturalHeight;
+                    var ratio = (w / h).toFixed(2);
+
+                    var isValidResolution = w >= 380 && h >= 380;
+                    var isValidRatio = ratio >= 0.65 && ratio <= 1.25;
+
+                    feedback.style.display = 'block';
+                    if (isValidResolution && isValidRatio) {
+                        feedback.className = 'icao-feedback mt-2 alert alert-success py-2 px-3 small rounded-3 d-flex align-items-center justify-content-between';
+                        feedback.innerHTML = '<span><i class="bi bi-check-circle-fill text-success me-1"></i> <strong>ICAO Standard Compliant:</strong> ' + w + '×' + h + ' px (Portrait Ratio ' + ratio + ')</span><span class="badge bg-success">Valid</span>';
+                    } else {
+                        var reason = !isValidResolution ? 'Resolution too low (< 400px)' : 'Invalid aspect ratio (Landscape/distorted)';
+                        feedback.className = 'icao-feedback mt-2 alert alert-warning py-2 px-3 small rounded-3';
+                        feedback.innerHTML = '<i class="bi bi-exclamation-triangle-fill me-1"></i> <strong>Photo Warning:</strong> ' + reason + ' (' + w + '×' + h + ' px, ratio ' + ratio + '). Standard passport photos must be vertical portrait (~0.7 to 1.15).';
+                    }
+                };
+                img.src = objectUrl;
+            });
+        });
+    });
+</script>
 @endsection

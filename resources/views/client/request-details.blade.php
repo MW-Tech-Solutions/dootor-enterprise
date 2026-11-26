@@ -501,16 +501,21 @@
         <!-- Payment Checkout Card (Shown if unpaid or has balance) -->
         @if($request->payment_status !== 'Paid' || $request->outstanding_balance > 0)
             @php
-                $activeGw = strtolower($settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paystack'));
-                $gwLabel = $activeGw === 'credo' ? 'Credo' : 'Paystack';
-                $currencySymbol = ($settings->default_currency ?? config('services.payment.currency', 'USD')) === 'NGN' ? '₦' : '$';
+                $activeGw = strtolower($settings->payment_gateway ?? config('services.payment.gateway') ?: env('PAYMENT_GATEWAY', 'paypal'));
+                $gwMap = [
+                    'paypal' => 'PayPal',
+                    'moneris' => 'Moneris',
+                    'credo' => 'Credo',
+                    'paystack' => 'Paystack',
+                ];
+                $gwLabel = $gwMap[$activeGw] ?? ucfirst($activeGw);
                 $currencyCode = $settings->default_currency ?? config('services.payment.currency', 'USD');
             @endphp
             <div class="card border-0 shadow-sm p-3.5 p-md-4 rounded-4 text-white mb-4" style="background: linear-gradient(135deg, #004225, #006637); border-radius: 20px !important; padding: 22px 20px !important;">
-                <h5 class="fw-bold text-white mb-2"><i class="bi bi-credit-card me-2"></i> {{ $gwLabel }} Checkout</h5>
-                <p class="small text-white-50 mb-3">Pay securely online using credit/debit card or bank transfer via {{ $gwLabel }} Gateway.</p>
+                <h5 class="fw-bold text-white mb-2"><i class="bi bi-credit-card me-2"></i> Secure Payment Checkout</h5>
+                <p class="small text-white-50 mb-3">Choose a payment gateway below to complete your payment securely.</p>
 
-                <div class="d-flex justify-content-between align-items-center bg-white bg-opacity-10 p-3 rounded-3 mb-4">
+                <div class="d-flex justify-content-between align-items-center bg-white bg-opacity-10 p-3 rounded-3 mb-3">
                     <span class="small text-white-50">Amount Due:</span>
                     <span class="fw-bold fs-4 text-white">{{ $currencyCode }} {{ number_format($request->outstanding_balance > 0 ? $request->outstanding_balance : $request->price, 2) }}</span>
                 </div>
@@ -518,10 +523,18 @@
                 <form action="{{ route('payment.checkout', $request->id) }}" method="POST" id="payForm" onsubmit="return handlePaySubmit(event, this)">
                     @csrf
                     <input type="hidden" name="amount" value="{{ $request->outstanding_balance > 0 ? $request->outstanding_balance : $request->price }}">
-                    <input type="hidden" name="gateway" value="{{ $activeGw }}">
+                    <div class="mb-3">
+                        <label for="gatewaySelect" class="form-label small text-white-50 mb-1">Select Payment Method</label>
+                        <select name="gateway" id="gatewaySelect" class="form-select rounded-3 fw-semibold" onchange="document.getElementById('payBtnLabel').textContent = 'Pay Now with ' + this.options[this.selectedIndex].dataset.label;">
+                            <option value="paypal" data-label="PayPal" {{ $activeGw === 'paypal' ? 'selected' : '' }}>PayPal (Cards &amp; PayPal Wallet)</option>
+                            <option value="moneris" data-label="Moneris" {{ $activeGw === 'moneris' ? 'selected' : '' }}>Moneris Checkout (Visa / Mastercard / Interac)</option>
+                            <option value="credo" data-label="Credo" {{ $activeGw === 'credo' ? 'selected' : '' }}>Credo Central (Card &amp; Bank Transfer)</option>
+                            <option value="paystack" data-label="Paystack" {{ $activeGw === 'paystack' ? 'selected' : '' }}>Paystack Gateway</option>
+                        </select>
+                    </div>
                     <button type="submit" id="payBtn" onclick="triggerPaySpinner(this)" class="btn btn-light w-100 py-3 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2" style="color: #004225; transition: all 0.25s ease;">
                         <i class="bi bi-lock-fill me-1"></i>
-                        <span>Pay Now with {{ $gwLabel }}</span>
+                        <span id="payBtnLabel">Pay Now with {{ $gwLabel }}</span>
                     </button>
                 </form>
             </div>

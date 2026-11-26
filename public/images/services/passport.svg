@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="50%" stop-color="#022c22"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#eab308"/>
+      <stop offset="100%" stop-color="#ca8a04"/>
+    </linearGradient>
+    <linearGradient id="cover" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#065f46"/>
+      <stop offset="100%" stop-color="#042f2e"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="600" height="380" rx="20" fill="url(#bg)"/>
+  <circle cx="500" cy="80" r="140" fill="#10b981" opacity="0.08"/>
+  <circle cx="80" cy="300" r="100" fill="#eab308" opacity="0.05"/>
+  <!-- Passport Book -->
+  <g transform="translate(190, 45)" filter="url(#shadow)">
+    <!-- Book Cover -->
+    <rect x="0" y="0" width="220" height="290" rx="14" fill="url(#cover)" stroke="#10b981" stroke-width="1.5"/>
+    <!-- Spine Line -->
+    <line x1="16" y1="0" x2="16" y2="290" stroke="rgba(255,255,255,0.12)" stroke-width="2"/>
+    <rect x="30" y="24" width="160" height="20" rx="4" fill="rgba(0,0,0,0.2)"/>
+    <text x="110" y="38" font-family="'Outfit', sans-serif" font-size="10" font-weight="700" fill="url(#gold)" text-anchor="middle" letter-spacing="1.5">FEDERAL REPUBLIC OF NIGERIA</text>
+    <text x="110" y="60" font-family="'Outfit', sans-serif" font-size="16" font-weight="800" fill="url(#gold)" text-anchor="middle" letter-spacing="2">PASSPORT</text>
+    <!-- Coat of Arms Emblem -->
+    <g transform="translate(110, 135) scale(0.9)">
+      <circle cx="0" cy="0" r="38" fill="none" stroke="url(#gold)" stroke-width="2" stroke-dasharray="4 2"/>
+      <path d="M-18 -15 L0 -28 L18 -15 L14 15 L0 24 L-14 15 Z" fill="none" stroke="url(#gold)" stroke-width="2.5"/>
+      <path d="M-6 -6 L0 8 L6 -6" stroke="url(#gold)" stroke-width="2.5" fill="none"/>
+      <circle cx="0" cy="-28" r="5" fill="url(#gold)"/>
+      <path d="M-22 2 L-14 2 M14 2 L22 2" stroke="url(#gold)" stroke-width="2"/>
+    </g>
+    <!-- Biometric Chip Symbol -->
+    <g transform="translate(110, 225)">
+      <rect x="-18" y="-12" width="36" height="24" rx="4" fill="none" stroke="url(#gold)" stroke-width="2"/>
+      <line x1="-18" y1="0" x2="-6" y2="0" stroke="url(#gold)" stroke-width="2"/>
+      <line x1="6" y1="0" x2="18" y2="0" stroke="url(#gold)" stroke-width="2"/>
+      <circle cx="0" cy="0" r="6" fill="url(#gold)"/>
+    </g>
+    <text x="110" y="268" font-family="'Outfit', sans-serif" font-size="8.5" font-weight="600" fill="rgba(254, 240, 138, 0.7)" text-anchor="middle" letter-spacing="1.5">STANDARD e-PASSPORT</text>
+  </g>
+  <!-- Floating Fast Track Pill -->
+  <g transform="translate(40, 60)" filter="url(#shadow)">
+    <rect width="130" height="42" rx="21" fill="rgba(15, 23, 42, 0.85)" stroke="rgba(255,255,255,0.15)"/>
+    <circle cx="22" cy="21" r="7" fill="#10b981"/>
+    <circle cx="22" cy="21" r="11" fill="none" stroke="#10b981" stroke-width="1.5" opacity="0.4"/>
+    <text x="38" y="20" font-family="'Outfit', sans-serif" font-size="11" font-weight="700" fill="#ffffff">Fast-Track</text>
+    <text x="38" y="32" font-family="'Outfit', sans-serif" font-size="9" fill="#94a3b8">48h Expedited</text>
+  </g>
+  <!-- Floating Verified Stamp -->
+  <g transform="translate(430, 240)" filter="url(#shadow)">
+    <rect width="130" height="46" rx="12" fill="rgba(15, 23, 42, 0.85)" stroke="#10b981" stroke-width="1.5"/>
+    <text x="16" y="22" font-family="'Outfit', sans-serif" font-size="11" font-weight="700" fill="#10b981">NIS Approved</text>
+    <text x="16" y="36" font-family="'Outfit', sans-serif" font-size="9" fill="#94a3b8">Official Verification</text>
+  </g>
+</svg>

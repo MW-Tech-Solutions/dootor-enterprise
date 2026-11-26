@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(ApiCors::class);
+        $middleware->validateCsrfTokens(except: [
+            'chat/gemini',
+        ]);
         $middleware->alias([
             'role' => EnsureRole::class,
             'vendor.approved' => App\Http\Middleware\EnsureApprovedVendor::class,
@@ -24,5 +27,12 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Illuminate\Session\TokenMismatchException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Session expired. Please refresh and try again.'], 419);
+            }
+            return redirect()->back()
+                ->withInput($request->except('password', 'password_confirmation'))
+                ->with('error', 'Your session expired. A fresh security token has been issued — please try again.');
+        });
     })->create();

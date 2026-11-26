@@ -3,6 +3,8 @@
 use App\Http\Controllers\Web\AdminController;
 use App\Http\Controllers\Web\AuthController;
 use App\Http\Controllers\Web\ClientController;
+use App\Http\Controllers\Web\GeminiChatController;
+use App\Http\Controllers\Web\LiveChatController;
 use App\Http\Controllers\Web\PaymentController;
 use App\Http\Controllers\Web\PublicController;
 use App\Http\Controllers\Web\ReportController;
@@ -56,6 +58,23 @@ Route::get('/sitemap.xml', [PublicController::class, 'sitemap'])->name('sitemap'
 // Public Contact Form Submission
 Route::post('/contact', [PublicController::class, 'sendContact'])->name('contact.send');
 
+// Public Analytics Event Tracking
+Route::post('/analytics/track', [PublicController::class, 'trackAnalytics'])->name('analytics.track');
+
+// Public Review Submission
+Route::post('/reviews', [PublicController::class, 'storeReview'])->name('reviews.store');
+
+// Gemini AI Chatbot (public, rate-limited)
+Route::post('/chat/gemini', [GeminiChatController::class, 'chat'])->name('chat.gemini')->middleware('throttle:20,1');
+
+// Live Chat – Client (auth required)
+Route::middleware('auth')->prefix('live-chat')->name('live-chat.')->group(function () {
+    Route::post('/start', [LiveChatController::class, 'start'])->name('start');
+    Route::post('/{chatId}/message', [LiveChatController::class, 'sendMessage'])->name('message');
+    Route::get('/{chatId}/messages', [LiveChatController::class, 'getMessages'])->name('messages');
+    Route::post('/{chatId}/close', [LiveChatController::class, 'close'])->name('close');
+});
+
 // Public Legal & Policy Pages
 Route::get('/terms-and-conditions', [PublicController::class, 'termsAndConditions'])->name('terms.conditions');
 Route::get('/refund-policy', [PublicController::class, 'refundPolicy'])->name('refund.policy');
@@ -67,6 +86,9 @@ Route::get('/v/{vendor}', [PublicController::class, 'vendorStorefront'])->name('
 // Payment Callback Routes
 Route::get('/payment/paystack/callback', [PaymentController::class, 'paystackCallback'])->name('payment.paystack.callback');
 Route::get('/payment/credo/callback', [PaymentController::class, 'callback'])->name('payment.credo.callback');
+Route::get('/payment/paypal/callback', [PaymentController::class, 'paypalCallback'])->name('payment.paypal.callback');
+Route::get('/payment/paypal/cancel', [PaymentController::class, 'paypalCancel'])->name('payment.paypal.cancel');
+Route::post('/payment/moneris/callback', [PaymentController::class, 'monerisCallback'])->name('payment.moneris.callback');
 
 // Media / Storage File Fallback Route (for servers without symlink)
 Route::get('/storage/{folder}/{filename}', function ($folder, $filename) {
@@ -114,6 +136,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/reset-password/new', [AuthController::class, 'updatePasswordWeb'])->name('password.update-web');
 });
 
+Route::get('/staff-portal', [AuthController::class, 'staffPortal'])->name('staff.portal');
+Route::post('/staff-portal/login', [AuthController::class, 'staffLoginWeb'])->name('staff.login.post');
+
 Route::post('/logout', [AuthController::class, 'logoutWeb'])->name('logout')->middleware('auth');
 
 // Protected Monolith Dashboard Sections
@@ -153,6 +178,7 @@ Route::middleware('auth')->group(function () {
         // User Management
         Route::middleware('permission:users.view')->group(function () {
             Route::get('/users', [AdminController::class, 'users'])->name('admin.users');
+            Route::post('/users', [AdminController::class, 'storeUser'])->name('admin.users.store');
             Route::patch('/users/{user}', [AdminController::class, 'updateUser'])->name('admin.user.update');
             Route::delete('/users/{user}', [AdminController::class, 'deleteUser'])->name('admin.user.delete');
         });
@@ -243,6 +269,41 @@ Route::middleware('auth')->group(function () {
         Route::get('/profile', [AdminController::class, 'profile'])->name('admin.profile');
         Route::post('/profile', [AdminController::class, 'updateProfile'])->name('admin.profile.update');
         Route::post('/profile/password', [AdminController::class, 'updatePassword'])->name('admin.profile.password');
+
+        // Traffic & Click Analytics
+        Route::middleware('permission:analytics.view')->group(function () {
+            Route::get('/analytics', [AdminController::class, 'analytics'])->name('admin.analytics');
+        });
+
+        // IT Support Desk & Server Health
+        Route::middleware('permission:it_support.view')->group(function () {
+            Route::get('/it-support', [AdminController::class, 'itSupport'])->name('admin.it-support');
+            Route::post('/it-support/clear-cache', [AdminController::class, 'clearSystemCache'])->name('admin.it-support.clear-cache');
+        });
+
+        // Client Reviews Management
+        Route::middleware('permission:reviews.manage')->group(function () {
+            Route::get('/reviews', [AdminController::class, 'reviewsIndex'])->name('admin.reviews');
+            Route::post('/reviews/{review}/toggle-approve', [AdminController::class, 'reviewsToggleApprove'])->name('admin.reviews.toggle-approve');
+            Route::post('/reviews/{review}/toggle-feature', [AdminController::class, 'reviewsToggleFeature'])->name('admin.reviews.toggle-feature');
+            Route::delete('/reviews/{review}', [AdminController::class, 'reviewsDelete'])->name('admin.reviews.delete');
+        });
+
+        // Live Support Chat – Admin/Agent
+        Route::middleware('permission:live_chat.manage')->group(function () {
+            Route::get('/live-chat', [LiveChatController::class, 'agentDashboard'])->name('admin.live-chat');
+            Route::post('/live-chat/{chatId}/accept', [LiveChatController::class, 'accept'])->name('admin.live-chat.accept');
+            Route::post('/live-chat/{chatId}/message', [LiveChatController::class, 'agentSendMessage'])->name('admin.live-chat.message');
+            Route::get('/live-chat/{chatId}/messages', [LiveChatController::class, 'agentGetMessages'])->name('admin.live-chat.messages');
+            Route::post('/live-chat/{chatId}/close', [LiveChatController::class, 'agentClose'])->name('admin.live-chat.close');
+            Route::get('/live-chat/queue-status', [LiveChatController::class, 'queueStatus'])->name('admin.live-chat.queue');
+        });
+
+        // Admin Shortcut: Create Client & Book Service on Behalf
+        Route::middleware('permission:applications.proxy_create')->group(function () {
+            Route::get('/proxy-booking', [AdminController::class, 'proxyBooking'])->name('admin.proxy-booking');
+            Route::post('/proxy-booking', [AdminController::class, 'storeProxyBooking'])->name('admin.proxy-booking.store');
+        });
     });
 
     // Vendor Dashboard Routes

@@ -235,6 +235,16 @@
             <h2 class="h5 fw-bold text-dark mb-4">Quick Actions</h2>
             
             <div class="d-grid gap-2 mb-2">
+                @if(auth()->user()->hasPermission('applications.proxy_create'))
+                    <a href="{{ route('admin.proxy-booking') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">Quick Client &amp; Request</span>
+                            <span class="shortcut-desc extra-small">Create a client account &amp; book service on their behalf</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
+
                 @if(auth()->user()->hasPermission('applications.view'))
                     <a href="{{ route('admin.subscriptions') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
                         <div>
@@ -258,6 +268,46 @@
                         <div>
                             <span class="fw-semibold d-block shortcut-title small">Reports & Analytics</span>
                             <span class="shortcut-desc extra-small">Export revenue CSV and review metrics</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
+
+                @if(auth()->user()->hasPermission('analytics.view'))
+                    <a href="{{ route('admin.analytics') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">Traffic &amp; Clicks Analytics</span>
+                            <span class="shortcut-desc extra-small">View site visits, social clicks &amp; telemetry charts</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
+
+                @if(auth()->user()->hasPermission('live_chat.manage'))
+                    <a href="{{ route('admin.live-chat') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">Live Support Chat</span>
+                            <span class="shortcut-desc extra-small">Respond to queued client live chats</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
+
+                @if(auth()->user()->hasPermission('reviews.manage'))
+                    <a href="{{ route('admin.reviews') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">Customer Reviews</span>
+                            <span class="shortcut-desc extra-small">Approve, feature, and manage client feedback</span>
+                        </div>
+                        <i class="bi bi-chevron-right"></i>
+                    </a>
+                @endif
+
+                @if(auth()->user()->hasPermission('it_support.view'))
+                    <a href="{{ route('admin.it-support') }}" class="btn shortcut-btn text-start p-3 rounded-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-semibold d-block shortcut-title small">IT Support &amp; Health</span>
+                            <span class="shortcut-desc extra-small">Server diagnostics, PHP info &amp; cache tools</span>
                         </div>
                         <i class="bi bi-chevron-right"></i>
                     </a>

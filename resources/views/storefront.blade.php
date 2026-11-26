@@ -93,7 +93,7 @@
                 </div>
                 
                 <hr class="my-4 border-light">
-                <a href="/" class="btn btn-outline-dark rounded-pill w-100"><i class="bi bi-arrow-left me-2"></i> Back to Platform</a>
+                <a href="{{ route('home') }}" class="btn btn-outline-dark rounded-pill w-100"><i class="bi bi-arrow-left me-2"></i> Back to Platform</a>
             </div>
         </div>
         

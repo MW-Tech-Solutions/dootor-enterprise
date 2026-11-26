@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg_n" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#042f2e"/>
+      <stop offset="60%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="card_grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <filter id="shadow_n">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+  <rect width="600" height="380" rx="20" fill="url(#bg_n)"/>
+  <circle cx="480" cy="280" r="130" fill="#10b981" opacity="0.08"/>
+  <!-- Smart ID Card -->
+  <g transform="translate(100, 60)" filter="url(#shadow_n)">
+    <rect width="400" height="250" rx="18" fill="url(#card_grad)" stroke="#10b981" stroke-width="1.5"/>
+    <!-- Top Green Stripe / Flag -->
+    <rect x="0" y="0" width="400" height="8" rx="8" fill="#10b981"/>
+    <!-- NIMC Logo Area -->
+    <circle cx="45" cy="45" r="18" fill="#10b981" opacity="0.2"/>
+    <path d="M35 45 L42 35 L48 45 L55 35" stroke="#10b981" stroke-width="2.5" fill="none"/>
+    <text x="75" y="42" font-family="'Outfit', sans-serif" font-size="12" font-weight="800" fill="#ffffff" letter-spacing="1">NATIONAL IDENTITY MANAGEMENT</text>
+    <text x="75" y="55" font-family="'Outfit', sans-serif" font-size="9" font-weight="600" fill="#10b981" letter-spacing="1.5">FEDERAL REPUBLIC OF NIGERIA</text>
+    <!-- Photo Box -->
+    <rect x="35" y="80" width="90" height="110" rx="8" fill="#334155" stroke="rgba(255,255,255,0.1)"/>
+    <circle cx="80" cy="120" r="22" fill="#64748b"/>
+    <path d="M55 165 Q80 145 105 165" stroke="#64748b" stroke-width="14" fill="none"/>
+    <!-- Chip -->
+    <rect x="145" y="80" width="46" height="36" rx="6" fill="#eab308" stroke="#ca8a04"/>
+    <rect x="155" y="88" width="26" height="20" rx="2" fill="none" stroke="#713f12" stroke-width="1.5"/>
+    <line x1="145" y1="98" x2="191" y2="98" stroke="#713f12" stroke-width="1.5"/>
+    <line x1="168" y1="80" x2="168" y2="116" stroke="#713f12" stroke-width="1.5"/>
+    <!-- User details -->
+    <text x="210" y="95" font-family="'Outfit', sans-serif" font-size="10" fill="#94a3b8">NATIONAL IDENTIFICATION NUMBER (NIN)</text>
+    <text x="210" y="115" font-family="'Outfit', sans-serif" font-size="18" font-weight="800" fill="#ffffff" letter-spacing="2">6842 &bull; 9104 &bull; 3328</text>
+    <text x="145" y="145" font-family="'Outfit', sans-serif" font-size="9" fill="#94a3b8">STATUS: <tspan fill="#10b981" font-weight="700">VERIFIED &amp; SYNCED</tspan></text>
+    <text x="145" y="165" font-family="'Outfit', sans-serif" font-size="9" fill="#94a3b8">MODIFICATION: <tspan fill="#ffffff" font-weight="600">NAME / DOB / PHONE</tspan></text>
+    <!-- Fingerprint Icon -->
+    <g transform="translate(320, 130)">
+      <circle cx="25" cy="25" r="24" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1"/>
+      <path d="M25 12 A13 13 0 0 1 38 25 M12 25 A13 13 0 0 1 25 12 M25 17 A8 8 0 0 1 33 25 M17 25 A8 8 0 0 1 25 17 M25 21 A4 4 0 0 1 29 25" stroke="#10b981" stroke-width="2" fill="none" stroke-linecap="round"/>
+    </g>
+    <!-- Security Ribbon Bottom -->
+    <rect x="35" y="210" width="330" height="22" rx="4" fill="rgba(255,255,255,0.05)"/>
+    <text x="200" y="225" font-family="monospace" font-size="10" fill="#10b981" text-anchor="middle" letter-spacing="3">&lt;&lt;&lt; NIMC.GOV.NG // BIOMETRIC VERIFIED &gt;&gt;&gt;</text>
+  </g>
+</svg>

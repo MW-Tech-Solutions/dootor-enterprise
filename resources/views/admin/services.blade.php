@@ -626,7 +626,7 @@
                     <h5 class="modal-title fw-bold" id="editServiceModalLabel-{{ $service->id }}">Edit Platform Service: {{ $service->name }}</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('admin.service.update', $service->id) }}" method="POST">
+                <form action="{{ route('admin.service.update', $service->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PATCH')
                     <div class="modal-body p-4">
@@ -641,6 +641,28 @@
                                     <option value="Active" {{ $service->status === 'Active' ? 'selected' : '' }}>Active</option>
                                     <option value="Inactive" {{ $service->status === 'Inactive' ? 'selected' : '' }}>Inactive</option>
                                 </select>
+                            </div>
+
+                            <!-- Custom Image / Banner Upload -->
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-dark">
+                                    <i class="bi bi-image text-primary me-1"></i> Service Card Image / Banner (Replaces default icon when present)
+                                </label>
+                                @if(!empty($service->image_url))
+                                    <div class="d-flex align-items-center gap-3 p-2 bg-light rounded-3 mb-2 border">
+                                        <img src="{{ asset($service->image_url) }}" alt="Preview" class="rounded" style="width: 60px; height: 40px; object-fit: cover;">
+                                        <div class="flex-grow-1 min-w-0">
+                                            <span class="d-block text-truncate small fw-semibold text-dark">{{ $service->image_url }}</span>
+                                            <span class="text-success extra-small">Active custom image</span>
+                                        </div>
+                                        <div class="form-check m-0">
+                                            <input class="form-check-input" type="checkbox" name="remove_image" value="1" id="rm-img-{{ $service->id }}">
+                                            <label class="form-check-label extra-small text-danger" for="rm-img-{{ $service->id }}">Remove</label>
+                                        </div>
+                                    </div>
+                                @endif
+                                <input type="file" name="image" id="edit-image-{{ $service->id }}" class="form-control rounded-3" accept="image/*">
+                                <small class="text-muted" style="font-size: 11px;">Upload custom photo/graphic. If no image is provided, the card displays the modern stylized gradient icon badge.</small>
                             </div>
 
                             <!-- Mother Service Dropdown in Edit Modal -->
@@ -705,7 +727,7 @@
                 <h5 class="modal-title fw-bold" id="createServiceModalLabel">Add Platform Service / Sub-Service</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form action="{{ route('admin.services.store') }}" method="POST">
+            <form action="{{ route('admin.services.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="modal-body p-4">
                     <div class="row g-3">
@@ -719,6 +741,15 @@
                                 <option value="Active">Active</option>
                                 <option value="Inactive">Inactive</option>
                             </select>
+                        </div>
+
+                        <!-- Service Image / Banner -->
+                        <div class="col-12">
+                            <label for="create-image" class="form-label small fw-bold text-dark">
+                                <i class="bi bi-image text-primary me-1"></i> Custom Service Card Image / Banner (Optional)
+                            </label>
+                            <input type="file" name="image" id="create-image" class="form-control rounded-3" accept="image/*">
+                            <small class="text-muted" style="font-size: 11px;">If left empty, the service card will automatically render with the stylized gradient icon badge.</small>
                         </div>
 
                         <!-- Which primary service is the mother of the sub service? -->

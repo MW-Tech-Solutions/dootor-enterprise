@@ -25,7 +25,63 @@ class PublicController extends Controller
             ->orderBy('name', 'asc')
             ->get();
 
-        return view('welcome', compact('settings', 'faqs', 'primaryServices'));
+        $reviews = \App\Models\Review::where('is_approved', true)
+            ->where('is_featured', true)
+            ->latest()
+            ->take(8)
+            ->get();
+
+        return view('welcome', compact('settings', 'faqs', 'primaryServices', 'reviews'));
+    }
+
+    public function trackAnalytics(Request $request)
+    {
+        $validated = $request->validate([
+            'event_type' => ['required', 'string', 'max:50'],
+            'category'   => ['nullable', 'string', 'max:50'],
+            'label'      => ['nullable', 'string', 'max:150'],
+            'url'        => ['nullable', 'string', 'max:500'],
+        ]);
+
+        try {
+            \App\Models\AnalyticsEvent::create([
+                'event_type' => $validated['event_type'],
+                'category'   => $validated['category'] ?? null,
+                'label'      => $validated['label'] ?? null,
+                'url'        => $validated['url'] ?? $request->header('referer'),
+                'ip_address' => $request->ip(),
+                'user_agent' => substr($request->userAgent() ?? '', 0, 500),
+                'user_id'    => auth()->id(),
+            ]);
+
+            return response()->json(['status' => 'tracked']);
+        } catch (\Throwable $e) {
+            return response()->json(['status' => 'ignored'], 200);
+        }
+    }
+
+    public function storeReview(Request $request)
+    {
+        $validated = $request->validate([
+            'client_name'   => ['required', 'string', 'max:100'],
+            'client_title'  => ['nullable', 'string', 'max:120'],
+            'service_name'  => ['nullable', 'string', 'max:150'],
+            'rating'        => ['required', 'integer', 'min:1', 'max:5'],
+            'comment'       => ['required', 'string', 'min:10', 'max:1200'],
+        ]);
+
+        \App\Models\Review::create([
+            'user_id'       => auth()->id(),
+            'client_name'   => $validated['client_name'],
+            'client_title'  => $validated['client_title'] ?? 'Verified Client',
+            'service_name'  => $validated['service_name'] ?? 'Administrative & Consular Service',
+            'rating'        => $validated['rating'],
+            'comment'       => $validated['comment'],
+            'is_approved'   => true, // auto-approve so client immediately sees their submitted review
+            'is_featured'   => true,
+        ]);
+
+        return redirect()->to('/#reviews')->with('review_success', 'Thank you! Your verified client review has been recorded.');
     }
 
     public function vendorStorefront(User $vendor)

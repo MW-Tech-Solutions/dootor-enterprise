@@ -46,6 +46,52 @@ class AuthController extends Controller
         return $this->redirectUser($user);
     }
 
+    public function staffPortal()
+    {
+        if (Auth::check()) {
+            $u = Auth::user();
+            if ($u->role === 'admin' || $u->isAdmin() || $u->roles()->exists()) {
+                return redirect()->route('admin.dashboard');
+            }
+        }
+        return view('auth.staff-portal');
+    }
+
+    public function staffLoginWeb(Request $request)
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
+
+        $remember = $request->has('remember');
+
+        if (!Auth::attempt($credentials, $remember)) {
+            throw ValidationException::withMessages([
+                'email' => ['The provided staff credentials are incorrect.'],
+            ]);
+        }
+
+        $request->session()->regenerate();
+        $user = Auth::user();
+
+        if ($user->status === 'Disabled') {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('staff.portal')->with('error', 'Your staff account has been disabled.');
+        }
+
+        if ($user->role !== 'admin' && !$user->isAdmin() && !$user->roles()->exists()) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            return redirect()->route('staff.portal')->with('error', 'Access denied. This portal is restricted to authorized staff accounts.');
+        }
+
+        return redirect()->route('admin.dashboard')->with('success', 'Welcome back to the Staff Portal!');
+    }
+
     public function showRegisterVendor()
     {
         // Vendor registration disabled for the mean time - redirecting to client registration

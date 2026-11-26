@@ -3,9 +3,14 @@
 @section('title', 'User Management - ' . ($settings->platform_name ?? 'Dooter Enterprises'))
 
 @section('content')
-<div class="mb-4">
-    <h1 class="h3 fw-bold text-dark mb-1">User Management Logs</h1>
-    <p class="text-secondary small">Filter profiles, modify roles/access status, and delete user records</p>
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+        <h1 class="h3 fw-bold text-dark mb-1">User Management Logs</h1>
+        <p class="text-secondary small mb-0">Filter profiles, create support/staff accounts, modify roles/access status, and delete user records</p>
+    </div>
+    <button type="button" class="btn btn-dark rounded-pill px-4 fw-semibold" data-bs-toggle="modal" data-bs-target="#createUserModal">
+        <i class="bi bi-person-plus me-1"></i> Create Staff / Support User
+    </button>
 </div>
 
 <div class="card border-0 shadow-sm p-4 rounded-4 bg-white mb-4">
@@ -296,6 +301,77 @@
             <p class="text-secondary mt-2 small">No users found matching the filter parameters.</p>
         </div>
     @endif
+</div>
+
+<!-- Create Staff / Support User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold">Create Staff / Support User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{{ route('admin.users.store') }}" method="POST">
+                @csrf
+                <div class="modal-body p-4 text-start">
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-medium">First Name <span class="text-danger">*</span></label>
+                            <input type="text" name="first_name" class="form-control rounded-3" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-medium">Last Name <span class="text-danger">*</span></label>
+                            <input type="text" name="last_name" class="form-control rounded-3" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Email Address <span class="text-danger">*</span></label>
+                        <input type="email" name="email" class="form-control rounded-3" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Phone Number</label>
+                        <input type="text" name="phone" class="form-control rounded-3">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Password <span class="text-danger">*</span></label>
+                        <input type="password" name="password" class="form-control rounded-3" minlength="8" required placeholder="Minimum 8 characters">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Assign Role <span class="text-danger">*</span></label>
+                        <select name="role" class="form-select rounded-3" required>
+                            @if(isset($roles) && $roles->count() > 0)
+                            <optgroup label="RBAC Roles (Recommended for Support / Staff)">
+                                @foreach($roles as $r)
+                                    <option value="{{ $r->id }}" {{ $r->slug === 'customer-support' ? 'selected' : '' }}>
+                                        {{ $r->name }}
+                                    </option>
+                                @endforeach
+                            </optgroup>
+                            @endif
+                            <optgroup label="Base Roles">
+                                <option value="admin">Admin (Standard Staff)</option>
+                                <option value="vendor">Vendor</option>
+                                <option value="client">Client</option>
+                            </optgroup>
+                        </select>
+                        <small class="text-muted d-block mt-1">Select <strong>Customer Support</strong> to grant Live Support Chat access, or any other RBAC role.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-medium">Account Status</label>
+                        <select name="status" class="form-select rounded-3">
+                            <option value="Approved" selected>Approved (Active immediately)</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Disabled">Disabled</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-dark rounded-pill px-4">Create User</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 @endsection
 

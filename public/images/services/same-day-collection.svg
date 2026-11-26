@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg_sd" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#451a03"/>
+      <stop offset="50%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <filter id="shadow_sd">
+      <feDropShadow dx="0" dy="12" stdDeviation="16" flood-color="#000000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+  <rect width="600" height="380" rx="20" fill="url(#bg_sd)"/>
+  <g transform="translate(130, 45)" filter="url(#shadow_sd)">
+    <rect width="340" height="280" rx="14" fill="#ffffff" stroke="#fed7aa"/>
+    <rect width="340" height="52" rx="14" fill="#ea580c"/>
+    <rect y="38" width="340" height="14" fill="#ea580c"/>
+    <text x="170" y="32" font-family="'Outfit', sans-serif" font-size="12" font-weight="800" fill="#ffffff" text-anchor="middle">SAME-DAY VIP COLLECTION</text>
+    <g transform="translate(35, 75)">
+      <circle cx="30" cy="30" r="30" fill="#fff7ed" stroke="#ea580c" stroke-width="1.5"/>
+      <path d="M30 14 L22 32 H32 L28 46 L40 28 H29 Z" fill="#ea580c"/>
+    </g>
+    <text x="110" y="95" font-family="'Outfit', sans-serif" font-size="12" font-weight="700" fill="#0f172a">EXPRESS VIP DISPATCH</text>
+    <text x="110" y="115" font-family="'Outfit', sans-serif" font-size="9.5" fill="#64748b">Instant courier handoff &amp; verification</text>
+    <text x="110" y="132" font-family="'Outfit', sans-serif" font-size="9.5" fill="#ea580c" font-weight="700">&#9889; Ready within 24 Hours</text>
+    <g transform="translate(230, 185)">
+      <circle cx="28" cy="28" r="30" fill="#ea580c" stroke="#fed7aa" stroke-width="2"/>
+      <text x="28" y="27" font-family="'Outfit', sans-serif" font-size="8" font-weight="800" fill="#ffffff" text-anchor="middle">VIP SAME DAY</text>
+      <text x="28" y="37" font-family="'Outfit', sans-serif" font-size="7" font-weight="700" fill="#ffedd5" text-anchor="middle">GUARANTEED</text>
+    </g>
+  </g>
+</svg>

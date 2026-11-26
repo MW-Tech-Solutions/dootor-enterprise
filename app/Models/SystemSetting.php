@@ -33,6 +33,11 @@ class SystemSetting extends Model
         'credo_public_key',
         'credo_secret_key',
         'credo_base_url',
+        'paypal_client_id',
+        'paypal_client_secret',
+        'moneris_store_id',
+        'moneris_api_token',
+        'moneris_checkout_id',
         'smtp_host',
         'smtp_port',
         'smtp_user',
@@ -53,6 +58,8 @@ class SystemSetting extends Model
         'linkedin_url',
         'whatsapp_number',
         'youtube_url',
+        'promo_video_url',
+        'promo_video_title',
         'tiktok_url',
         'contact_email',
         'contact_phone',
@@ -63,6 +70,9 @@ class SystemSetting extends Model
         'paid_incomplete_expiry_unit',
         'auto_purge_enabled',
         'purge_action',
+        'gemini_api_key',
+        'chatbot_enabled',
+        'chatbot_system_prompt',
     ];
 
     protected function casts(): array
@@ -71,6 +81,7 @@ class SystemSetting extends Model
             'maintenance_mode' => 'boolean',
             'payments_enabled' => 'boolean',
             'auto_purge_enabled' => 'boolean',
+            'chatbot_enabled' => 'boolean',
             'draft_expiry_value' => 'integer',
             'paid_incomplete_expiry_value' => 'integer',
             'smtp_port' => 'integer',
